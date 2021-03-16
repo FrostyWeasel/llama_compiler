@@ -1,0 +1,58 @@
+%{
+#DEFINE T_EOF 0
+...    
+%}
+
+L [A-Z]
+D [0-9]
+W [ \T\N\R]
+
+%%
+T_AND; }
+T_ARRAY; }
+T_BEGIN; }
+T_BOOL; }
+T_CHAR; }
+T_DELETE; }
+T_DIM; }
+T_DO; }
+T_DONE; }
+T_DOWNTO; }
+T_ELSE; }
+T_END; }
+T_FALSE; }
+T_FOR; }
+T_IF; }
+T_IN; }
+T_INT; }
+T_LET; }
+T_MATCH; }
+T_MOD; }
+T_MUTABLE; }
+T_NEW; }
+T_NOT; }
+T_OF; }
+T_REC; }
+T_REF; }
+T_THEN; }
+T_TO; }
+T_TRUE; }
+T_TYPE; }
+T_UNIT; }
+T_WHILE; }
+T_WITH; }
+
+[\=\|\+\-\*\/\!\;\<\>\(\)\[\]\,\:] { RETURN YYTEXT[0]; }
+
+T_TYPE_ARROW_OP;}
+T_AND_OP;}
+T_OR_OP;}
+T_NOT_EQ_OP;}
+T_LESS_THAN_OR_EQ_OP;}
+T_GREATER_THAN_OR_EQ_OP;}
+T_NAT_EQ_OP;}
+T_NAT_NOT_EQ_OP;}
+T_ASSIGNMENT_OP;}
+
+
+%%
