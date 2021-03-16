@@ -33,11 +33,11 @@ match t with
 Nil
  -> ()
 | Node n t1 t2 -> print_int n;
-print_string ”(”;
+print_string "(";
 treePrint t1;
-print_string ”|”;
+print_string "|";
 treePrint t2;
-print_string ”)”
+print_string ")"
 end
 let rec treeCount t =
 match t with
@@ -57,9 +57,9 @@ t := Nil;
 for i = 1 to 10 do
 t := treeInsert !t (random 100)
 done;
-print_string ”Initial tree: ”;
+print_string "Initial tree: ";
 treePrint !t;
-print_string ”\n”;
+print_string "\n";
 let rec choose t =
 match t with
 Node n t1 t2 ->
@@ -75,11 +75,11 @@ choose t2
 end in
 for i = 1 to treeCount !t do
 let n = choose !t in
-print_string ”Deleting ”;
+print_string "Deleting ";
 print_int n;
-print_string ”: ”;
+print_string ": ";
 t := treeDelete !t n;
 treePrint !t;
-print_string ”\n”
+print_string "\n"
 done
 

@@ -1,7 +1,7 @@
 let main =
-print_string ”Give n: ”;
+print_string "Give n: ";
 let n = read_int () in
-print_string ”Give k: ”;
+print_string "Give k: ";
 let k = read_int () in
 let mutable sum
 and mutable seed in
@@ -13,8 +13,8 @@ sum := !sum +. float_of_int !seed
 done;
 if k > 0 then
 begin
-print_string ”Mean: ”;
+print_string "Mean: ";
 print_float (!sum /. float_of_int k);
-print_string ”\n”
+print_string "\n"
 end
 

@@ -23,9 +23,9 @@ let mprint m =
 for i = 0 to dim 1 m - 1 do
 for j = 0 to dim 2 m - 1 do
 print_int !m[i, j];
-print_string ” ”
+print_string " "
 done;
-print_string ”\n”
+print_string "\n"
 done
 let main =
 let mutable x[3,4]
@@ -34,9 +34,9 @@ and mutable z[3,5] in
 minitminitx;
 y;
 mprint x;
-print_string ”\ntimes\n\n”;
+print_string "\ntimes\n\n";
 mprint y;
-print_string ”\nmakes\n\n”;
+print_string "\nmakes\n\n";
 mmult x y z;
 mprint z
 
