@@ -46,7 +46,7 @@
 #define T_CONSTRUCTOR_ID 1043
 #define T_CONST_CHAR    1044
 #define T_CONST_INT     1045
-#define T_STRING_CONST  1046
+#define T_STRING_LITERAL  1046
 
 void ERROR();
 %}
@@ -61,7 +61,13 @@ W [ \t\n\r]
 %option noyywrap
 %option yylineno
 
+/* %x STRING_LITERAL */
+%x MULTILINE_COMMENT
+
 %%
+
+    int comment_nesting = 0;
+
 "and"		{ return T_AND; }
 "array"		{ return T_ARRAY; }
 "begin"		{ return T_BEGIN; }
@@ -112,15 +118,22 @@ W [ \t\n\r]
 {L_upper}({L}|{D}|_)*       { return T_CONSTRUCTOR_ID; }
 
 
-{D}+                { return T_CONST_INT; }
-\"[^\"\n\r]*\"        { return T_STRING_CONST; }
+{D}+    { return T_CONST_INT; }
 \'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x[{D}A-Fa-f][{D}A-Fa-f])\'      { return T_CONST_CHAR; }
+
+\"([^\n\r\"]|\\\")*\"   { return T_STRING_LITERAL; }
 
 {W}+        { /* nothing */ }   /*White space*/
 
 --.*\n      { /* nothing */ }   /*One line comment*/
 
-"(*"([^*]+|\*+[^*)])*\*+")"     { /* nothing */ }
+"(*"                        { BEGIN(MULTILINE_COMMENT); }
+<MULTILINE_COMMENT>"(*"     { ++comment_nesting; }
+<MULTILINE_COMMENT>"*)"     { if (comment_nesting != 0) --comment_nesting; else BEGIN(INITIAL); }
+<MULTILINE_COMMENT>"*"      { /* nothing */ }
+<MULTILINE_COMMENT>"("      { /* nothing */ } 
+<MULTILINE_COMMENT>[^\(\*]+ { /* nothing */ }
+<MULTILINE_COMMENT><<EOF>>  { fprintf(stderr, "EOF reached with open comment"); exit(1);}
 
 .       { ERROR(); }
 

@@ -5,7 +5,7 @@
 '\''
 '\xaf'
 '\"'
-"Allowed\n This string\t is \nyes\tyes\n"
+"Allowed\n`1234567890-=qwertyuiop[]\asdfghjkl;'zxcvbnm,./This string\t is \"\"\"'\hmm \nyes\tyes\n\""
 "i AM also allowed \"Hello, there \"\n Still allowed little shit just a string lol\t\n\r"
 --i am a comment lala\nafjafkjlaf\tajfhjahfjka
 -- i am another comeent only one line lolololololo\n
@@ -14,4 +14,7 @@ afjklajfkajfkljafljalkfjfmodiuljttjt\n\n\n\n\n\\t\r
 fjafdkjafkljafj
 i am infinire jacomment aaaaaa
 (*I am a comment within a comment!*)********
-********)
+******* more comments coming: (((fafa (* mpla (* f (*(* mpla mpala *) *) *) **)*)
+"Hello the comment finally ended :) Here is a test : (* *)"
+' '
+(**)
