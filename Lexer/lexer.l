@@ -47,8 +47,6 @@
 #define T_CONST_CHAR    1044
 #define T_CONST_INT     1045
 #define T_STRING_LITERAL  1046
-
-void ERROR();
 %}
 
 L [a-zA-Z]
@@ -135,7 +133,7 @@ W [ \t\n\r]
 <MULTILINE_COMMENT>[^\(\*]+ { /* nothing */ }
 <MULTILINE_COMMENT><<EOF>>  { fprintf(stderr, "EOF reached with open comment"); exit(1);}
 
-.       { ERROR(); }
+.       { fprintf(stderr, "Illegal character: \"%c\" (ASCII: %d) at line %d\n", yytext[0], yytext[0], yylineno); exit(1); }
 
 %%
 
@@ -148,9 +146,4 @@ int main(){
     }while(token != T_EOF);
 
     return 0;
-}
-
-void ERROR(){
-    fprintf(stderr, "Illegal character: \"%c\" (ASCII: %d) at line %d\n", yytext[0], yytext[0], yylineno);
-    exit(1);
 }
