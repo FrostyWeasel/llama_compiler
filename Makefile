@@ -1,17 +1,22 @@
 .PHONY: all clean distclean
-CXX=gcc
-CXXFLAGS=-Wall -Wextra -std=c++14
+CXX=g++
+CXXFLAGS=-O3 -Wall -Wextra -std=c++14
+
+LEXER_DIR := ./Lexer
 
 all: compiler
 
-lexer.cpp: lexer.l
-	flex -s -o lexer.cpp lexer.l
+$(LEXER_DIR)/lexer.cpp: $(LEXER_DIR)/lexer.l
+	flex -s -o $(LEXER_DIR)/lexer.cpp $(LEXER_DIR)/lexer.l
 
-compiler: lexer.o parser.o symbol.o
+$(LEXER_DIR)/lexer.o: $(LEXER_DIR)/lexer.cpp
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+compiler: $(LEXER_DIR)/lexer.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:
-	$(RM) lexer.cpp
+	$(RM) $(LEXER_DIR)/lexer.cpp
 
 distclean: clean
 	$(RM) compiler

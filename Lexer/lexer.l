@@ -57,7 +57,9 @@ L_upper [A-Z]
 D [0-9]
 W [ \t\n\r]
 
+%option 8bit
 %option noyywrap
+%option yylineno
 
 %%
 "and"		{ return T_AND; }
@@ -111,11 +113,13 @@ W [ \t\n\r]
 
 
 {D}+                { return T_CONST_INT; }
-\"[^\"\n]*\"        { return T_STRING_CONST; }
+\"[^\"\n\r]*\"        { return T_STRING_CONST; }
 \'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x[{D}A-Fa-f][{D}A-Fa-f])\'      { return T_CONST_CHAR; }
 
-{W}+        { /* nothing */ }
---.*\n      { /* nothing */ }
+{W}+        { /* nothing */ }   /*White space*/
+
+--.*\n      { /* nothing */ }   /*One line comment*/
+
 "(*"([^*]+|\*+[^*)])*\*+")"     { /* nothing */ }
 
 .       { ERROR(); }
@@ -127,13 +131,13 @@ int main(){
 
     do{
         token = yylex();
-        printf("token = %d, lexeme = \"%s\"\n", token, yytext);
+        printf("token = %d, lexeme = \"%s\", line = %d\n", token, yytext, yylineno);
     }while(token != T_EOF);
 
     return 0;
 }
 
 void ERROR(){
-    fprintf(stderr, "Illegal character: \"%s\"", yytext);
+    fprintf(stderr, "Illegal character: \"%c\" (ASCII: %d) at line %d\n", yytext[0], yytext[0], yylineno);
     exit(1);
 }
