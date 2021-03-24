@@ -1,52 +1,5 @@
 %{
 #define T_EOF           0
-#define T_AND           1000       
-#define T_ARRAY         1001
-#define T_BEGIN         1002
-#define T_BOOL          1003
-#define T_CHAR          1004
-#define T_DELETE        1005
-#define T_DIM           1006
-#define T_DO            1007
-#define T_DONE          1008
-#define T_DOWNTO        1009
-#define T_ELSE          1010
-#define T_END           1011
-#define T_FALSE         1012
-#define T_FOR           1013
-#define T_IF            1014
-#define T_IN            1015
-#define T_INT           1016 
-#define T_LET           1017
-#define T_MATCH         1018
-#define T_MOD           1019
-#define T_MUTABLE       1020
-#define T_NEW           1021
-#define T_NOT           1022
-#define T_OF            1023
-#define T_REC           1024
-#define T_REF           1025
-#define T_THEN          1026
-#define T_TO            1027
-#define T_TRUE          1028
-#define T_TYPE          1029
-#define T_UNIT          1030
-#define T_WHILE         1031
-#define T_WITH          1032
-#define T_TYPE_ARROW_OP 1033
-#define T_AND_OP        1034
-#define T_OR_OP         1035
-#define T_NOT_EQ_OP     1036
-#define T_LESS_THAN_OR_EQ_OP 1037
-#define T_GREATER_THAN_OR_EQ_OP 1038
-#define T_NAT_EQ_OP     1039
-#define T_NAT_NOT_EQ_OP 1040
-#define T_ASSIGNMENT_OP 1041
-#define T_ID            1042
-#define T_CONSTRUCTOR_ID 1043
-#define T_CONST_CHAR    1044
-#define T_CONST_INT     1045
-#define T_STRING_LITERAL  1046
 %}
 
 L [a-zA-Z]
@@ -95,7 +48,7 @@ W [ \t\n\r]
 "then"		{ return T_THEN; }
 "to"		{ return T_TO; }
 "true"		{ return T_TRUE; }
-"type"		{ return T_TYPE; }
+"type"		{ fprintf(stderr, "User defined types not currently supported\n"); exit(1); }
 "unit"		{ return T_UNIT; }
 "while"		{ return T_WHILE; }
 "with"		{ return T_WITH; }
@@ -131,19 +84,8 @@ W [ \t\n\r]
 <MULTILINE_COMMENT>"*"      { /* nothing */ }
 <MULTILINE_COMMENT>"("      { /* nothing */ } 
 <MULTILINE_COMMENT>[^\(\*]+ { /* nothing */ }
-<MULTILINE_COMMENT><<EOF>>  { fprintf(stderr, "EOF reached with open comment"); exit(1);}
+<MULTILINE_COMMENT><<EOF>>  { fprintf(stderr, "EOF reached with open comment\n"); exit(1);}
 
 .       { fprintf(stderr, "Illegal character: \"%c\" (ASCII: %d) at line %d\n", yytext[0], yytext[0], yylineno); exit(1); }
 
 %%
-
-int main(){
-    int token;
-
-    do{
-        token = yylex();
-        printf("token = %d, lexeme = \"%s\", line = %d\n", token, yytext, yylineno);
-    }while(token != T_EOF);
-
-    return 0;
-}
