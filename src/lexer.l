@@ -1,4 +1,10 @@
 %{
+#include <cstdlib>
+#include <string>
+#include "includes.hpp"
+#include "lexer.hpp"
+#include "parser.hpp"
+
 #define T_EOF           0
 %}
 
@@ -48,12 +54,12 @@ W [ \t\n\r]
 "then"		{ return T_THEN; }
 "to"		{ return T_TO; }
 "true"		{ return T_TRUE; }
-"type"		{ fprintf(stderr, "User defined types not currently supported\n"); exit(1); }
+"type"		{ yyerror("User defined types not currently supported\n"); }
 "unit"		{ return T_UNIT; }
 "while"		{ return T_WHILE; }
 "with"		{ return T_WITH; }
 
-[\=\|\+\-\*\/\!\;\<\>\(\)\[\]\,\:]		{ return yytext[0]; }
+[\=\|\+\-\*\/\!\;\<\>\(\)\[\]\,\:]		{ yylval.op = yytext[0]; return yytext[0]; }
 
 "->"		{ return T_TYPE_ARROW_OP; }
 "&&"		{ return T_AND_OP; }
@@ -68,11 +74,10 @@ W [ \t\n\r]
 {L_lower}({L}|{D}|_)*       { return T_ID; }
 {L_upper}({L}|{D}|_)*       { return T_CONSTRUCTOR_ID; }
 
+{D}+    { yylval.number = atoi(yytext); return T_CONST_INT; }
+\'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x[{D}A-Fa-f][{D}A-Fa-f])\' { return T_CONST_CHAR; }
 
-{D}+    { return T_CONST_INT; }
-\'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x[{D}A-Fa-f][{D}A-Fa-f])\'      { return T_CONST_CHAR; }
-
-\"([^\n\r\"]|\\\")*\"   { return T_STRING_LITERAL; }
+\"([^\n\r\"]|\\\")*\" { return T_STRING_LITERAL; }
 
 {W}+        { /* nothing */ }   /*White space*/
 
@@ -87,5 +92,3 @@ W [ \t\n\r]
 <MULTILINE_COMMENT><<EOF>>  { fprintf(stderr, "EOF reached with open comment\n"); exit(1);}
 
 .       { fprintf(stderr, "Illegal character: \"%c\" (ASCII: %d) at line %d\n", yytext[0], yytext[0], yylineno); exit(1); }
-
-%%
