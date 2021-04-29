@@ -2,8 +2,8 @@
 #define __ENUMS_HPP__
 
 enum class BoolType     { True, False };
-enum class UnOpType     { Plus, Minus, Dereference, Not };
-enum class BinOpType    { Plus, Minus, Times, Divide, Equals, NotEquals, LessThan, MoreThan, LessOrEqualThan, MoreOrEqualThan, NatEquals, NatNotEquals, And, Or, Concat, Assign };
+enum class OpType       { Plus, Minus, Times, Divide, Equals, NotEquals, LessThan, MoreThan, LessOrEqualThan, MoreOrEqualThan, NatEquals, NatNotEquals, And, Or, Concat, Assign, Dereference, Not };
 enum class TypeTag      { Unit, Int, Char, Bool };
+enum class LetType      { Rec, NoRec };
 
 #endif

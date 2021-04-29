@@ -4,6 +4,8 @@
 #include "for.hpp"
 
 class ForTo : public For{
+public:
+    ForTo(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr) {}
 
 };
 

@@ -1,0 +1,4 @@
+1:	unit, fun[_outer; 0; 0; 0; 0; 0], -, -
+2:	par, "Hello world!\n", V, -
+3:	call, -, -, fun[print_string; 0; 2; 0; 0; 0]
+4:	endu, fun[_outer; 0; 0; 0; 0; 0], -, -

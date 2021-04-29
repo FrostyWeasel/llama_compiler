@@ -6,10 +6,11 @@
 
 template <class T>
 class Block : public AST{
-public:
+public:public:
   virtual void print(std::ostream &out) const override {}
-  virtual void append(T element) {}
-  virtual void insert(std::vector::iterator it, T element) {}
+  virtual void append(T* element) {}
+  virtual void insert(typename std::vector<T>::iterator it, T* element) {}
+  virtual typename std::vector<T>::iterator begin() { return list.begin(); }
 
 private:
     std::vector<T> list;

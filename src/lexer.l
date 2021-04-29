@@ -6,6 +6,60 @@
 #include "parser.hpp"
 
 #define T_EOF           0
+
+char get_ascii(const char* hex){
+    char res = 0;
+
+    for(int i = 0; i < 2; i++){
+        char ch = *hex++;
+        char tmp = 0;
+
+        if (ch >= '0' && ch <= '9')
+            tmp = ch - '0';
+        if (ch >= 'A' && ch <= 'F')
+            tmp = ch - 'A' + 10;
+        if (ch >= 'a' && ch <= 'f')
+            tmp = ch - 'a' + 10;
+
+        res = tmp + res * i * 16;
+    }
+    return res;
+}
+
+char get_char(const char* char_read){
+    if(char_read[1] != '\\') return char_read[1];
+
+    switch(char_read[2]){
+        case 'n':
+            return '\n';
+            break;
+        case 't':
+            return '\t';
+            break;
+        case 'r':
+            return '\r';
+            break;
+        case '0':
+            return '\0';
+            break;
+        case '\\':
+            return '\\';
+            break;
+        case '\'':
+            return '\'';
+            break;
+        case '\"':
+            return '\"';
+            break;
+        case 'x':
+            return get_ascii(char_read + 3);
+            break;
+        default:
+            return -1;
+            break;
+    }
+
+}
 %}
 
 L [a-zA-Z]
@@ -60,6 +114,7 @@ W [ \t\n\r]
 "with"		{ return T_WITH; }
 
 [\=\|\+\-\*\/\!\;\<\>\(\)\[\]\,\:]		{ yylval.op = yytext[0]; return yytext[0]; }
+'='
 
 "->"		{ return T_TYPE_ARROW_OP; }
 "&&"		{ return T_AND_OP; }
@@ -71,13 +126,13 @@ W [ \t\n\r]
 "!="		{ return T_NAT_NOT_EQ_OP; }
 ":="		{ return T_ASSIGNMENT_OP; }
 
-{L_lower}({L}|{D}|_)*       { return T_ID; }
+{L_lower}({L}|{D}|_)*       { std::string* id = new std::string { yytext }; yylval.id = id; return T_ID; }
 {L_upper}({L}|{D}|_)*       { return T_CONSTRUCTOR_ID; }
 
 {D}+    { yylval.number = atoi(yytext); return T_CONST_INT; }
-\'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x[{D}A-Fa-f][{D}A-Fa-f])\' { return T_CONST_CHAR; }
+\'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x({D}|[A-Fa-f])({D}|[A-Fa-f]))\' { yylval.const_char = get_char(yytext); return T_CONST_CHAR; }
 
-\"([^\n\r\"]|\\\")*\" { return T_STRING_LITERAL; }
+\"([^\n\r\"]|\\\")*\" { std::string* str = new std::string { yytext }; yylval.string_literal = str; return T_STRING_LITERAL; }
 
 {W}+        { /* nothing */ }   /*White space*/
 

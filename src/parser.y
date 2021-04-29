@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
-#include "lexer.hpp"
 #include "includes.hpp"
+#include "lexer.hpp"
 
 %}
 
@@ -88,13 +88,18 @@
     Par* par;
     Expr* expr;
     Type* type;
-    Block* block;
+    Block<Expr>* expr_list;
+    Block<Expr>* expr_comma_list;
+    Block<Par>* par_list;
+    Block<Def>* def_list;
+    Block<LetDef>* letdef_list;
+    BinOpType op;
 
     std::string* id;
     std::string* string_literal;
     char const_char;
     int number;
-    char op;
+    int dimension_count;
 }
 
 %type<let_def> letdef
@@ -102,7 +107,12 @@
 %type<par> par
 %type<expr> expr
 %type<type> type
-%type<block> program asterisk_list expr_comma_list expr_list par_list def_list letdef_list
+%type<dimension_count> asterisk_list
+%type<expr_list> expr_list
+%type<expr_comma_list> expr_comma_list
+%type<par_list> par_list
+%type<def_list> def_list
+%type<letdef_list> program letdef_list
 
 %%
 
@@ -111,17 +121,17 @@ program:
 ;
 
 letdef_list:
-    %empty              { $$ = new LetDefList(); }
+    %empty              { $$ = new Block<LetDef>(); }
 |   letdef_list letdef  { $1->append($2); }
 ;
 
 letdef:
-    "let" "rec" def def_list    { $4->insert($4->begin(), $3); $$ = new LetDef($4, LetType::rec); }
-|   "let" def def_list          { $3->insert($3->begin(), $2); $$ = new LetDef($3, LetType::non_rec); }
+    "let" "rec" def def_list    { $4->insert($4->begin(), $3); $$ = new LetDef($4, LetType::Rec); }
+|   "let" def def_list          { $3->insert($3->begin(), $2); $$ = new LetDef($3, LetType::NoRec); }
 ;
 
 def_list:
-    %empty              { $$ = new DefList(); }
+    %empty              { $$ = new Block<Def>(); }
 |   def_list "and" def  { $1->append($3); }
 ;
 
@@ -134,7 +144,7 @@ def:
 ;
 
 par_list:
-    %empty          { $$ = new ParList(); }
+    %empty          { $$ = new Block<Par>(); }
 |   par_list par    { $1->append($2); }
 ;
 
@@ -144,7 +154,7 @@ par:
 ;
 
 expr_comma_list:
-    %empty                      { $$ = new ExprList(); }
+    %empty                      { $$ = new Block<Expr>(); }
 |   expr_comma_list ',' expr    { $1->append($3); }
 ;
 
@@ -173,44 +183,45 @@ expr:
 |   '-' expr    %prec UNOP                                  { $$ = new UnOp($2, UnOpType::Minus); }
 |   '!' expr                                                { $$ = new UnOp($2, UnOpType::Dereference); }
 |   "not" expr                                              { $$ = new UnOp($2, UnOpType::Not); }
-|   expr '+' expr                                           { $$ = new Binop($1, $3, BinOpType::Plus); }
-|   expr '-' expr                                           { $$ = new Binop($1, $3, BinOpType::Minus)}
-|   expr '*' expr                                           { $$ = new Binop($1, $3, BinOpType::Times)}              
-|   expr '/' expr                                           { $$ = new Binop($1, $3, BinOpType::Divide)}
-|   expr '=' expr                                           { $$ = new Binop($1, $3, BinOpType::Equals)}
-|   expr "<>" expr                                          { $$ = new Binop($1, $3, BinOpType::NotEquals)}
-|   expr '<' expr                                           { $$ = new Binop($1, $3, BinOpType::LessThan)}
-|   expr '>' expr                                           { $$ = new Binop($1, $3, BinOpType::MoreThan)}
-|   expr "<=" expr                                          { $$ = new Binop($1, $3, BinOpType::LessOrEqualThan)}
-|   expr ">=" expr                                          { $$ = new Binop($1, $3, BinOpType::MoreOrEqualThan)}
-|   expr "==" expr                                          { $$ = new Binop($1, $3, BinOpType::NatEquals)}
-|   expr "!=" expr                                          { $$ = new Binop($1, $3, BinOpType::NatNotEquals)}
-|   expr "&&" expr                                          { $$ = new Binop($1, $3, BinOpType::And)}
-|   expr "||" expr                                          { $$ = new Binop($1, $3, BinOpType::Or)}
-|   expr ';' expr                                           { $$ = new Binop($1, $3, BinOpType::Concat)}
-|   expr ":=" expr                                          { $$ = new Binop($1, $3, BinOpType::Assign)}
+|   expr '+' expr                                           { $$ = new BinOp($1, $3, BinOpType::Plus); }
+|   expr '-' expr                                           { $$ = new BinOp($1, $3, BinOpType::Minus); }
+|   expr '*' expr                                           { $$ = new BinOp($1, $3, BinOpType::Times); }              
+|   expr '/' expr                                           { $$ = new BinOp($1, $3, BinOpType::Divide); }
+|   expr '=' expr                                           { $$ = new BinOp($1, $3, BinOpType::Equals); }
+|   expr "<>" expr                                          { $$ = new BinOp($1, $3, BinOpType::NotEquals); }
+|   expr '<' expr                                           { $$ = new BinOp($1, $3, BinOpType::LessThan); }
+|   expr '>' expr                                           { $$ = new BinOp($1, $3, BinOpType::MoreThan); }
+|   expr "<=" expr                                          { $$ = new BinOp($1, $3, BinOpType::LessOrEqualThan); }
+|   expr ">=" expr                                          { $$ = new BinOp($1, $3, BinOpType::MoreOrEqualThan); }
+|   expr "==" expr                                          { $$ = new BinOp($1, $3, BinOpType::NatEquals); }
+|   expr "!=" expr                                          { $$ = new BinOp($1, $3, BinOpType::NatNotEquals); }
+|   expr "&&" expr                                          { $$ = new BinOp($1, $3, BinOpType::And); }
+|   expr "||" expr                                          { $$ = new BinOp($1, $3, BinOpType::Or); }
+|   expr ';' expr                                           { $$ = new BinOp($1, $3, BinOpType::Concat); }
+|   expr ":=" expr                                          { $$ = new BinOp($1, $3, BinOpType::Assign); }
 ;
 
 expr_list:
-    %empty                          { $$ = new ExprList(); }
+    %empty                          { $$ = new Block<Expr>(); }
 |   expr_list expr  %prec EXPR_LIST { $1->append($2); }
 
 type:
-    "unit"                                          { $$ = Type(TypeTag::Unit); }
-|   "int"                                           { $$ = Type(TypeTag::Int); }
-|   "char"                                          { $$ = Type(TypeTag::Char); }
-|   "bool"                                          { $$ = Type(TypeTag::Bool); }
+    "unit"                                          { $$ = new Type(TypeTag::Unit); }
+|   "int"                                           { $$ = new Type(TypeTag::Int); }
+|   "char"                                          { $$ = new Type(TypeTag::Char); }
+|   "bool"                                          { $$ = new Type(TypeTag::Bool); }
 |   '(' type ')'                                    { $$ = $2; }
 |   type "->" type                                  { $$ = new FunctionType($1, $3); }
 |   type "ref"                                      { $$ = new RefType($1); }
 |   "array" "of" type                               { $$ = new ArrayType($3); }
-|   "array" '[' '*' asterisk_list ']' "of" type     { $4->size++; $$ = new ArrayType($4, $7); }
+|   "array" '[' '*' asterisk_list ']' "of" type     { $4++; $$ = new ArrayType($7, $4); }
 /* |   T_ID                                            { $$ = }  propably not possible due to no user defined types*/
 ;
 
+/* ugly replace block? */
 asterisk_list:
-    %empty                  { $$ = new AsteristList(); }
-|   asterisk_list ',' '*'   { $1->size++; }
+    %empty                  { $$ = 0; }
+|   asterisk_list ',' '*'   { $1++; }
 ;
 
 %%

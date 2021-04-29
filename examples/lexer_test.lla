@@ -18,3 +18,5 @@ i am infinire jacomment aaaaaa
 "Hello the comment finally ended :) Here is a test : (* *)"
 ' '
 (**)
+print "hello, there", "please read me as separate";;
+(*open commen (* another one *)*)*)

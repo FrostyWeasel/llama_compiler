@@ -123,15 +123,21 @@ union YYSTYPE
     Par* par;
     Expr* expr;
     Type* type;
-    Block* block;
+    Block<Expr>* expr_list;
+    Block<Expr>* expr_comma_list;
+    Block<Par>* par_list;
+    Block<Def>* def_list;
+    Block<LetDef>* letdef_list;
+
 
     std::string* id;
     std::string* string_literal;
     char const_char;
     int number;
     char op;
+    int dimension_count;
 
-#line 135 "./src/parser.hpp"
+#line 141 "./src/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

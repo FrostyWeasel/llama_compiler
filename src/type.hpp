@@ -2,9 +2,14 @@
 #define __TYPE_HPP__
 
 #include "ast.hpp"
+#include "includes.hpp"
+
 
 class Type : public AST{
-  virtual void print(std::ostream &out) const override {  }
+public:public:
+    Type() {}
+    Type(TypeTag type) {}
+    virtual void print(std::ostream &out) const override {  }
 };
 
 #endif

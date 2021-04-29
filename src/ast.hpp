@@ -2,7 +2,7 @@
 #define __AST_HPP__
 
 #include <iostream>
-
+#include "includes.hpp"
 class AST{
 public:
     virtual ~AST() {}

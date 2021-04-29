@@ -4,7 +4,8 @@
 #include "ast.hpp"
 
 class Expr : public AST{
-  virtual void print(std::ostream &out) const override {  }
+public:  
+    virtual void print(std::ostream &out) const override {  }
 };
 
 #endif
