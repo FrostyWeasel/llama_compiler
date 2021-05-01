@@ -5,7 +5,15 @@
 #include "includes.hpp"
 class Bool : public Expr{
 public:
-    Bool(BoolType value) {}
+    Bool(bool value) : value(value), type(new Type(TypeTag::Bool)) {}
+
+    virtual void print(std::ostream& out) const override{
+        out << "Bool(" << value << ") ";
+    }
+    
+private:
+    bool value;
+    Type* type;
 
 };
 

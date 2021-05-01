@@ -7,7 +7,20 @@
 
 class Delete : public Expr{
 public:
-    Delete(Expr* expr) {}
+    Delete(Expr* expr): expr(expr) {}
+
+    virtual void print(std::ostream &out) const override {
+        out << "Delete(";
+        out << "Exr: ";
+        if(expr != nullptr)
+            expr->print(out);
+        else
+            out << "null ";
+        out << ") ";
+    }
+
+private:
+    Expr* expr;
 
 };
 

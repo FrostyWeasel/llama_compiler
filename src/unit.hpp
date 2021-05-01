@@ -7,7 +7,14 @@
 
 class Unit : public Expr{
 public:
-    Unit() {}
+    Unit() : type(new Type(TypeTag::Unit)) {}
+
+    virtual void print(std::ostream& out) const override{
+        out << "Unit";
+    }
+
+private:
+    Type* type;
 
 };
 

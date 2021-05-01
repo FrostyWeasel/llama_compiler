@@ -7,7 +7,17 @@
 
 class RefType : public Type{
 public:
-    RefType(Type* type) {}
+    RefType(Type* type) : type(type) {}
+
+    virtual void print(std::ostream &out) const { 
+        if (type == nullptr)
+            out << "Type: Null";
+        else
+            out << type << " ref ";
+    }
+    
+private:
+    Type* type;
 
 };
 

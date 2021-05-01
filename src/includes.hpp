@@ -32,5 +32,10 @@
 #include "unit.hpp"
 #include "un_op.hpp"
 #include "while.hpp"
+#include "var_def.hpp"
+#include "array_def.hpp"
+#include "function_def.hpp"
+#include "const_def.hpp"
+
 
 #endif

@@ -62,23 +62,23 @@
 /* %right "in" */
 %nonassoc EXPR_LIST
 %nonassoc LOCAL_DEFS
-%left ';'
+%left<op> ';'
 %nonassoc IF_THEN IF_THEN_ELSE
-%nonassoc ":="
-%left "||"
-%left "&&"
-%nonassoc '=' "<>" '>' '<' "<=" ">=" "==" "!="
-%left '+' '-'
-%left '*' '/' "mod" 
-%right "**"
-%left UNOP "not" "delete"
+%nonassoc<op> ":="
+%left<op> "||"
+%left<op> "&&"
+%nonassoc<op> '=' "<>" '>' '<' "<=" ">=" "==" "!="
+%left<op> '+' '-'
+%left<op> '*' '/' "mod" 
+%right<op> "**"
+%left<op> UNOP "not" "delete"
 %right "->"
 %left "ref"
 %right "array" "of"
 %right FUNCTION_CALL
 %precedence "dim" "false" "true" "for" "if" "let" "while" '(' T_ID T_CONST_CHAR T_CONST_INT T_STRING_LITERAL
 %right "begin"
-%nonassoc '!'
+%nonassoc<op> '!'
 %nonassoc ARRAY_INDEX
 %nonassoc "new"
 
@@ -93,7 +93,7 @@
     Block<Par>* par_list;
     Block<Def>* def_list;
     Block<LetDef>* letdef_list;
-    BinOpType op;
+    OpType op;
 
     std::string* id;
     std::string* string_literal;
@@ -136,11 +136,14 @@ def_list:
 ;
 
 def:
-    T_ID par_list ':' type '=' expr                         { $$ = new Def($1, $2, $4, $6); }
-|   T_ID par_list '=' expr                                  { $$ = new Def($1, $2, $4); }
-|   "mutable" T_ID                                          { $$ = new Def($2); }
-|   "mutable" T_ID '[' expr expr_comma_list ']'             { $5->insert($5->begin(), $4); $$ = new Def($2, $5); }
-|   "mutable" T_ID '[' expr expr_comma_list ']' ':' type    { $5->insert($5->begin(), $4); $$ = new Def($2, $5, $8); }
+    T_ID '=' expr                                           { $$ = new ConstDef($1, $3); }
+|   T_ID ':' type '=' expr                                  { $$ = new ConstDef($1, $3, $5); }
+|   T_ID par par_list ':' type '=' expr                     { $3->insert($3->begin(), $2); $$ = new FunctionDef($1, $3, $7, $5); }
+|   T_ID par par_list '=' expr                              { $3->insert($3->begin(), $2); $$ = new FunctionDef($1, $3, $5); }
+|   "mutable" T_ID                                          { $$ = new VarDef($2); }
+|   "mutable" T_ID ':' type                                 { $$ = new VarDef($2, $4); }
+|   "mutable" T_ID '[' expr expr_comma_list ']'             { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5); }
+|   "mutable" T_ID '[' expr expr_comma_list ']' ':' type    { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5, $8); }
 ;
 
 par_list:
@@ -162,8 +165,8 @@ expr:
     T_CONST_INT                                             { $$ = new Int($1); }                                         
 |   T_CONST_CHAR                                            { $$ = new Char($1); }
 |   T_STRING_LITERAL                                        { $$ = new String($1); }
-|   "true"                                                  { $$ = new Bool(BoolType::True); }
-|   "false"                                                 { $$ = new Bool(BoolType::False); }
+|   "true"                                                  { $$ = new Bool(true); }
+|   "false"                                                 { $$ = new Bool(false); }
 |   '(' ')'                                                 { $$ = new Unit(); }
 |   '(' expr ')'                                            { $$ = $2; }
 |   T_ID expr_list  %prec FUNCTION_CALL                     { $$ = new FunctionCall($1, $2); }
@@ -179,26 +182,27 @@ expr:
 |   "while" expr "do" expr "done"                           { $$ = new While($2, $4); }
 |   "for" T_ID '=' expr "to" expr "do" expr "done"          { $$ = new ForTo($2, $4, $6, $8); }
 |   "for" T_ID '=' expr "downto" expr "do" expr "done"      { $$ = new ForDownTo($2, $4, $6, $8); }
-|   '+' expr    %prec UNOP                                  { $$ = new UnOp($2, UnOpType::Plus); }
-|   '-' expr    %prec UNOP                                  { $$ = new UnOp($2, UnOpType::Minus); }
-|   '!' expr                                                { $$ = new UnOp($2, UnOpType::Dereference); }
-|   "not" expr                                              { $$ = new UnOp($2, UnOpType::Not); }
-|   expr '+' expr                                           { $$ = new BinOp($1, $3, BinOpType::Plus); }
-|   expr '-' expr                                           { $$ = new BinOp($1, $3, BinOpType::Minus); }
-|   expr '*' expr                                           { $$ = new BinOp($1, $3, BinOpType::Times); }              
-|   expr '/' expr                                           { $$ = new BinOp($1, $3, BinOpType::Divide); }
-|   expr '=' expr                                           { $$ = new BinOp($1, $3, BinOpType::Equals); }
-|   expr "<>" expr                                          { $$ = new BinOp($1, $3, BinOpType::NotEquals); }
-|   expr '<' expr                                           { $$ = new BinOp($1, $3, BinOpType::LessThan); }
-|   expr '>' expr                                           { $$ = new BinOp($1, $3, BinOpType::MoreThan); }
-|   expr "<=" expr                                          { $$ = new BinOp($1, $3, BinOpType::LessOrEqualThan); }
-|   expr ">=" expr                                          { $$ = new BinOp($1, $3, BinOpType::MoreOrEqualThan); }
-|   expr "==" expr                                          { $$ = new BinOp($1, $3, BinOpType::NatEquals); }
-|   expr "!=" expr                                          { $$ = new BinOp($1, $3, BinOpType::NatNotEquals); }
-|   expr "&&" expr                                          { $$ = new BinOp($1, $3, BinOpType::And); }
-|   expr "||" expr                                          { $$ = new BinOp($1, $3, BinOpType::Or); }
-|   expr ';' expr                                           { $$ = new BinOp($1, $3, BinOpType::Concat); }
-|   expr ":=" expr                                          { $$ = new BinOp($1, $3, BinOpType::Assign); }
+|   '+' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
+|   '-' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
+|   '!' expr                                                { $$ = new UnOp($2, $1); }
+|   "not" expr                                              { $$ = new UnOp($2, $1); }
+|   expr '+' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr '-' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr '*' expr                                           { $$ = new BinOp($1, $3, $2); }              
+|   expr '/' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr '=' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr "<>" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr '<' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr '>' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr "<=" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr ">=" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "==" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "!=" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "&&" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "||" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr ';' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr ":=" expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "mod" expr
 ;
 
 expr_list:

@@ -5,7 +5,7 @@
 
 class ForTo : public For{
 public:
-    ForTo(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr) {}
+    ForTo(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr): For(id, first_condition, second_condition, expr) {}
 
 };
 

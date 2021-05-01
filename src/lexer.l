@@ -98,7 +98,6 @@ W [ \t\n\r]
 "int"		{ return T_INT; }        
 "let"		{ return T_LET; }
 "match"		{ return T_MATCH; }
-"mod"		{ return T_MOD; }
 "mutable"	{ return T_MUTABLE; }
 "new"		{ return T_NEW; }
 "not"		{ return T_NOT; }
@@ -113,18 +112,27 @@ W [ \t\n\r]
 "while"		{ return T_WHILE; }
 "with"		{ return T_WITH; }
 
-[\=\|\+\-\*\/\!\;\<\>\(\)\[\]\,\:]		{ yylval.op = yytext[0]; return yytext[0]; }
-'='
+"mod"		{ yylval.op = OpType::Modulo; return T_MOD; }
+
+"+" { yylval.op = OpType::Plus; return yytext[0]; }
+"-" { yylval.op = OpType::Minus; return yytext[0]; }
+"*" { yylval.op = OpType::Times; return yytext[0]; }
+"/" { yylval.op = OpType::Divide; return yytext[0]; }
+"=" { yylval.op = OpType::Equals; return yytext[0]; }
+"<" { yylval.op = OpType::LessThan; return yytext[0]; }
+">" { yylval.op = OpType::GreaterThan; return yytext[0]; }
+"!" { yylval.op = OpType::Dereference; return yytext[0]; }
+";" { yylval.op = OpType::Concat; return yytext[0]; }
 
 "->"		{ return T_TYPE_ARROW_OP; }
-"&&"		{ return T_AND_OP; }
-"||"		{ return T_OR_OP; }
-"<>"		{ return T_NOT_EQ_OP; }
-"<="		{ return T_LESS_THAN_OR_EQ_OP; }
-">="		{ return T_GREATER_THAN_OR_EQ_OP; }
-"=="		{ return T_NAT_EQ_OP; }
-"!="		{ return T_NAT_NOT_EQ_OP; }
-":="		{ return T_ASSIGNMENT_OP; }
+"&&"		{ yylval.op = OpType::And; return T_AND_OP; }
+"||"		{ yylval.op = OpType::Or; return T_OR_OP; }
+"<>"		{ yylval.op = OpType::NotEquals; return T_NOT_EQ_OP; }
+"<="		{ yylval.op = OpType::LessOrEqualThan; return T_LESS_THAN_OR_EQ_OP; }
+">="		{ yylval.op = OpType::GreaterOrEqualThan; return T_GREATER_THAN_OR_EQ_OP; }
+"=="		{ yylval.op = OpType::NatEquals; return T_NAT_EQ_OP; }
+"!="		{ yylval.op = OpType::NatNotEquals; return T_NAT_NOT_EQ_OP; }
+":="		{ yylval.op = OpType::Assign; return T_ASSIGNMENT_OP; }
 
 {L_lower}({L}|{D}|_)*       { std::string* id = new std::string { yytext }; yylval.id = id; return T_ID; }
 {L_upper}({L}|{D}|_)*       { return T_CONSTRUCTOR_ID; }
