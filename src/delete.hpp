@@ -9,6 +9,11 @@ class Delete : public Expr{
 public:
     Delete(Expr* expr): expr(expr) {}
 
+    ~Delete() {
+	std::cout << "Delete deleted\n";
+        delete expr;
+    }
+
     virtual void print(std::ostream &out) const override {
         out << "Delete(";
         out << "Exr: ";

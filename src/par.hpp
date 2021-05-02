@@ -9,6 +9,11 @@ public:
     Par(std::string* id): id(*id), type(new Type(TypeTag::Unknown)) {}
     Par(std::string* id, Type* type): id(*id), type(type) {}
 
+    ~Par() {
+	std::cout << "Par deleted\n";
+        delete type;
+    }
+
     virtual void print(std::ostream &out) const override { 
         out << "Par(";
         out << "Id: " << id << " ";
@@ -23,6 +28,7 @@ public:
 private:
     std::string id;
     Type* type;
+    
 
 };
 

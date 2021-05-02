@@ -10,6 +10,13 @@ public:
     If(Expr* condition, Expr* if_expr): condition(condition), if_expr(if_expr), else_expr(nullptr) {}
     If(Expr* condition, Expr* if_expr, Expr* else_expr): condition(condition), if_expr(if_expr), else_expr(else_expr) {}
 
+    ~If() {
+	std::cout << "If deleted\n";
+        delete condition;
+        delete if_expr;
+        delete else_expr;
+    }
+
     virtual void print(std::ostream &out) const override {
         out << "If(";
         out << "Condition: ";

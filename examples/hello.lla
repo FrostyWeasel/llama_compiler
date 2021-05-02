@@ -1,2 +1,2 @@
-let main = "Hello \' there i am \n a \t string"
+let main = print_string "Hello, world!\n"
 

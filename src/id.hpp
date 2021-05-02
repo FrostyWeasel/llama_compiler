@@ -8,7 +8,7 @@
 #include "enums.hpp"
 #include "includes.hpp"
 
-
+//TODO: Search ST for type
 class Id : public Expr{
 public:
     Id(std::string* id): id(*id) {}
@@ -19,6 +19,7 @@ public:
 
 private:
     std::string id;
+    
 };
 
 #endif

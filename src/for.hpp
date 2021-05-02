@@ -10,6 +10,13 @@ public:
     For() {}
     For(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr): id(*id), first_condition(first_condition), second_condition(second_condition), expr(expr) {}
 
+    ~For() {
+	std::cout << "For deleted\n";
+        delete first_condition;
+        delete second_condition;
+        delete expr;
+    }
+
     virtual void print(std::ostream &out) const override {
         out << "For(";
         out << "Id: " << id << " ";

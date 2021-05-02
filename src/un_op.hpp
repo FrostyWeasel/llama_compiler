@@ -9,6 +9,11 @@ class UnOp : public Expr{
 public:
     UnOp(Expr* expr, OpType op): expr(expr), op(op) {}
 
+    ~UnOp() {
+	std::cout << "UnOp deleted\n";
+        delete expr;
+    }
+
     virtual void print(std::ostream &out) const override {
         out << "UnOp(";
         out << "Expr: ";
@@ -76,7 +81,7 @@ public:
                 out << "Times ";
                 break;
             default:
-                out << "ERROR: No known type "; //TODO: Error: Replace by error handling
+                out << "ERROR: No known op "; //TODO: Error: Replace by error handling
                 exit(1);
                 break;
         }

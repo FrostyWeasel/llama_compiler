@@ -8,6 +8,14 @@ template <class T>
 class Block : public AST{
 public:
 
+  Block<T>() {}
+  
+  ~Block<T>() {
+	std::cout << "Block<T> deleted\n";
+    for(auto element: list)
+      delete element;
+  }
+
   virtual void print(std::ostream &out) const override{
     out << "Block(";
     for(T* element: list){

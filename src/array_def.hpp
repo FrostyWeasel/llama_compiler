@@ -9,8 +9,13 @@
 
 class ArrayDef : public Def{
 public:
-    ArrayDef(std::string* id, Block<Expr>* expr_list): id(*id), type(new Type(TypeTag::Unknown)), expr_list(expr_list) {}
-    ArrayDef(std::string* id, Block<Expr>* expr_list, Type* type): id(*id), expr_list(expr_list), type(type) {}
+    ArrayDef(std::string* id, Block<Expr>* expr_list): id(*id), Def(new Type(TypeTag::Unknown)), expr_list(expr_list) {}
+    ArrayDef(std::string* id, Block<Expr>* expr_list, Type* type): id(*id), expr_list(expr_list), Def(type) {}
+
+    ~ArrayDef() {
+	std::cout << "ArrayDef deleted\n";
+        delete expr_list;
+    }
 
     virtual void print(std::ostream& out) const override{
         out << "ArrayDef(";
@@ -31,7 +36,6 @@ public:
 private:
     std::string id;
     Block<Expr>* expr_list;
-    Type* type;
 };
 
 #endif

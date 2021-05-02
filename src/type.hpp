@@ -9,6 +9,8 @@ class Type{
 public:
     Type() : tag(TypeTag::Unknown) {}
     Type(TypeTag type) : tag(type) {}
+
+    virtual ~Type() {}
     
     virtual void print(std::ostream& out) const { 
         out << "Type(";

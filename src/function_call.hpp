@@ -9,7 +9,12 @@
 
 class FunctionCall : public Expr{
 public:
-    FunctionCall(std::string* id, Block<Expr>* expr_list) : id(*id), expr_list(expr_list) {}
+    FunctionCall(std::string* id, Block<Expr>* expr_list) : id(*id), expr_list(expr_list) { }
+
+    ~FunctionCall() {
+	std::cout << "FunctionCall deleted\n";
+        delete expr_list;
+    }
 
     virtual void print(std::ostream &out) const override{
         out << "FunctionCall(";

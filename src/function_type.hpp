@@ -8,6 +8,12 @@ class FunctionType : public Type{
 public:
     FunctionType(Type* from_type, Type* to_type): from_type(from_type), to_type(to_type) {}
     
+    ~FunctionType() {
+	std::cout << "FunctionType deleted\n";
+        delete from_type;
+        delete to_type;
+    }
+
     virtual void print(std::ostream &out) const { 
         if (from_type == nullptr)
             out << "from_type: Null ";

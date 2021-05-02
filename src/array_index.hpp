@@ -11,6 +11,11 @@ class ArrayIndex : public Expr{
 public:
     ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
 
+    ~ArrayIndex() {
+	std::cout << "ArrayIndex deleted\n";
+        delete expr_list;
+    }
+
     virtual void print(std::ostream &out) const override{
         out << "ArrayIndex( ";
         out << "Id: " << id << ", ";

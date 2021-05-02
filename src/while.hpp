@@ -9,6 +9,12 @@ class While : public Expr{
 public:
     While(Expr* condition, Expr* expr): condition(condition), expr(expr) {}
 
+    ~While() {
+	std::cout << "While deleted\n";
+        delete condition;
+        delete expr;
+    }
+
     virtual void print(std::ostream &out) const override {
         out << "While(";
         out << "Condition: ";

@@ -9,6 +9,12 @@ class BinOp : public Expr{
 public:
     BinOp(Expr* lval, Expr* rval, OpType op): lval(lval), rval(rval), op(op) {}
 
+    ~BinOp() {
+	std::cout << "BinOp deleted\n";
+        delete lval;
+        delete rval;
+    }
+
     virtual void print(std::ostream &out) const override {
         out << "BinOp(";
         out << "lval: ";

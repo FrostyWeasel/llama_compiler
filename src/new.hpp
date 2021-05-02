@@ -7,7 +7,7 @@
 
 class New : public Expr{
 public:
-    New(Type* type): type(type) {}
+    New(Type* type): Expr(type) {}
 
     virtual void print(std::ostream &out) const override {
         out << "New(";
@@ -18,9 +18,7 @@ public:
             out << "null ";
         out << ") ";
     }
-
-private:
-    Type* type;
+    
 };
 
 #endif

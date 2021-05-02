@@ -10,6 +10,15 @@
 class Def : public AST{
 public:    
     Def() {}
+    Def(Type* type): type(type) {}
+
+    virtual ~Def() {
+	std::cout << "Def deleted\n";
+        delete type;
+    }
+
+protected:
+    Type* type;
 };
 
 #endif

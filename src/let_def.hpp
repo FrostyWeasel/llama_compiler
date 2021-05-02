@@ -8,6 +8,11 @@
 class LetDef : public AST{
 public:    
     LetDef(Block<Def>* def, LetType type): def(def), type(type) {}
+
+    ~LetDef() {
+	std::cout << "LetDef deleted\n";
+        delete def;
+    }
   
     virtual void print(std::ostream &out) const override {
         out << "Let(";

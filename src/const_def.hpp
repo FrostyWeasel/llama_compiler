@@ -5,8 +5,13 @@
 
 class ConstDef : public Def{
 public:
-    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), type(new Type(TypeTag::Unknown)) {}
-    ConstDef(std::string* id, Type* type, Expr* expr): id(*id), type(type), expr(expr) {}
+    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new Type(TypeTag::Unknown)) {}
+    ConstDef(std::string* id, Type* type, Expr* expr): id(*id), Def(type), expr(expr) {}
+
+    ~ConstDef() {
+	std::cout << "ConstDef deleted\n";
+        delete expr;
+    }
 
     virtual void print(std::ostream& out) const override{
         out << "ConstDef(";
@@ -25,7 +30,6 @@ public:
     }
 private:
     std::string id;
-    Type* type;
     Expr* expr;
 };
 

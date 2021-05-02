@@ -101,15 +101,9 @@ extern int yydebug;
     T_CONST_CHAR = 302,            /* T_CONST_CHAR  */
     T_CONST_INT = 303,             /* T_CONST_INT  */
     T_STRING_LITERAL = 304,        /* T_STRING_LITERAL  */
-    EXPR_LIST = 305,               /* EXPR_LIST  */
-    EMPTY_EXPR_LIST = 306,         /* EMPTY_EXPR_LIST  */
-    ID = 307,                      /* ID  */
-    LOCAL_DEFS = 308,              /* LOCAL_DEFS  */
-    IF_THEN = 309,                 /* IF_THEN  */
-    IF_THEN_ELSE = 310,            /* IF_THEN_ELSE  */
-    UNOP = 312,                    /* UNOP  */
-    FUNCTION_CALL = 313,           /* FUNCTION_CALL  */
-    ARRAY_INDEX = 314              /* ARRAY_INDEX  */
+    IF_THEN = 305,                 /* IF_THEN  */
+    IF_THEN_ELSE = 306,            /* IF_THEN_ELSE  */
+    UNOP = 308                     /* UNOP  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -118,14 +112,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 86 "./src/parser.y"
+#line 79 "./src/parser.y"
 
     LetDef* let_def;
     Def* def;
     Par* par;
     Expr* expr;
     Type* type;
-    Block<Expr>* expr_list;
+    Block<Expr>* func_expr_list;
     Block<Expr>* expr_comma_list;
     Block<Par>* par_list;
     Block<Def>* def_list;
@@ -138,7 +132,7 @@ union YYSTYPE
     int number;
     int dimension_count;
 
-#line 142 "./src/parser.hpp"
+#line 136 "./src/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

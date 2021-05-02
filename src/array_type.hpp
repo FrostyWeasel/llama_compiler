@@ -10,6 +10,11 @@ public:
     ArrayType(Type* type): type(type), dimensions(1) {}
     ArrayType(Type* type, int dimensions): type(type), dimensions(dimensions) {}
 
+    ~ArrayType() {
+	    std::cout << "ArrayType deleted\n";
+        delete type;
+    }
+
     virtual void print(std::ostream &out) const { 
         out << "array "; 
         if(dimensions > 1){

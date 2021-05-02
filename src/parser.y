@@ -60,9 +60,6 @@
 %expect 1
 
 %nonassoc "let" "in"
-%left EXPR_LIST EMPTY_EXPR_LIST
-%nonassoc ID
-%nonassoc LOCAL_DEFS
 %left<op> ';'
 %nonassoc IF_THEN IF_THEN_ELSE
 %nonassoc<op> ":="
@@ -76,11 +73,7 @@
 %right "->"
 %left "ref"
 %right "array" "of"
-%nonassoc FUNCTION_CALL
-%precedence "dim" "false" "true" "for" "if" "let" "while" '(' T_ID T_CONST_CHAR T_CONST_INT T_STRING_LITERAL
-%right "begin"
 %nonassoc<op> '!'
-%nonassoc ARRAY_INDEX
 %nonassoc "new"
 
 %union{
@@ -118,7 +111,7 @@
 %%
 
 program:
-    letdef_list { std::cout << "AST: " << *$1 << std::endl; }  
+    letdef_list { std::cout << "AST: " << *$1 << std::endl; delete $1;}  
 ;
 
 letdef_list:
@@ -163,13 +156,13 @@ expr_comma_list:
 ;
 
 expr:
-    func_expr                                               { $$ = $1 }
-|   T_ID func_expr_list  %prec FUNCTION_CALL                { $$ = new FunctionCall($1, $3); }
+    func_expr                                               { $$ = $1; }
+|   T_ID func_expr func_expr_list                           { $3->insert($3->begin(), $2); $$ = new FunctionCall($1, $3); }
 |   "dim" T_ID                                              { $$ = new Dim($2); }
 |   "dim" T_CONST_INT T_ID                                  { $$ = new Dim($3, $2); }
 |   "new" type                                              { $$ = new New($2); }
 |   "delete" expr                                           { $$ = new Delete($2); }
-|   letdef "in" expr    %prec LOCAL_DEFS                    { $$ = new LetIn($1, $3); }
+|   letdef "in" expr                                        { $$ = new LetIn($1, $3); }
 |   "begin" expr "end"                                      { $$ = $2; }
 |   "if" expr "then" expr               %prec IF_THEN       { $$ = new If($2, $4); }
 |   "if" expr "then" expr "else" expr   %prec IF_THEN_ELSE  { $$ = new If($2, $4, $6); }
@@ -202,36 +195,36 @@ func_expr:
    '!' func_expr                                            { $$ = new UnOp($2, $1); }
 |   '(' expr ')'                                            { $$ = $2; }
 |   '(' ')'                                                 { $$ = new Unit(); }
-|   T_ID    %prec ID                                        { $$ = new Id($1); }
+|   T_ID                                                    { $$ = new Id($1); }
 |   T_CONST_INT                                             { $$ = new Int($1); }                                         
 |   T_CONST_CHAR                                            { $$ = new Char($1); }
 |   T_STRING_LITERAL                                        { $$ = new String($1); }
 |   "true"                                                  { $$ = new Bool(true); }
 |   "false"                                                 { $$ = new Bool(false); }
-|   T_ID '[' expr expr_comma_list ']'   %prec ARRAY_INDEX   { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); }
+|   T_ID '[' expr expr_comma_list ']'                       { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); }
 
 
 func_expr_list:          
-    %empty  %prec EMPTY_EXPR_LIST               { $$ = new Block<Expr>(); }
-|   func_expr_list func_expr %prec EXPR_LIST    { $1->append($2); }
+    %empty                                                  { $$ = new Block<Expr>(); }
+|   func_expr_list func_expr                                { $1->append($2); }
 
 type:
-    "unit"                                          { $$ = new Type(TypeTag::Unit); }
-|   "int"                                           { $$ = new Type(TypeTag::Int); }
-|   "char"                                          { $$ = new Type(TypeTag::Char); }
-|   "bool"                                          { $$ = new Type(TypeTag::Bool); }
-|   '(' type ')'                                    { $$ = $2; }
-|   type "->" type                                  { $$ = new FunctionType($1, $3); }
-|   type "ref"                                      { $$ = new RefType($1); }
-|   "array" "of" type                               { $$ = new ArrayType($3); }
-|   "array" '[' '*' asterisk_list ']' "of" type     { $4++; $$ = new ArrayType($7, $4); }
+    "unit"                                                  { $$ = new Type(TypeTag::Unit); }
+|   "int"                                                   { $$ = new Type(TypeTag::Int); }
+|   "char"                                                  { $$ = new Type(TypeTag::Char); }
+|   "bool"                                                  { $$ = new Type(TypeTag::Bool); }
+|   '(' type ')'                                            { $$ = $2; }
+|   type "->" type                                          { $$ = new FunctionType($1, $3); }
+|   type "ref"                                              { $$ = new RefType($1); }
+|   "array" "of" type                                       { $$ = new ArrayType($3); }
+|   "array" '[' asterisk_list ']' "of" type                 { $$ = new ArrayType($6, $3); }
 /* |   T_ID                                            { $$ = }  propably not possible due to no user defined types*/
 ;
 
 /* ugly replace block? */
 asterisk_list:
-    %empty                  { $$ = 0; }
-|   asterisk_list ',' '*'   { $1++; }
+    '*'                     { $$ = 1; }
+|   asterisk_list ',' '*'   { $$ = 1 + $1; }
 ;
 
 %%

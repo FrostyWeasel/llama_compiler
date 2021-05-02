@@ -5,7 +5,7 @@
 #include "includes.hpp"
 class AST{
 public:
-    virtual ~AST() {}
+    virtual ~AST() {  }
     virtual void print(std::ostream& out) const = 0;
 };
 
