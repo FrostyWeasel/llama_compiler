@@ -22,7 +22,7 @@ public:
         if (type == nullptr)
             out << "Type: Null";
         else
-        out << "of " << type << " ";
+        out << "of " << *type << " ";
     }
 private:
     Type* type;

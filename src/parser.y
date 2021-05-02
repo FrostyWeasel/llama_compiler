@@ -59,8 +59,9 @@
 
 %expect 1
 
-/* %right "in" */
-%nonassoc EXPR_LIST
+%nonassoc "let" "in"
+%left EXPR_LIST EMPTY_EXPR_LIST
+%nonassoc ID
 %nonassoc LOCAL_DEFS
 %left<op> ';'
 %nonassoc IF_THEN IF_THEN_ELSE
@@ -75,7 +76,7 @@
 %right "->"
 %left "ref"
 %right "array" "of"
-%right FUNCTION_CALL
+%nonassoc FUNCTION_CALL
 %precedence "dim" "false" "true" "for" "if" "let" "while" '(' T_ID T_CONST_CHAR T_CONST_INT T_STRING_LITERAL
 %right "begin"
 %nonassoc<op> '!'
@@ -88,7 +89,7 @@
     Par* par;
     Expr* expr;
     Type* type;
-    Block<Expr>* expr_list;
+    Block<Expr>* func_expr_list;
     Block<Expr>* expr_comma_list;
     Block<Par>* par_list;
     Block<Def>* def_list;
@@ -105,10 +106,10 @@
 %type<let_def> letdef
 %type<def> def
 %type<par> par
-%type<expr> expr
+%type<expr> expr func_expr
 %type<type> type
 %type<dimension_count> asterisk_list
-%type<expr_list> expr_list
+%type<func_expr_list> func_expr_list
 %type<expr_comma_list> expr_comma_list
 %type<par_list> par_list
 %type<def_list> def_list
@@ -162,15 +163,8 @@ expr_comma_list:
 ;
 
 expr:
-    T_CONST_INT                                             { $$ = new Int($1); }                                         
-|   T_CONST_CHAR                                            { $$ = new Char($1); }
-|   T_STRING_LITERAL                                        { $$ = new String($1); }
-|   "true"                                                  { $$ = new Bool(true); }
-|   "false"                                                 { $$ = new Bool(false); }
-|   '(' ')'                                                 { $$ = new Unit(); }
-|   '(' expr ')'                                            { $$ = $2; }
-|   T_ID expr_list  %prec FUNCTION_CALL                     { $$ = new FunctionCall($1, $2); }
-|   T_ID '[' expr expr_comma_list ']'   %prec ARRAY_INDEX   { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); }
+    func_expr                                               { $$ = $1 }
+|   T_ID func_expr_list  %prec FUNCTION_CALL                { $$ = new FunctionCall($1, $3); }
 |   "dim" T_ID                                              { $$ = new Dim($2); }
 |   "dim" T_CONST_INT T_ID                                  { $$ = new Dim($3, $2); }
 |   "new" type                                              { $$ = new New($2); }
@@ -184,7 +178,6 @@ expr:
 |   "for" T_ID '=' expr "downto" expr "do" expr "done"      { $$ = new ForDownTo($2, $4, $6, $8); }
 |   '+' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
 |   '-' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
-|   '!' expr                                                { $$ = new UnOp($2, $1); }
 |   "not" expr                                              { $$ = new UnOp($2, $1); }
 |   expr '+' expr                                           { $$ = new BinOp($1, $3, $2); }
 |   expr '-' expr                                           { $$ = new BinOp($1, $3, $2); }
@@ -202,12 +195,25 @@ expr:
 |   expr "||" expr                                          { $$ = new BinOp($1, $3, $2); }
 |   expr ';' expr                                           { $$ = new BinOp($1, $3, $2); }
 |   expr ":=" expr                                          { $$ = new BinOp($1, $3, $2); }
-|   expr "mod" expr
+|   expr "mod" expr                                         { $$ = new BinOp($1, $3, $2); }
 ;
 
-expr_list:
-    %empty                          { $$ = new Block<Expr>(); }
-|   expr_list expr  %prec EXPR_LIST { $1->append($2); }
+func_expr:
+   '!' func_expr                                            { $$ = new UnOp($2, $1); }
+|   '(' expr ')'                                            { $$ = $2; }
+|   '(' ')'                                                 { $$ = new Unit(); }
+|   T_ID    %prec ID                                        { $$ = new Id($1); }
+|   T_CONST_INT                                             { $$ = new Int($1); }                                         
+|   T_CONST_CHAR                                            { $$ = new Char($1); }
+|   T_STRING_LITERAL                                        { $$ = new String($1); }
+|   "true"                                                  { $$ = new Bool(true); }
+|   "false"                                                 { $$ = new Bool(false); }
+|   T_ID '[' expr expr_comma_list ']'   %prec ARRAY_INDEX   { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); }
+
+
+func_expr_list:          
+    %empty  %prec EMPTY_EXPR_LIST               { $$ = new Block<Expr>(); }
+|   func_expr_list func_expr %prec EXPR_LIST    { $1->append($2); }
 
 type:
     "unit"                                          { $$ = new Type(TypeTag::Unit); }

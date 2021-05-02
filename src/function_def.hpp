@@ -5,7 +5,7 @@
 
 class FunctionDef : public Def{
 public:
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), type(new Type(TypeTag::Unkown)), expr(expr) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), type(new Type(TypeTag::Unknown)), expr(expr) {}
     FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, Type* type): id(*id), par_list(par_list), type(type), expr(expr) {}
 
     virtual void print(std::ostream& out) const override{

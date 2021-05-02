@@ -12,12 +12,12 @@ public:
         if (from_type == nullptr)
             out << "from_type: Null ";
         else
-            out << from_type << " -> " << to_type << " ";
+            out << *from_type << " ";
         out << " -> ";
         if (to_type == nullptr)
             out << "to_type: Null ";
         else
-            out << to_type << " ";
+            out << *to_type << " ";
 
     }
     

@@ -12,9 +12,13 @@ public:
     ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
 
     virtual void print(std::ostream &out) const override{
-        out << "ArrayIndex(";
-        out << " id: " << id << " ";
-        expr_list->print(out);
+        out << "ArrayIndex( ";
+        out << "Id: " << id << ", ";
+        out << "Expr_list: ";
+        if(expr_list != nullptr)
+            expr_list->print(out);
+        else
+            out << "null ";
         out << ") ";
     }
 

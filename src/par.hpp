@@ -6,7 +6,7 @@
 
 class Par : public AST{
 public:
-    Par(std::string* id): id(*id) {}
+    Par(std::string* id): id(*id), type(new Type(TypeTag::Unknown)) {}
     Par(std::string* id, Type* type): id(*id), type(type) {}
 
     virtual void print(std::ostream &out) const override { 

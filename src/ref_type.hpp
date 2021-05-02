@@ -13,7 +13,7 @@ public:
         if (type == nullptr)
             out << "Type: Null";
         else
-            out << type << " ref ";
+            out << *type << " ref ";
     }
     
 private:

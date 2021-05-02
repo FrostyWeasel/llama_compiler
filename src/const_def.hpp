@@ -5,7 +5,7 @@
 
 class ConstDef : public Def{
 public:
-    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), type(new Type(TypeTag::Unkown)) {}
+    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), type(new Type(TypeTag::Unknown)) {}
     ConstDef(std::string* id, Type* type, Expr* expr): id(*id), type(type), expr(expr) {}
 
     virtual void print(std::ostream& out) const override{

@@ -114,6 +114,8 @@ W [ \t\n\r]
 
 "mod"		{ yylval.op = OpType::Modulo; return T_MOD; }
 
+[\|\(\)\[\]\,\:]		{ return yytext[0]; }
+
 "+" { yylval.op = OpType::Plus; return yytext[0]; }
 "-" { yylval.op = OpType::Minus; return yytext[0]; }
 "*" { yylval.op = OpType::Times; return yytext[0]; }

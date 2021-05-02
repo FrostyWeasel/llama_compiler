@@ -13,8 +13,12 @@ public:
 
     virtual void print(std::ostream &out) const override{
         out << "FunctionCall(";
-        out << " id: " << id << " ";
-        expr_list->print(out);
+        out << " Id: " << id << ", ";
+        out << "Expr_list: ";
+        if(expr_list != nullptr)
+            expr_list->print(out);
+        else
+            out << "null ";
         out << ") ";
     }
 

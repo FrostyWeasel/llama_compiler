@@ -7,7 +7,7 @@
 
 class Type{
 public:
-    Type() : tag(TypeTag::Unkown) {}
+    Type() : tag(TypeTag::Unknown) {}
     Type(TypeTag type) : tag(type) {}
     
     virtual void print(std::ostream& out) const { 
@@ -25,8 +25,8 @@ public:
             case TypeTag::Unit:
                 out << "Unit";
                 break;
-            case TypeTag::Unkown:
-                out << "Unkown";
+            case TypeTag::Unknown:
+                out << "Unknown";
                 break;
         }
         out << ") ";

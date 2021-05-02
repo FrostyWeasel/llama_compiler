@@ -9,7 +9,7 @@
 
 class ArrayDef : public Def{
 public:
-    ArrayDef(std::string* id, Block<Expr>* expr_list): id(*id), type(new Type(TypeTag::Unkown)), expr_list(expr_list) {}
+    ArrayDef(std::string* id, Block<Expr>* expr_list): id(*id), type(new Type(TypeTag::Unknown)), expr_list(expr_list) {}
     ArrayDef(std::string* id, Block<Expr>* expr_list, Type* type): id(*id), expr_list(expr_list), type(type) {}
 
     virtual void print(std::ostream& out) const override{
