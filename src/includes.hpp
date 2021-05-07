@@ -1,8 +1,10 @@
 #ifndef __INCLUDES_HPP__
 #define __INCLUDES_HPP__
 
+
 #include "enums.hpp"
 #include "type.hpp"
+#include "symbol_table.hpp"
 #include "block.hpp"
 #include "par.hpp"
 #include "expr.hpp"
@@ -38,5 +40,6 @@
 #include "const_def.hpp"
 #include "id.hpp"
 
+constexpr bool debug = true;
 
 #endif

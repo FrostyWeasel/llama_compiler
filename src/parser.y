@@ -111,7 +111,7 @@
 %%
 
 program:
-    letdef_list { std::cout << "AST: " << *$1 << std::endl; delete $1;}  
+    letdef_list { if(debug) std::cout << "AST: " << *$1 << std::endl; delete $1;}  
 ;
 
 letdef_list:
