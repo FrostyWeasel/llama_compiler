@@ -44,5 +44,4 @@ inline std::ostream& operator<<(std::ostream& out, const Type& type){
     return out;
 }
 
-
 #endif

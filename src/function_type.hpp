@@ -9,7 +9,7 @@ public:
     FunctionType(Type* from_type, Type* to_type): from_type(from_type), to_type(to_type) {}
     
     ~FunctionType() {
-	std::cout << "FunctionType deleted\n";
+	    std::cout << "FunctionType deleted\n";
         delete from_type;
         delete to_type;
     }
@@ -24,7 +24,6 @@ public:
             out << "to_type: Null ";
         else
             out << *to_type << " ";
-
     }
     
 private:

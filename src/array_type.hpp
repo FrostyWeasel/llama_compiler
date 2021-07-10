@@ -3,8 +3,6 @@
 
 #include "type.hpp"
 #include "includes.hpp"
-
-
 class ArrayType : public Type{
 public:
     ArrayType(Type* type): type(type), dimensions(1) {}

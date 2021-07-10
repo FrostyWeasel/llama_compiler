@@ -1352,7 +1352,7 @@ yyreduce:
     {
   case 2: /* program: letdef_list  */
 #line 114 "./src/parser.y"
-                { std::cout << "AST: " << *(yyvsp[0].letdef_list) << std::endl; delete (yyvsp[0].letdef_list);}
+                { if(debug) std::cout << "AST: " << *(yyvsp[0].letdef_list) << std::endl; delete (yyvsp[0].letdef_list);}
 #line 1357 "./src/parser.cpp"
     break;
 

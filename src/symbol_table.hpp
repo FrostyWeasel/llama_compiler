@@ -7,9 +7,9 @@ class SymbolTable{
 
 
 private:
-    unsigned int hashtable_size;
-    SymbolTableEntry* hashtable;
-    Scope current_scope;
+    // unsigned int hashtable_size;
+    // SymbolTableEntry* hashtable;
+    // Scope current_scope;
 
 };
 
