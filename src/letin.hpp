@@ -10,7 +10,7 @@ public:
     LetIn(LetDef* let_def, Expr* expr): let_def(let_def), expr(expr) {}
 
     ~LetIn() {
-	std::cout << "LetIn deleted\n";
+	    std::cout << "LetIn deleted\n";
         delete expr;
         delete let_def;
     }

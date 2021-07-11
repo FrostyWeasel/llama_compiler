@@ -3,8 +3,12 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+// #include "global_variables.hpp"
 #include "includes.hpp"
 #include "lexer.hpp"
+#include "symbol_table.hpp"
+
+SymbolTable* st = new SymbolTable(1000);
 
 %}
 
@@ -111,7 +115,11 @@
 %%
 
 program:
-    letdef_list { if(debug) std::cout << "AST: " << *$1 << std::endl; delete $1;}  
+    letdef_list { 
+            // AST::make_table(); //Make a static symboltable
+            if(debug) std::cout << "AST: " << *$1 << std::endl;
+            delete $1;
+        }  
 ;
 
 letdef_list:

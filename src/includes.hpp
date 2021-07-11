@@ -3,9 +3,6 @@
 
 #include "enums.hpp"
 #include "type.hpp"
-#include "symbol_entry.hpp"
-#include "scope.hpp"
-#include "symbol_table.hpp"
 #include "block.hpp"
 #include "par.hpp"
 #include "expr.hpp"

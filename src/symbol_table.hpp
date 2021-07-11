@@ -1,10 +1,12 @@
 #ifndef __SYMBOLTABLE_HPP__
 #define __SYMBOLTABLE_HPP__
 
-#include "includes.hpp"
+#include "scope.hpp"
+#include "symbol_entry.hpp"
+#include "enums.hpp"
+#include <string>
 
 class SymbolTable{
-
 public:
 
     SymbolTable(unsigned int size) : hashtable_size(size), current_scope(nullptr) {

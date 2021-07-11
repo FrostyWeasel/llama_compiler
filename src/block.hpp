@@ -10,8 +10,7 @@ public:
 
   Block<T>() {}
   
-  ~Block<T>() {
-	std::cout << "Block<T> deleted\n";
+  virtual ~Block<T>() {
     for(auto element: list)
       delete element;
   }
@@ -28,6 +27,13 @@ public:
   virtual void append(T* element) { list.push_back(element); }
   virtual void insert(typename std::vector<T*>::const_iterator it, T* element) { list.insert(it, element); }
   virtual const typename std::vector<T*>::const_iterator begin() const { return list.cbegin(); }
+
+  virtual void sem() override {
+    for(T* element: list) {
+      if(element != nullptr)
+        element->sem();
+    }
+  }
 
 private:
     std::vector<T*> list;

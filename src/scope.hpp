@@ -1,7 +1,7 @@
 #ifndef __SCOPE_HPP__
 #define __SCOPE_HPP__
 
-#include "includes.hpp"
+#include "symbol_entry.hpp"
 
 class Scope{
 public:

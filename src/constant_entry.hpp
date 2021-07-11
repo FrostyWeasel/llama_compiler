@@ -1,7 +1,8 @@
 #ifndef __CONSTANTENTRY_HPP__
 #define __CONSTANTENTRY_HPP__
 
-#include "includes.hpp"
+#include "enums.hpp"
+#include "type.hpp"
 #include "symbol_entry.hpp"
 
 template <class T>

@@ -1,7 +1,8 @@
 #ifndef __SYMBOLENTRY_HPP__
 #define __SYMBOLENTRY_HPP__
 
-#include "includes.hpp"
+#include "enums.hpp"
+#include <string>
 
 class SymbolEntry{
 public:
