@@ -50,33 +50,33 @@ void SymbolTable::insert_entry(SymbolEntry* entry){
 
 }
 
-// SymbolEntry* SymbolTable::entry_lookup(ID* id, LookupType lookup_type) {
-//     unsigned int hash_value = PJW_hash(id->get_id()) % hashtable_size;
-//     SymbolEntry* entry = hashtable[hash_value];
+SymbolEntry* SymbolTable::lookup_entry(std::string id, LookupType lookup_type) {
+    unsigned int hash_value = PJW_hash(id) % hashtable_size;
+    SymbolEntry* entry = hashtable[hash_value];
 
-//     switch(lookup_type) {
-//         case LookupType::LOOKUP_CURRENT_SCOPE:
-//             while (entry != nullptr && entry->get_nesting_level() == this->current_scope->get_nesting_level()) {
-//                 if(entry->get_id() == id->get_id())
-//                     return entry;
-//                 else
-//                     entry = entry->get_next_hash();
-//             }
-//             break;
-//         case LookupType::LOOKUP_ALL_SCOPES:
-//             while (entry != nullptr) {
-//                 if(entry->get_id() == id->get_id())
-//                     return entry;
-//                 else
-//                     entry = entry->get_next_hash();
-//             }           
-//             break;
-//     }
+    switch(lookup_type) {
+        case LookupType::LOOKUP_CURRENT_SCOPE:
+            while (entry != nullptr && entry->get_nesting_level() == this->current_scope->get_nesting_level()) {
+                if(entry->get_id() == id)
+                    return entry;
+                else
+                    entry = entry->get_next_hash();
+            }
+            break;
+        case LookupType::LOOKUP_ALL_SCOPES:
+            while (entry != nullptr) {
+                if(entry->get_id() == id)
+                    return entry;
+                else
+                    entry = entry->get_next_hash();
+            }           
+            break;
+    }
 
-//     //TODO: Error if unknown identifier.
-//     exit(1);
-//     return nullptr;
-// }
+    //TODO: Error if unknown identifier.
+    exit(1);
+    return nullptr;
+}
 
 typedef unsigned long int HashType;
 unsigned int SymbolTable::PJW_hash(std::string id) {

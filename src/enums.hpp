@@ -16,25 +16,24 @@ enum class EntryType    {   ENTRY_VARIABLE,                       /* Μεταβ�
                             ENTRY_PARAMETER,                      /* Παράμετροι συναρτήσεων     */
                             // ENTRY_TYPE,                        /* User defined Types         */
                             ENTRY_IDENTIFIER
-
-                        }
+                        };
 
 /* Τύποι περάσματος παραμετρων */
 // enum class PassMode     {
 //                             PASS_BY_VALUE,                        /* Κατ' αξία                  */
 //                             PASS_BY_REFERENCE                     /* Κατ' αναφορά               */
-//                         }
+//                         };
 
 /* Τύπος αναζήτησης στον πίνακα συμβόλων */
 enum class LookupType   {
                             LOOKUP_CURRENT_SCOPE,
                             LOOKUP_ALL_SCOPES
-                        }
+                        };
 
 /* Κατάσταση παραμέτρων συνάρτησηςs  */
 // enum class ParDef       {                               
 //                             PARDEF_COMPLETE,                    /* Πλήρης ορισμός     */
 //                             PARDEF_DEFINE,                      /* Εν μέσω ορισμού    */
 //                             PARDEF_CHECK                        /* Εν μέσω ελέγχου    */
-//                         }
+//                         };
 #endif

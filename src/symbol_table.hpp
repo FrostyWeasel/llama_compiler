@@ -25,7 +25,7 @@ public:
     void        scope_hide    (Scope* scope, bool flag);
 
     void            insert_entry   (SymbolEntry* entry);
-    // SymbolEntry*    entry_lookup   (ID* id, LookupType lookup_type);
+    SymbolEntry*    lookup_entry   (std::string id, LookupType lookup_type);
 
 private:
     unsigned int    hashtable_size;
