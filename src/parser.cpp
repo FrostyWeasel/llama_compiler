@@ -1694,7 +1694,7 @@ yyreduce:
 
   case 59: /* func_expr: T_ID  */
 #line 198 "./src/parser.y"
-                                                            { (yyval.expr) = new Id((yyvsp[0].id)); }
+                                                            { (yyval.expr) = new ID((yyvsp[0].id)); }
 #line 1699 "./src/parser.cpp"
     break;
 

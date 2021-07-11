@@ -9,13 +9,15 @@
 #include "includes.hpp"
 
 //TODO: Search ST for type
-class Id : public Expr{
+class ID : public Expr{
 public:
-    Id(std::string* id): id(*id) {}
+    ID(std::string* id): id(*id) {}
 
     virtual void print(std::ostream& out) const override{
-        out << "Id(" << id << ") ";
+        out << "ID(" << id << ") ";
     }
+
+    std::string get_id() { return id; }
 
 private:
     std::string id;

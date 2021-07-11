@@ -15,8 +15,7 @@ public:
     }
 
 private:
-    int value;
-    
+    int value;    
 };
 
 #endif

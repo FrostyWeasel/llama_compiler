@@ -14,7 +14,7 @@ public:
         delete to_type;
     }
 
-    virtual void print(std::ostream &out) const { 
+    virtual void print(std::ostream &out) const override{ 
         if (from_type == nullptr)
             out << "from_type: Null ";
         else

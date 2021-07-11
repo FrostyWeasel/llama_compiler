@@ -1,9 +1,10 @@
 #ifndef __INCLUDES_HPP__
 #define __INCLUDES_HPP__
 
-
 #include "enums.hpp"
 #include "type.hpp"
+#include "symbol_entry.hpp"
+#include "scope.hpp"
 #include "symbol_table.hpp"
 #include "block.hpp"
 #include "par.hpp"

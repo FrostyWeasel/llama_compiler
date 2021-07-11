@@ -16,8 +16,7 @@ public:
     }
 
 private:
-    std::string value;
-    
+    std::string value;    
 };
 
 #endif

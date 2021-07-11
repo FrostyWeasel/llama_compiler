@@ -13,7 +13,7 @@ public:
         delete type;
     }
 
-    virtual void print(std::ostream &out) const { 
+    virtual void print(std::ostream &out) const override{ 
         out << "array "; 
         if(dimensions > 1){
             out << "[";
