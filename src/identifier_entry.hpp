@@ -9,8 +9,10 @@
 class IdentifierEntry: public SymbolEntry{
 public:
 
-    IdentifierEntry(std::string id, EntryType entry_type) : type(type),
+    IdentifierEntry(std::string id, EntryType entry_type, Type* type) : type(type),
         SymbolEntry(id, entry_type) { }
+
+    ~IdentifierEntry() { }
 
 private:
     Type*   type;

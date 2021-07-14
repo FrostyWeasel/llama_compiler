@@ -1,0 +1,11 @@
+let x = 5
+let rec x = x + 5 --fails
+
+--
+
+let x = 5
+let rec x = 6 and y = x --fails
+
+--
+let x = 5
+let x = x + 5 and y = x --succeeds (y is 5)

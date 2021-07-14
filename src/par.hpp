@@ -2,7 +2,11 @@
 #define __PAR_HPP__
 
 #include "ast.hpp"
-#include "includes.hpp"
+#include "type.hpp"
+#include "enums.hpp"
+#include "symbol_entry.hpp"
+#include "parameter_entry.hpp"
+#include <string>
 
 class Par : public AST{
 public:
@@ -25,11 +29,17 @@ public:
         out << ") ";
     }
 
+    virtual Type* infer() {
+        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type);
+
+        st->insert_entry(entry);
+
+        return this->type;
+    }
+
 private:
     std::string id;
     Type* type;
-    
-
 };
 
 #endif

@@ -15,6 +15,10 @@ public:
         out << ") ";
     }
 
+    virtual Type* infer() override { 
+        return this->type;
+    }
+
 private:
     std::string value;    
 };

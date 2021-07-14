@@ -23,6 +23,10 @@ public:
         out << ") ";
     }
 
+    virtual void sem() override {
+        
+    }
+
 private:
     std::string id;
 };

@@ -1,10 +1,13 @@
 #ifndef __SYMBOLENTRY_HPP__
 #define __SYMBOLENTRY_HPP__
 
+#include "scope.hpp"
 #include "enums.hpp"
 #include <string>
 
-class SymbolEntry{
+
+class Scope; 
+class SymbolEntry {
 public:
 
    SymbolEntry(std::string id, EntryType entry_type) : id(id), entry_type(entry_type) { }
@@ -25,14 +28,22 @@ public:
    unsigned int get_nesting_level() { return nesting_level; }
    void set_nesting_level(unsigned int nesting_level) { this->nesting_level = nesting_level; }
 
-private:
+   EntryType get_entry_type() { return this->entry_type; }
+
+   void set_scope(Scope* scope) { this->scope = scope; }
+   Scope* get_scope() { return this->scope; }
+
+protected:
    std::string         id;                   /* Ονομα αναγνωριστικού          */
    EntryType           entry_type;           /* Τύπος της εγγραφής            */
+
+private:
    unsigned int        nesting_level;        /* Βάθος φωλιάσματος             */
    unsigned int        hash_value;           /* Τιμή κατακερματισμού          */
    SymbolEntry*        next_hash;            /* Επόμενη εγγραφή στον Π.Κ.     */
    SymbolEntry*        next_in_scope;        /* Επόμενη εγγραφή στην εμβέλεια */
-   // Scope*              scope;                /* Εμβέλεια όπου βρίσκεται       */
+   Scope*              scope;                /* Εμβέλεια όπου βρίσκεται       */
+
 };
 
 #endif

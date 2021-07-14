@@ -14,6 +14,10 @@ public:
         out << "Char(" << value << ") ";
     }
 
+    virtual Type* infer() override { 
+        return this->type;
+    }
+
 private:
     char value;
     

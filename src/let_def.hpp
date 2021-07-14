@@ -8,12 +8,11 @@
 #include "enums.hpp"
 #include "symbol_table.hpp"
 
-extern SymbolTable* st;
-
-//TODO: Put def in symboltable with recursive letdefs allowing expr in defs to use the id just defined.
+//TODO: After sem check that : let x = 5 let rec x = x + 6 does not work but let x = 5 let x = x + 5 does
+//TODO: Check that you can run infer without opening scopes (you propably cant)
 class LetDef : public AST{
 public:    
-    LetDef(Block<Def>* def, LetType type): def(def), type(type) {}
+    LetDef(Block<Def>* def, LetType let_type): def(def), let_type(let_type) {}
 
     ~LetDef() {
         delete def;
@@ -21,7 +20,7 @@ public:
   
     virtual void print(std::ostream &out) const override {
         out << "Let(";
-        out << "Type: " << ((type == LetType::Rec) ? "Rec" : "NonRec") << ", ";
+        out << "Type: " << ((let_type == LetType::Rec) ? "Rec" : "NonRec") << ", ";
         out << "Def: ";
         if(def != nullptr)
             def->print(out);
@@ -30,13 +29,36 @@ public:
         out << ") ";
     }
 
+    virtual Type* infer() override {
+        AST::st->scope_open();
+
+        if(let_type == LetType::NoRec)
+            AST::st->scope_hide(true);
+        
+        //TODO:Is the current scope always the same as the one just hidden upon return?
+        Type* type = def->infer();
+
+        if(let_type == LetType::NoRec)
+            AST::st->scope_hide(false);
+
+        return type;
+    }
+
     virtual void sem() override {     
-        st->scope_open(); 
+        AST::st->scope_open();
+
+        if(let_type == LetType::NoRec)
+            AST::st->scope_hide(true);
+        
+        def->sem();
+
+        if(let_type == LetType::NoRec)
+            AST::st->scope_hide(false);
     };
 
 private:
     Block<Def>* def;
-    LetType type;
+    LetType let_type;
 };
 
 #endif

@@ -1,7 +1,15 @@
 #ifndef __FUNCTIONDEF_HPP__
 #define __FUNCTIONDEF_HPP__
 
-#include "includes.hpp"
+#include "enums.hpp"
+#include "type.hpp"
+#include "block.hpp"
+#include "par.hpp"
+#include "expr.hpp"
+#include "def.hpp"
+#include "symbol_entry.hpp"
+#include "function_entry.hpp"
+#include <string>
 
 class FunctionDef : public Def{
 public:
@@ -9,7 +17,6 @@ public:
     FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, Type* type): id(*id), par_list(par_list), Def(type), expr(expr) {}
 
     ~FunctionDef() {
-	std::cout << "FunctionDef deleted\n";
         delete expr;
         delete par_list;
     }
@@ -34,6 +41,27 @@ public:
             out << "null ";
         out << ") ";
     }
+
+    virtual Type* infer() override {
+        FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, this->type, nullptr);
+        this->st->insert_entry(entry);
+
+        //Function scope includes parameters and body
+        this->st->scope_open(); 
+
+        Type* from_type = this->par_list->infer();
+
+        entry->set_from_type(from_type);
+
+        Type* to_type = this->expr->infer();
+
+        //Function return type must be the same as its body expr type.
+        this->st->add_constraint(this->type, to_type);
+
+        this->st->scope_close();
+
+    }
+
 private:
     std::string id;
     Block<Par>* par_list;

@@ -1,27 +1,32 @@
 .PHONY: all lexer parser clean distclean
 CXX=g++
-CXXFLAGS=-O3 -Wall -Wextra -Wno-reorder -std=c++14 -g
+CXXFLAGS=-O0 -Wall -Wextra -Wno-reorder -std=c++14 -g
 
-SRC_DIR := ./src
-HPP_FILES := $(find ./src -name '*.hpp' -o -name '.cpp')
+HPPFILES=$(shell find ./src -name "*.hpp")
+CPPFILES=$(shell find ./src -name "*.cpp")
+OBJFILES=$(patsubst %.cpp,%.o,$(CPPFILES))
+
 
 all: compiler
 
-$(SRC_DIR)/lexer.cpp: $(SRC_DIR)/lexer.l $(HPP_FILES)
-	flex -s -o $(SRC_DIR)/lexer.cpp $(SRC_DIR)/lexer.l
+./src/lexer.cpp: ./src/lexer.l
+	flex -s -o ./src/lexer.cpp ./src/lexer.l
 
-$(SRC_DIR)/lexer.o: $(SRC_DIR)/lexer.cpp $(SRC_DIR)/lexer.hpp $(SRC_DIR)/parser.hpp  $(HPP_FILES)
+./src/lexer.o: ./src/lexer.cpp ./src/lexer.hpp ./src/parser.hpp
 
-$(SRC_DIR)/parser.hpp $(SRC_DIR)/parser.cpp: $(SRC_DIR)/parser.y $(HPP_FILES)
-	bison -dv -o  $(SRC_DIR)/parser.cpp $(SRC_DIR)/parser.y
+./src/parser.hpp ./src/parser.cpp: ./src/parser.y
+	bison -dv -o ./src/parser.cpp ./src/parser.y
 
-parser.o: parser.cpp lexer.hpp 
+./src/%.o: ./src/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-compiler: $(SRC_DIR)/lexer.o $(SRC_DIR)/parser.o $(HPP_FILES)
-	$(CXX) $(CXXFLAGS) -o $@ $(SRC_DIR)/lexer.o $(SRC_DIR)/parser.o
+./src/parser.o: ./src/parser.cpp ./src/lexer.hpp
+
+compiler: ./src/lexer.o ./src/parser.o $(OBJFILES)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(SRC_DIR)/lexer.cpp $(SRC_DIR)/parser.hpp $(SRC_DIR)/parser.cpp
+	$(RM) ./src/lexer.cpp ./src/parser.hpp ./src/parser.cpp $(OBJFILES) 
 
 distclean: clean
 	$(RM) compiler

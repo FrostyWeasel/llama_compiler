@@ -1,3 +1,3 @@
 #include "ast.hpp"
 
-// SymbolTable* AST::st = new SymbolTable(1000);
+SymbolTable* AST::st = new SymbolTable(1000);

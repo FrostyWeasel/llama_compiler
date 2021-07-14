@@ -7,12 +7,13 @@
 
 class RefType : public Type{
 public:
-    RefType(Type* type) : type(type) {}
+    RefType(Type* type) : type(type), Type(TypeTag::Reference) { }
 
     ~RefType() {
-	std::cout << "RefType deleted\n";
         delete type;
     }
+
+    virtual void set_tag(TypeTag tag) override { type->set_tag(tag); }
 
     virtual void print(std::ostream &out) const override{ 
         if (type == nullptr)

@@ -10,6 +10,10 @@ public:
     virtual void print(std::ostream& out) const override{
         out << "Bool(" << value << ") ";
     }
+
+    virtual Type* infer() override { 
+        return this->type;
+    }
     
 private:
     bool value;

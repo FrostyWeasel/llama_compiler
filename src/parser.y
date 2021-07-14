@@ -3,12 +3,8 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
-// #include "global_variables.hpp"
 #include "includes.hpp"
 #include "lexer.hpp"
-#include "symbol_table.hpp"
-
-SymbolTable* st = new SymbolTable(1000);
 
 %}
 
@@ -117,13 +113,15 @@ SymbolTable* st = new SymbolTable(1000);
 program:
     letdef_list { 
             // AST::make_table(); //Make a static symboltable
+            $1->infer();
+            $1->unify();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             delete $1;
         }  
 ;
 
 letdef_list:
-    %empty              { $$ = new Block<LetDef>(); }
+    %empty              { $$ = new Block<LetDef>(BlockType::LetDef); }
 |   letdef_list letdef  { $1->append($2); }
 ;
 
@@ -133,7 +131,7 @@ letdef:
 ;
 
 def_list:
-    %empty              { $$ = new Block<Def>(); }
+    %empty              { $$ = new Block<Def>(BlockType::Def); }
 |   def_list "and" def  { $1->append($3); }
 ;
 
@@ -149,7 +147,7 @@ def:
 ;
 
 par_list:
-    %empty          { $$ = new Block<Par>(); }
+    %empty          { $$ = new Block<Par>(BlockType::Par); }
 |   par_list par    { $1->append($2); }
 ;
 
@@ -159,7 +157,7 @@ par:
 ;
 
 expr_comma_list:
-    %empty                      { $$ = new Block<Expr>(); }
+    %empty                      { $$ = new Block<Expr>(BlockType::Expr); }
 |   expr_comma_list ',' expr    { $1->append($3); }
 ;
 
@@ -213,7 +211,7 @@ func_expr:
 
 
 func_expr_list:          
-    %empty                                                  { $$ = new Block<Expr>(); }
+    %empty                                                  { $$ = new Block<Expr>(BlockType::Expr); }
 |   func_expr_list func_expr                                { $1->append($2); }
 
 type:

@@ -1,7 +1,12 @@
 #ifndef __CONSTANTDEF_HPP__
 #define __CONSTANTDEF_HPP__
 
-#include "includes.hpp"
+#include "expr.hpp"
+#include "def.hpp"
+#include "type.hpp"
+#include "symbol_entry.hpp"
+#include "constant_entry.hpp"
+#include <string>
 
 class ConstDef : public Def{
 public:
@@ -9,7 +14,6 @@ public:
     ConstDef(std::string* id, Type* type, Expr* expr): id(*id), Def(type), expr(expr) {}
 
     ~ConstDef() {
-	std::cout << "ConstDef deleted\n";
         delete expr;
     }
 
@@ -28,6 +32,23 @@ public:
             out << "null ";
         out << ") ";
     }
+
+    virtual Type* infer() override {
+        ConstantEntry* entry = new ConstantEntry(id, EntryType::ENTRY_CONSTANT, this->type);
+        st->insert_entry(entry);
+
+        auto expr_type = this->expr->infer();
+
+        st->add_constraint(this->type, expr_type);
+
+        return this->type;
+    }
+
+    virtual void sem() override {
+        
+
+    }
+
 private:
     std::string id;
     Expr* expr;

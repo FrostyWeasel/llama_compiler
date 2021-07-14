@@ -3,14 +3,18 @@
 
 #include <iostream>
 #include "symbol_table.hpp"
+#include "type.hpp"
 class AST{
 public:
     virtual ~AST() { }
     virtual void print(std::ostream& out) const = 0;
-    virtual void sem() {};
+    virtual Type* infer() { };
+    virtual void sem() { };
 
-// protected:
-    // static SymbolTable* st;
+    void unify() { st->unify(); }
+
+protected:
+    static SymbolTable* st;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){

@@ -2,16 +2,14 @@
 #define __ARRAYTYPE_HPP__
 
 #include "type.hpp"
-#include "includes.hpp"
+#include "enums.hpp"
+
 class ArrayType : public Type{
 public:
-    ArrayType(Type* type): type(type), dimensions(1) {}
-    ArrayType(Type* type, int dimensions): type(type), dimensions(dimensions) {}
+    ArrayType(Type* type): dimensions(1), type(type), Type(TypeTag::Array) {}
+    ArrayType(Type* type, int dimensions): dimensions(dimensions), type(type), Type(TypeTag::Array) {}
 
-    ~ArrayType() {
-	    std::cout << "ArrayType deleted\n";
-        delete type;
-    }
+    ~ArrayType() { }
 
     virtual void print(std::ostream &out) const override{ 
         out << "array "; 
@@ -22,9 +20,6 @@ public:
             }
             out << "]";
         }
-        if (type == nullptr)
-            out << "Type: Null";
-        else
         out << "of " << *type << " ";
     }
 private:

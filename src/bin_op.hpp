@@ -10,7 +10,6 @@ public:
     BinOp(Expr* lval, Expr* rval, OpType op): lval(lval), rval(rval), op(op) {}
 
     ~BinOp() {
-	std::cout << "BinOp deleted\n";
         delete lval;
         delete rval;
     }
@@ -92,6 +91,10 @@ public:
                 break;
         }
         out << ") ";
+    }
+
+    virtual Type* infer() {
+        
     }
 
 

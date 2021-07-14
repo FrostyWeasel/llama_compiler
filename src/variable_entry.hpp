@@ -11,6 +11,8 @@ public:
 
     VariableEntry(std::string id, EntryType entry_type, Type* type) : type(type),
         SymbolEntry(id, entry_type) { }
+    
+    ~VariableEntry() { }
 
 
 private:

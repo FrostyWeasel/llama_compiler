@@ -5,8 +5,6 @@
 #include <string>
 #include "ast.hpp"
 #include "includes.hpp"
-
-//TODO: Abstract Symbol table entry
 class Def : public AST{
 public:    
     Def() {}

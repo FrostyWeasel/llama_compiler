@@ -10,6 +10,10 @@ public:
     Type(TypeTag type) : tag(type) {}
 
     virtual ~Type() {}
+
+    virtual TypeTag get_tag() { return tag; };
+    virtual void set_tag(TypeTag tag) { this->tag = tag; }
+
     
     virtual void print(std::ostream& out) const { 
         out << "Type(";
@@ -29,12 +33,20 @@ public:
             case TypeTag::Unknown:
                 out << "Unknown";
                 break;
+            case TypeTag::Array:
+                out << "Array";
+                break;
+            case TypeTag::Function:
+                out << "Function";
+                break;
+            case TypeTag::Reference:
+                out << "Reference";
+                break;
         }
         out << ") ";
     }
 
-
-private:
+protected:
     TypeTag tag;
 };
 

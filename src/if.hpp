@@ -37,6 +37,21 @@ public:
         out << ") ";
     }
 
+    virtual Type* infer() override {
+        auto if_expr_type = this->if_expr->infer();
+        
+        if (else_expr != nullptr) {
+            auto else_expr_type = this->else_expr->infer();
+
+            st->add_constraint(if_expr_type, else_expr_type);
+        }
+
+        auto condition_type = this->condition->infer();
+        st->add_constraint(condition_type, new Type(TypeTag::Bool));
+
+        return if_expr_type;
+    }
+
 private:
     Expr* condition;
     Expr* if_expr;

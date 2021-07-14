@@ -9,9 +9,13 @@
 
 class Int : public Expr{
 public:
-    Int(int value) : value(value), Expr(new Type(TypeTag::Int)) {}
+    Int(int value) : value(value), Expr(new Type(TypeTag::Int)) { }
     virtual void print(std::ostream& out) const override{
         out << "Int(" << value << ") ";
+    }
+
+    virtual Type* infer() override { 
+        return this->type;
     }
 
 private:
