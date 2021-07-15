@@ -2,7 +2,7 @@
 #define __ENUMS_HPP__
 
 enum class OpType       { Plus, Minus, Times, Divide, Equals, NotEquals, LessThan, GreaterThan, LessOrEqualThan, GreaterOrEqualThan, NatEquals, NatNotEquals, And, Or, Concat, Assign, Dereference, Not, Modulo };
-enum class TypeTag      { Unit, Int, Char, Bool, Unknown, Array, Function, Reference };
+enum class TypeTag      { Unit, Int, Char, Bool, Unknown, Array, Function, Reference, TypeVariable };
 enum class LetType      { Rec, NoRec };
 enum class DefType      { Mutable, NonMutable };
 
