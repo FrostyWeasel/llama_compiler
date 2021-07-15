@@ -26,9 +26,14 @@ enum class BlockType    {
                             LetDef,
                             Def,
                             Par,
+                            Expr
+                        };
+
+enum class NodeType     {
+                            Par,
                             Expr,
-                            
-                        }
+                            Def
+                        };   
 
 
 #endif

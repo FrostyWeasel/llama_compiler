@@ -47,7 +47,7 @@ public:
         }
 
         auto condition_type = this->condition->infer();
-        st->add_constraint(condition_type, new Type(TypeTag::Bool));
+        st->add_constraint(condition_type, new Type(TypeTag::Bool, this));
 
         return if_expr_type;
     }

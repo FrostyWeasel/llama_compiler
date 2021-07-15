@@ -10,7 +10,7 @@
 
 class ConstDef : public Def{
 public:
-    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new Type(TypeTag::Unknown)) {}
+    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new Type(TypeTag::Unknown, this)) {}
     ConstDef(std::string* id, Type* type, Expr* expr): id(*id), Def(type), expr(expr) {}
 
     ~ConstDef() {
@@ -45,7 +45,6 @@ public:
     }
 
     virtual void sem() override {
-        
 
     }
 

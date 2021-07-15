@@ -12,6 +12,8 @@ public:
 
     ~ParameterEntry() { }
 
+    Type* get_type() { return type; }
+
 private:
     Type*         type;  
     // int           offset;

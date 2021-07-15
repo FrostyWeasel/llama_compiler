@@ -1,4 +1,11 @@
 #include "symbol_table.hpp"
+#include "function_type.hpp"
+#include "type.hpp"
+#include "enums.hpp"
+#include "expr.hpp"
+#include "par.hpp"
+#include "def.hpp"
+#include "ast.hpp"
 
 void SymbolTable::scope_open() {
     this->current_scope = new Scope(this->current_scope, nullptr, 
@@ -114,11 +121,9 @@ unsigned int SymbolTable::PJW_hash(std::string id) {
     return h;
 }
 
-//if function type then contraint(from type1, from type 2) and constraint(to type 1, to type 2)
 //if t1 array then make sure that t2 is also array
 //think about the possibility that one is a function and one is not(can the constraint be satisfied? do i need contains?)
 //if one is a ref? should the other be a reference too?
-//make enum that tells me what type it is t1 and t2 are
  
 void SymbolTable::unify() {
     bool matched_rule;
@@ -137,16 +142,31 @@ void SymbolTable::unify() {
             matched_rule = true;
         }
 
-        if(!matched_rule && (t1->get_tag() == TypeTag::Unknown /*&& !t2->contains(t1)*/)) {
+        if(!matched_rule && (t1->get_tag() == TypeTag::Unknown && !t2->contains(t1))) {
             matched_rule = true;
             this->substitute(t1, t2);
             this->bind(t1, t2);
         }
 
-        if(!matched_rule && (t2->get_tag() == TypeTag::Unknown /*&& !t1->contains(t1)*/)) {
+        if(!matched_rule && (t2->get_tag() == TypeTag::Unknown && !t1->contains(t2))) {
             matched_rule = true;
             this->substitute(t2, t1);
             this->bind(t2, t1);
+        }
+
+        if(!matched_rule && ((t1->get_tag() == TypeTag::Function) && (t2->get_tag() == TypeTag::Function))) {
+            matched_rule = true;
+            FunctionType* t1 = dynamic_cast<FunctionType*>(t1);
+            FunctionType* t2 = dynamic_cast<FunctionType*>(t2);
+
+            Type* from_type_t1 = t1->get_from_type();
+            Type* to_type_t1 = t1->get_to_type();
+
+            Type* from_type_t2 = t2->get_from_type();
+            Type* to_type_t2 = t2->get_to_type();
+
+            this->add_constraint(from_type_t1, from_type_t2);
+            this->add_constraint(to_type_t1, to_type_t2);
         }
 
         if(!matched_rule){
@@ -155,9 +175,44 @@ void SymbolTable::unify() {
         }
     }
 
-    //All contraints unified now set inferred values to all bindings.
+    //All contraints unified now set inferred values to all bindings. (type_variable, type)
     for(auto bound_pair = this->bound_types.begin(); bound_pair != this->bound_types.end(); bound_pair++){
-        bound_pair->first->set_tag(bound_pair->second->get_tag());
+        //TODO: Implement all typetags
+        switch (bound_pair->second->get_tag()) {
+            case TypeTag::Function: {
+                FunctionType* t2 = dynamic_cast<FunctionType*>(bound_pair->second);
+
+                AST* parent_t1 = bound_pair->first->get_parent();
+                Type* new_type = new FunctionType(t2->get_from_type(), t2->get_to_type(), bound_pair->first->get_parent());
+                delete bound_pair->first;
+
+                switch (parent_t1->get_node_type()) {
+                    case NodeType::Expr: {
+                        Expr* parent_t1 = dynamic_cast<Expr*>(parent_t1);
+                        parent_t1->set_type(new_type);
+                        break;
+                    }
+                    case NodeType::Par: {
+                        Par* parent_t1 = dynamic_cast<Par*>(parent_t1);
+                        parent_t1->set_type(new_type);
+                        break;
+                    }
+                    case NodeType::Def: {
+                        Def* parent_t1 = dynamic_cast<Def*>(parent_t1);
+                        parent_t1->set_type(new_type);
+                        break;
+                    }
+                    default:
+                        std::cerr << "Uknown node type\n";
+                        exit(1);
+                        break;
+                }
+                break;
+            }
+            default:
+                bound_pair->first->set_tag(bound_pair->second->get_tag());
+                break;
+        }
     }
 }
 

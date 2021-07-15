@@ -9,7 +9,7 @@
 
 class Int : public Expr{
 public:
-    Int(int value) : value(value), Expr(new Type(TypeTag::Int)) { }
+    Int(int value) : value(value), Expr(new Type(TypeTag::Int, this)) { }
     virtual void print(std::ostream& out) const override{
         out << "Int(" << value << ") ";
     }

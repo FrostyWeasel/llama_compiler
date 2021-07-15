@@ -9,7 +9,7 @@
 
 class Char : public Expr{
 public:
-    Char(char value): value(value), Expr(new Type(TypeTag::Char)) { }
+    Char(char value): value(value), Expr(new Type(TypeTag::Char, this)) { }
     virtual void print(std::ostream& out) const override{
         out << "Char(" << value << ") ";
     }

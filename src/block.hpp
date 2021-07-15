@@ -1,11 +1,14 @@
 #ifndef __BLOCK_HPP__
 #define __BLOCK_HPP__
 
+#include <iostream>
 #include <vector>
 #include "ast.hpp"
 #include "type.hpp"
 #include "enums.hpp"
 #include "function_type.hpp"
+
+// class FunctionType;
 
 template <class T>
 class Block : public AST {
@@ -36,8 +39,8 @@ public:
 
     //TODO: Do all cases
     switch (this->block_type) {
-      case BlockType::Par: {
-        if(list.size() == 0) {
+      case BlockType::Par:
+        if(this->list.size() == 0) {
           std::cerr << "Parameter list is empty.\n";
           exit(1); //TODO: Error handling
         }
@@ -45,7 +48,8 @@ public:
           block_type = list[0]->infer();
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
-                block_type = new FunctionType(block_type, (*element_it)->infer());
+                Type* new_type = (*element_it)->infer();
+                block_type = new FunctionType(block_type, new_type, new_type->get_parent());
               }
               else {
                 std::cerr << "Nullptr in block list.\n";
@@ -54,10 +58,34 @@ public:
           }
         }
         break;
-      }
+
+      case BlockType::Expr:
+        if(this->list.size() == 0) {
+          std::cerr << "Expression list is empty.\n";
+          exit(1); //TODO: Error handling
+        }
+        else {
+          block_type = list[0]->infer();
+            for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
+              if(*element_it != nullptr){
+                Type* new_type = (*element_it)->infer();
+                block_type = new FunctionType(block_type, new_type, new_type->get_parent());
+              }
+              else {
+                std::cerr << "Nullptr in block list.\n";
+                exit(1); //TODO: Error handling
+              }
+          }
+        }
+      break;
+
       default:
-        std::cerr << "Unknown block type\n"; //TODO: Error Handling.
-        exit(1);
+          for(T* element: list){
+            if(element != nullptr)
+              element->infer();
+          }
+        // std::cerr << "Unknown block type.\n"; //TODO: Error Handling.
+        // exit(1);
         break;
     }
 
@@ -65,7 +93,9 @@ public:
   }
 
   virtual void sem() override {
+    
   }
+
 
 private:
     std::vector<T*> list;

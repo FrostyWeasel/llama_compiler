@@ -6,7 +6,9 @@
 #include "expr.hpp"
 #include "type.hpp"
 #include "enums.hpp"
-#include "includes.hpp"
+#include "symbol_entry.hpp"
+#include "constant_entry.hpp"
+#include "parameter_entry.hpp"
 
 //TODO: Search ST for type
 class Id : public Expr{
@@ -26,8 +28,14 @@ public:
         switch (id_entry->get_entry_type()) {
             case EntryType::ENTRY_CONSTANT: {
                 ConstantEntry* entry = dynamic_cast<ConstantEntry*>(id_entry);
+
                 return entry->get_type();
                 break;
+            }
+            case EntryType::ENTRY_PARAMETER: {
+                ParameterEntry* entry = dynamic_cast<ParameterEntry*>(id_entry);
+
+                return entry->get_type();
             }
             default: {
                 //TODO: Error Handling

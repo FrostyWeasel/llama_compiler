@@ -1,5 +1,6 @@
 #include "enums.hpp"
-#include "type.hpp"
+
+class Type;
 
 class Constraint {
 public:

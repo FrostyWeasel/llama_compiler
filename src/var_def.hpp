@@ -9,7 +9,7 @@
 
 class VarDef : public Def{
 public:
-    VarDef(std::string* id): id(*id), Def(new Type(TypeTag::Unknown)) {}
+    VarDef(std::string* id): id(*id), Def(new Type(TypeTag::Unknown, this)) {}
     VarDef(std::string* id, Type* type): id(*id), Def(type) {}
 
     virtual void print(std::ostream& out) const override{

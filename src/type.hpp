@@ -4,10 +4,14 @@
 #include <iostream>
 #include "enums.hpp"
 
+class AST;
+
 class Type{
 public:
     Type() : tag(TypeTag::Unknown) {}
     Type(TypeTag type) : tag(type) {}
+    Type(AST* parent) : tag(TypeTag::Unknown), parent(parent) {}
+    Type(TypeTag type, AST* parent) : tag(type), parent(parent) {}
 
     virtual ~Type() {}
 
@@ -34,20 +38,32 @@ public:
                 out << "Unknown";
                 break;
             case TypeTag::Array:
-                out << "Array";
+                this->print(out);
                 break;
             case TypeTag::Function:
-                out << "Function";
+                this->print(out);
                 break;
             case TypeTag::Reference:
-                out << "Reference";
+                this->print(out);
+                break;
+            default:
+                std::cerr << "Unknown typetag\n";
+                exit(1);
                 break;
         }
         out << ") ";
     }
 
+    virtual bool contains(Type* t1) {
+        return t1 == this;
+    }
+
+    virtual AST* get_parent() { return this->parent; }
+    virtual void set_parent(AST* parent) { this->parent = parent; }
+
 protected:
     TypeTag tag;
+    AST* parent;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Type& type){
