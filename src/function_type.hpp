@@ -28,7 +28,6 @@ public:
         else if(to_type != nullptr) {
             if(to_type->contains(type)) return true;
         }
-
         return false;
     }
 
@@ -37,7 +36,7 @@ public:
             out << "from_type: Null ";
         else
             out << *from_type << " ";
-        out << " -> ";
+        out << "-> ";
         if (to_type == nullptr)
             out << "to_type: Null ";
         else

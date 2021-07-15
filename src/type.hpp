@@ -8,12 +8,12 @@ class AST;
 
 class Type{
 public:
-    Type() : tag(TypeTag::Unknown) {}
-    Type(TypeTag type) : tag(type) {}
-    Type(AST* parent) : tag(TypeTag::Unknown), parent(parent) {}
-    Type(TypeTag type, AST* parent) : tag(type), parent(parent) {}
+    Type() : tag(TypeTag::Unknown) { count = counter++; }
+    Type(TypeTag type) : tag(type) { count = counter++; }
+    Type(AST* parent) : tag(TypeTag::Unknown), parent(parent) { count = counter++; }
+    Type(TypeTag type, AST* parent) : tag(type), parent(parent) { count = counter++; }
 
-    virtual ~Type() {}
+    virtual ~Type() { }
 
     virtual TypeTag get_tag() { return tag; };
     virtual void set_tag(TypeTag tag) { this->tag = tag; }
@@ -64,6 +64,10 @@ public:
 protected:
     TypeTag tag;
     AST* parent;
+
+private:
+    unsigned int count;
+    static unsigned int counter;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Type& type){
