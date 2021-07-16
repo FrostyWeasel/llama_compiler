@@ -81,7 +81,7 @@
     Def* def;
     Par* par;
     Expr* expr;
-    Type* type;
+    TypeVariable* type;
     Block<Expr>* func_expr_list;
     Block<Expr>* expr_comma_list;
     Block<Par>* par_list;
@@ -216,15 +216,15 @@ func_expr_list:
 |   func_expr_list func_expr                                { $1->append($2); }
 
 type:
-    "unit"                                                  { $$ = new Type(TypeTag::Unit); }
-|   "int"                                                   { $$ = new Type(TypeTag::Int); }
-|   "char"                                                  { $$ = new Type(TypeTag::Char); }
-|   "bool"                                                  { $$ = new Type(TypeTag::Bool); }
+    "unit"                                                  { $$ = new TypeVariable(TypeTag::Unit); }
+|   "int"                                                   { $$ = new TypeVariable(TypeTag::Int); }
+|   "char"                                                  { $$ = new TypeVariable(TypeTag::Char); }
+|   "bool"                                                  { $$ = new TypeVariable(TypeTag::Bool); }
 |   '(' type ')'                                            { $$ = $2; }
-|   type "->" type                                          { $$ = new FunctionType($1, $3); }
-|   type "ref"                                              { $$ = new RefType($1); }
-|   "array" "of" type                                       { $$ = new ArrayType($3); }
-|   "array" '[' asterisk_list ']' "of" type                 { $$ = new ArrayType($6, $3); }
+|   type "->" type                                          { $$ = new TypeVariable(TypeTag::Function, $1, $3); }
+|   type "ref"                                              { $$ = new TypeVariable(TypeTag::Reference, $1); }
+|   "array" "of" type                                       { $$ = new TypeVariable(TypeTag::Array, $3); }
+|   "array" '[' asterisk_list ']' "of" type                 { $$ = new TypeVariable(TypeTag::Array, $6, $3); }
 /* |   T_ID                                            { $$ = }  propably not possible due to no user defined types*/
 ;
 

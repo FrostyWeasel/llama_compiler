@@ -1,32 +1,32 @@
 #ifndef __REFTYPE_HPP__
 #define __REFTYPE_HPP__
 
-#include "type.hpp"
 #include "enums.hpp"
+#include "type_variable.hpp"
 
-class AST;
+class Type;
 
-class RefType : public Type{
+class RefType : public Type {
 public:
-    RefType(Type* type) : type(type), Type(TypeTag::Reference) { }
-    RefType(Type* type, AST* parent) : type(type), Type(TypeTag::Reference, parent) { }
+    RefType(TypeVariable* type_variable) : type_variable(type_variable), Type(TypeTag::Reference) { }
 
     ~RefType() {
-        delete type;
+        delete type_variable;
     }
 
-    virtual void set_tag(TypeTag tag) override { type->set_tag(tag); }
+    virtual bool contains(TypeVariable* type_variable) override {
+        return this->type_variable->contains(type_variable);
+    }
 
     virtual void print(std::ostream &out) const override{ 
-        if (type == nullptr)
-            out << "Type: Null";
+        if (type_variable == nullptr)
+            out << "TypeVariable: Null";
         else
-            out << *type << " ref ";
+            out << *type_variable << " ref ";
     }
     
 private:
-    Type* type;
-
+    TypeVariable* type_variable;
 };
 
 #endif

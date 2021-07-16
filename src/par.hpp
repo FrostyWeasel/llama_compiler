@@ -10,37 +10,37 @@
 
 class Par : public AST{
 public:
-    Par(std::string* id): id(*id), type(new Type(TypeTag::Unknown, this)), AST(NodeType::Par) {}
-    Par(std::string* id, Type* type): id(*id), type(type), AST(NodeType::Par) { type->set_parent(this); }
+    Par(std::string* id): id(*id), type_variable(new TypeVariable()), AST(NodeType::Par) {}
+    Par(std::string* id, TypeVariable* type_variable): id(*id), type_variable(type_variable), AST(NodeType::Par) {  }
 
     ~Par() {
-        delete type;
+        delete type_variable;
     }
 
     virtual void print(std::ostream &out) const override { 
         out << "Par(";
         out << "Id: " << id << " ";
-        out << "Type: ";
-        if(type != nullptr)
-            type->print(out);
+        out << "TypeVariable: ";
+        if(type_variable != nullptr)
+            type_variable->print(out);
         else
             out << "null ";
         out << ") ";
     }
 
-    virtual Type* infer() override {
-        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type);
+    virtual TypeVariable* infer() override {
+        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
 
         st->insert_entry(entry);
 
-        return this->type;
+        return this->type_variable;
     }
 
-    virtual void set_type(Type* type) { this->type = type; }
+    virtual void set_type(TypeVariable* type_variable) { this->type_variable = type_variable; }
 
 private:
     std::string id;
-    Type* type;
+    TypeVariable* type_variable;
 };
 
 #endif

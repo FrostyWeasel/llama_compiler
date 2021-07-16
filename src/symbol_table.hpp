@@ -35,7 +35,7 @@ public:
     void            insert_entry   (SymbolEntry* entry);
     SymbolEntry*    lookup_entry   (std::string id, LookupType lookup_type);
 
-    inline void add_constraint (Type* t1, Type* t2) {
+    inline void add_constraint (TypeVariable* t1, TypeVariable* t2) {
         contraints.push_back(Constraint(t1, t2));
     }
 
@@ -47,17 +47,14 @@ private:
     Scope*          current_scope;
 
     std::vector<Constraint> contraints;
-    std::vector<std::pair<Type*, Type*>> bound_types;
-    std::unordered_map<Type*, Type*> substitutions;
+    std::vector<std::pair<TypeVariable*, TypeVariable*>> bound_types;
+    std::unordered_map<TypeVariable*, TypeVariable*> substitutions;
 
     unsigned int PJW_hash(std::string id);
 
-    void substitute(Type* type_variable, Type* type);
-    void constraint_substitute(Type* type_variable, Type* type, Type* constraint_type);
-
-    void bind(Type* type_variable, Type* type);
-
-    Type* find_substitute(Type* type);
+    void substitute(TypeVariable* type_variable, TypeVariable* type);
+    void bind(TypeVariable* type_variable, TypeVariable* type);
+    TypeVariable* find_substitute(TypeVariable* type);
 
 };
 

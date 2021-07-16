@@ -2,7 +2,9 @@
 #define __LETIN_HPP__
 
 #include "expr.hpp"
-#include "includes.hpp"
+#include "let_def.hpp"
+#include "type_variable.hpp"
+#include<iostream>
 
 //TODO: Open new scope for expression
 class LetIn : public Expr{
@@ -29,8 +31,17 @@ public:
         out << ") ";
     }
 
-    virtual Type* infer() override {
-        
+    virtual TypeVariable* infer() override {
+        //Opens but does not close scope.
+        //* Let def type thrown away.
+        this->let_def->infer(); 
+
+        this->type_variable = this->expr->infer();
+
+        //Letdef scope only encompasses expression.
+        st->scope_close();
+
+        return this->type_variable;
     }
 
 private:

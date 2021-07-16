@@ -2,20 +2,19 @@
 #define __INT_HPP__
 
 #include "expr.hpp"
-#include "type.hpp"
+#include "type_variable.hpp"
 #include "enums.hpp"
-#include "includes.hpp"
 
 
 class Int : public Expr{
 public:
-    Int(int value) : value(value), Expr(new Type(TypeTag::Int, this)) { }
+    Int(int value) : value(value), Expr(new TypeVariable(TypeTag::Int)) { }
     virtual void print(std::ostream& out) const override{
         out << "Int(" << value << ") ";
     }
 
-    virtual Type* infer() override { 
-        return this->type;
+    virtual TypeVariable* infer() override { 
+        return this->type_variable;
     }
 
 private:

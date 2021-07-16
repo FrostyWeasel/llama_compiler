@@ -21,7 +21,7 @@ public:
         out << "Id(" << id << ") ";
     }
 
-    virtual Type* infer() override {
+    virtual TypeVariable* infer() override {
         auto id_entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
 
         //TODO: Handle all entry types
@@ -37,6 +37,16 @@ public:
 
                 return entry->get_type();
             }
+            case EntryType::ENTRY_VARIABLE: {
+                VariableEntry* entry = dynamic_cast<VariableEntry*>(id_entry);
+
+                return entry->get_type();
+            }
+            case EntryType::ENTRY_FUNCTION: {
+                FunctionEntry* entry = dynamic_cast<FunctionEntry*>(id_entry);
+
+                return entry->get_type();
+            }
             default: {
                 //TODO: Error Handling
                 std::cerr << "Uknown entry type";
@@ -44,6 +54,7 @@ public:
                 break;
             }
         }
+
     }
 
 private:

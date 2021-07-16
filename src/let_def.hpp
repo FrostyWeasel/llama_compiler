@@ -29,14 +29,14 @@ public:
         out << ") ";
     }
 
-    virtual Type* infer() override {
+    virtual TypeVariable* infer() override {
         AST::st->scope_open();
 
         if(let_type == LetType::NoRec)
             AST::st->scope_hide(true);
         
         //TODO:Is the current scope always the same as the one just hidden upon return?
-        Type* type = def->infer();
+        TypeVariable* type = def->infer();
 
         if(let_type == LetType::NoRec)
             AST::st->scope_hide(false);

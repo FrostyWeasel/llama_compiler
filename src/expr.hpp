@@ -3,22 +3,23 @@
 
 #include "ast.hpp"
 #include "enums.hpp"
+#include "type_variable.hpp"
 
 class Expr : public AST{
 public:  
     Expr() : AST(NodeType::Expr) {}
-    Expr(Type* type): type(type), AST(NodeType::Expr) { type->set_parent(this); }
+    Expr(TypeVariable* type_variable): type_variable(type_variable), AST(NodeType::Expr) { }
 
     virtual ~Expr(){
-        delete type;
+        delete type_variable;
     }
 
     virtual void print(std::ostream &out) const override = 0;
 
-    virtual void set_type(Type* type) { this->type = type; }
+    virtual void set_type(TypeVariable* type_variable) { this->type_variable = type_variable; }
 
 protected:
-    Type* type;
+    TypeVariable* type_variable;
 };
 
 #endif

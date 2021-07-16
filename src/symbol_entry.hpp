@@ -33,6 +33,8 @@ public:
    void set_scope(Scope* scope) { this->scope = scope; }
    Scope* get_scope() { return this->scope; }
 
+   virtual TypeVariable* get_type() const = 0;
+
 protected:
    std::string         id;                   /* Ονομα αναγνωριστικού          */
    EntryType           entry_type;           /* Τύπος της εγγραφής            */

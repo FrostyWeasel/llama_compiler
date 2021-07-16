@@ -3,52 +3,47 @@
 
 #include "type.hpp"
 #include "enums.hpp"
+#include "type_variable.hpp"
 #include <iostream>
+
+class Type;
 
 class FunctionType : public Type {
 public:
-    FunctionType(Type* from_type, Type* to_type): from_type(from_type), to_type(to_type), Type(TypeTag::Function) {}
-    FunctionType(Type* from_type, Type* to_type, AST* parent): from_type(from_type), to_type(to_type), Type(TypeTag::Function, parent) {}
+    FunctionType(TypeVariable* from_type_variable, TypeVariable* to_type_variable): from_type_variable(from_type_variable), to_type_variable(to_type_variable), Type(TypeTag::Function) {}
     
-    //TODO: Cant delete for these to work fix function type creation.
     ~FunctionType() {
-        if (from_type != nullptr)
-            delete from_type;
-        if (to_type != nullptr)
-            delete to_type;
+        delete from_type_variable;
+        delete to_type_variable;
     }
 
-    void set_from_type(TypeTag tag) { this->from_type->set_tag(tag); }
-    void set_to_type(TypeTag tag) { this->to_type->set_tag(tag); }
-    
-    Type* get_from_type() { return this->from_type; }
-    Type* get_to_type() { return this->to_type; }
+    virtual bool contains(TypeVariable* type_variable) override {
+        return from_type_variable->contains(type_variable) || to_type_variable->contains(from_type_variable);
+    }
 
-    virtual bool contains(Type* type) override {
-        if(from_type != nullptr) {
-            if(from_type->contains(type)) return true;
-        }
-        else if(to_type != nullptr) {
-            if(to_type->contains(type)) return true;
-        }
-        return false;
+    TypeVariable* get_from_type_variable() {
+        return from_type_variable;
+    }
+
+    TypeVariable* get_to_type_variable() {
+        return to_type_variable;
     }
 
     virtual void print(std::ostream &out) const override{ 
-        if (from_type == nullptr)
+        if (from_type_variable == nullptr)
             out << "from_type: Null ";
         else
-            out << *from_type << " ";
+            out << *from_type_variable << " ";
         out << "-> ";
-        if (to_type == nullptr)
+        if (to_type_variable == nullptr)
             out << "to_type: Null ";
         else
-            out << *to_type << " ";
+            out << *to_type_variable << " ";
     }
     
 private:
-    Type* from_type;
-    Type* to_type;
+    TypeVariable* from_type_variable;
+    TypeVariable* to_type_variable;
 };
 
 #endif

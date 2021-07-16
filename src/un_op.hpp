@@ -10,7 +10,6 @@ public:
     UnOp(Expr* expr, OpType op): expr(expr), op(op) {}
 
     ~UnOp() {
-	std::cout << "UnOp deleted\n";
         delete expr;
     }
 
@@ -86,6 +85,50 @@ public:
                 break;
         }
         out << ") ";
+    }
+
+    virtual TypeVariable* infer() {
+        TypeVariable* expr_type = nullptr;
+
+        switch(op) {
+            case OpType::Not:
+                expr_type = this->expr->infer();
+                this->type_variable = new TypeVariable(TypeTag::Bool);
+
+                this->st->add_constraint(expr_type, this->type_variable);
+                break;
+            case OpType::Plus:
+                expr_type = this->expr->infer();
+                this->type_variable = new TypeVariable(TypeTag::Int);
+
+                this->st->add_constraint(expr_type, this->type_variable);
+                break;
+            case OpType::Minus:
+                expr_type = this->expr->infer();
+                this->type_variable = new TypeVariable(TypeTag::Int);
+
+                this->st->add_constraint(expr_type, this->type_variable);
+                break;
+            case OpType::Dereference:{
+                //TODO: Check that this is correct
+
+                expr_type = this->expr->infer(); //Type must be t ref
+                TypeVariable* referenced_type = new TypeVariable(TypeTag::Unknown);
+                TypeVariable* reference_type = new TypeVariable(TypeTag::Reference, referenced_type);
+                this->type_variable = new TypeVariable(); //Type must be t
+
+                
+                this->st->add_constraint(referenced_type, this->type_variable);
+                this->st->add_constraint(expr_type, reference_type);
+                break;
+            }
+            default:
+                std::cerr << "Unknown binary operator type\n";
+                exit(1); //TODO:Error handling
+                break;
+        }
+
+        return this->type_variable;
     }
 
 private:

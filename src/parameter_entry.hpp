@@ -2,23 +2,21 @@
 #define __PARAMETERENTRY_HPP__
 
 #include "symbol_entry.hpp"
-#include "type.hpp"
+#include "type_variable.hpp"
 #include "enums.hpp"
 class ParameterEntry: public SymbolEntry{
 public:
 
-    ParameterEntry(std::string id, EntryType entry_type, Type* type) : type(type),
+    ParameterEntry(std::string id, EntryType entry_type, TypeVariable* type) : type(type),
         SymbolEntry(id, entry_type) { }
 
     ~ParameterEntry() { }
 
-    Type* get_type() { return type; }
+    virtual TypeVariable* get_type() const override { return type; }
 
 private:
-    Type*         type;  
-    // int           offset;
-    // PassMode      mode;  
-    // SymbolEntry*  next;  
+    TypeVariable* type;  
+ 
 };
 
 #endif

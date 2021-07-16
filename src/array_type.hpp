@@ -1,17 +1,21 @@
 #ifndef __ARRAYTYPE_HPP__
 #define __ARRAYTYPE_HPP__
 
-#include "type.hpp"
 #include "enums.hpp"
+#include "type_variable.hpp"
 
-class ArrayType : public Type{
+class Type;
+
+class ArrayType : public Type {
 public:
-    ArrayType(Type* type): dimensions(1), type(type), Type(TypeTag::Array) {}
-    ArrayType(Type* type, int dimensions): dimensions(dimensions), type(type), Type(TypeTag::Array) {}
-    ArrayType(Type* type, AST* parent): dimensions(1), type(type), Type(TypeTag::Array, parent) {}
-    ArrayType(Type* type, int dimensions, AST* parent): dimensions(dimensions), type(type), Type(TypeTag::Array, parent) {}
+    ArrayType(TypeVariable* type_variable): dimensions(1), type_variable(type_variable), Type(TypeTag::Array) {}
+    ArrayType(TypeVariable* type_variable, int dimensions): dimensions(dimensions), type_variable(type_variable), Type(TypeTag::Array) {}
 
     ~ArrayType() { }
+
+    virtual bool contains(TypeVariable* type_variable) override {
+        return this->type_variable->contains(type_variable);
+    }
 
     virtual void print(std::ostream &out) const override{ 
         out << "array "; 
@@ -22,10 +26,11 @@ public:
             }
             out << "]";
         }
-        out << "of " << *type << " ";
+        out << "of " << *type_variable << " ";
     }
+
 private:
-    Type* type;
+    TypeVariable* type_variable;
     int dimensions;
 };
 

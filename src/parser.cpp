@@ -1755,25 +1755,25 @@ yyreduce:
 
   case 68: /* type: "unit"  */
 #line 219 "./src/parser.y"
-                                                            { (yyval.type) = new Type(TypeTag::Unit); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Unit); }
 #line 1760 "./src/parser.cpp"
     break;
 
   case 69: /* type: "int"  */
 #line 220 "./src/parser.y"
-                                                            { (yyval.type) = new Type(TypeTag::Int); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Int); }
 #line 1766 "./src/parser.cpp"
     break;
 
   case 70: /* type: "char"  */
 #line 221 "./src/parser.y"
-                                                            { (yyval.type) = new Type(TypeTag::Char); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Char); }
 #line 1772 "./src/parser.cpp"
     break;
 
   case 71: /* type: "bool"  */
 #line 222 "./src/parser.y"
-                                                            { (yyval.type) = new Type(TypeTag::Bool); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Bool); }
 #line 1778 "./src/parser.cpp"
     break;
 
@@ -1785,25 +1785,25 @@ yyreduce:
 
   case 73: /* type: type "->" type  */
 #line 224 "./src/parser.y"
-                                                            { (yyval.type) = new FunctionType((yyvsp[-2].type), (yyvsp[0].type)); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Function, (yyvsp[-2].type), (yyvsp[0].type)); }
 #line 1790 "./src/parser.cpp"
     break;
 
   case 74: /* type: type "ref"  */
 #line 225 "./src/parser.y"
-                                                            { (yyval.type) = new RefType((yyvsp[-1].type)); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Reference, (yyvsp[-1].type)); }
 #line 1796 "./src/parser.cpp"
     break;
 
   case 75: /* type: "array" "of" type  */
 #line 226 "./src/parser.y"
-                                                            { (yyval.type) = new ArrayType((yyvsp[0].type)); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Array, (yyvsp[0].type)); }
 #line 1802 "./src/parser.cpp"
     break;
 
   case 76: /* type: "array" '[' asterisk_list ']' "of" type  */
 #line 227 "./src/parser.y"
-                                                            { (yyval.type) = new ArrayType((yyvsp[0].type), (yyvsp[-3].dimension_count)); }
+                                                            { (yyval.type) = new TypeVariable(TypeTag::Array, (yyvsp[0].type), (yyvsp[-3].dimension_count)); }
 #line 1808 "./src/parser.cpp"
     break;
 

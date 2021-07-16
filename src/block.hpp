@@ -4,9 +4,8 @@
 #include <iostream>
 #include <vector>
 #include "ast.hpp"
-#include "type.hpp"
 #include "enums.hpp"
-#include "function_type.hpp"
+#include "type_variable.hpp"
 
 // class FunctionType;
 
@@ -34,8 +33,8 @@ public:
   virtual void insert(typename std::vector<T*>::const_iterator it, T* element) { list.insert(it, element); }
   virtual const typename std::vector<T*>::const_iterator begin() const { return list.cbegin(); }
 
-  virtual Type* infer() override {
-    Type* block_type = nullptr;
+  virtual TypeVariable* infer() override {
+    TypeVariable* block_type = nullptr;
 
     //TODO: Do all cases
     switch (this->block_type) {
@@ -48,8 +47,8 @@ public:
           block_type = list[0]->infer();
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
-                Type* new_type = (*element_it)->infer();
-                block_type = new FunctionType(block_type, new_type, new_type->get_parent());
+                TypeVariable* new_type = (*element_it)->infer();
+                block_type = new TypeVariable(TypeTag::Function, block_type, new_type);
               }
               else {
                 std::cerr << "Nullptr in block list.\n";
@@ -68,8 +67,8 @@ public:
           block_type = list[0]->infer();
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
-                Type* new_type = (*element_it)->infer();
-                block_type = new FunctionType(block_type, new_type, new_type->get_parent());
+                TypeVariable* new_type = (*element_it)->infer();
+                block_type = new TypeVariable(TypeTag::Function, block_type, new_type);
               }
               else {
                 std::cerr << "Nullptr in block list.\n";

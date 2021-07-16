@@ -14,10 +14,10 @@
 
 class FunctionEntry;
 
-class FunctionDef : public Def{
+class FunctionDef : public Def {
 public:
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new Type(TypeTag::Unknown, this)), expr(expr) {}
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, Type* type): id(*id), par_list(par_list), Def(type), expr(expr) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, TypeVariable* type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr) {}
 
     ~FunctionDef() {
         delete expr;
@@ -28,8 +28,8 @@ public:
         out << "FunctionDef(";
         out << " Id: " << id;
         out << " Type: ";
-        if(type != nullptr)
-            type->print(out);
+        if(type_variable != nullptr)
+            type_variable->print(out);
         else
             out << "null ";
         out << ", Par_list: ";
@@ -45,28 +45,27 @@ public:
         out << ") ";
     }
 
-    virtual Type* infer() override {
-        FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, this->type, nullptr);
+    virtual TypeVariable* infer() override {
+        FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, nullptr, this->type_variable);
 
         this->st->insert_entry(entry);
 
         //Function scope includes parameters and body
         this->st->scope_open(); 
 
-        Type* from_type = this->par_list->infer();
-
+        TypeVariable* from_type = this->par_list->infer();
         entry->set_from_type(from_type);
 
-        Type* to_type = this->expr->infer();
+        TypeVariable* to_type = this->expr->infer();
 
-        //TODO: to type cannot be a function 
+        //TODO:Sem to type cannot be a function 
 
         //Function return type must be the same as its body expr type.
-        this->st->add_constraint(this->type, to_type);
+        this->st->add_constraint(this->type_variable, to_type);
 
         this->st->scope_close();
 
-        return this->type;
+        return this->type_variable;
     }
 
 private:

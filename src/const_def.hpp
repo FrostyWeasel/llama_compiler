@@ -10,8 +10,8 @@
 
 class ConstDef : public Def{
 public:
-    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new Type(TypeTag::Unknown, this)) {}
-    ConstDef(std::string* id, Type* type, Expr* expr): id(*id), Def(type), expr(expr) {}
+    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new TypeVariable()) {}
+    ConstDef(std::string* id, TypeVariable* type_variable, Expr* expr): id(*id), Def(type_variable), expr(expr) {}
 
     ~ConstDef() {
         delete expr;
@@ -21,8 +21,8 @@ public:
         out << "ConstDef(";
         out << " Id: " << id;
         out << " Type: ";
-        if(type != nullptr)
-            type->print(out);
+        if(type_variable != nullptr)
+            type_variable->print(out);
         else
             out << "null ";
         out << " Expr: ";
@@ -33,15 +33,16 @@ public:
         out << ") ";
     }
 
-    virtual Type* infer() override {
-        ConstantEntry* entry = new ConstantEntry(id, EntryType::ENTRY_CONSTANT, this->type);
+    virtual TypeVariable* infer() override {
+        ConstantEntry* entry = new ConstantEntry(id, EntryType::ENTRY_CONSTANT, this->type_variable);
+        
         st->insert_entry(entry);
 
         auto expr_type = this->expr->infer();
 
-        st->add_constraint(this->type, expr_type);
+        st->add_constraint(this->type_variable, expr_type);
 
-        return this->type;
+        return this->type_variable;
     }
 
     virtual void sem() override {

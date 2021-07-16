@@ -5,21 +5,21 @@
 #include <string>
 #include "ast.hpp"
 #include "enums.hpp"
-#include "type.hpp"
+#include "type_variable.hpp"
 
 class Def : public AST {
 public:    
-    Def() :  AST(NodeType::Def) {}
-    Def(Type* type) : type(type), AST(NodeType::Def) { type->set_parent(this); }
+    Def() : AST(NodeType::Def) {}
+    Def(TypeVariable* type_variable) : type_variable(type_variable), AST(NodeType::Def) { }
 
     virtual ~Def() {
-        delete type;
+        delete type_variable;
     }
 
-    virtual void set_type(Type* type) { this->type = type; }
+    virtual void set_type( TypeVariable* type_variable) { this->type_variable = type_variable; }
 
 protected:
-    Type* type;
+    TypeVariable* type_variable;
 };
 
 #endif

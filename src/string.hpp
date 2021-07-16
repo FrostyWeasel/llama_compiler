@@ -4,19 +4,19 @@
 #include <iostream>
 #include "enums.hpp"
 #include "expr.hpp"
-#include "includes.hpp"
+#include "type_variable.hpp"
 
 class String : public Expr{
 public:
-    String(std::string* value): value(*value), Expr(new ArrayType(new Type(TypeTag::Char, this))) {  }
+    String(std::string* value): value(*value), Expr(new TypeVariable(TypeTag::Array, new TypeVariable(TypeTag::Char))) {  }
     virtual void print(std::ostream& out) const override{
         out << "String(";
         out << " Value: " << value;
         out << ") ";
     }
 
-    virtual Type* infer() override { 
-        return this->type;
+    virtual TypeVariable* infer() override { 
+        return this->type_variable;
     }
 
 private:

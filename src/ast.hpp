@@ -15,7 +15,7 @@ public:
     AST(NodeType node_type) : node_type(node_type) { }
     virtual ~AST() { }
     virtual void print(std::ostream& out) const = 0;
-    virtual Type* infer() { };
+    virtual TypeVariable* infer() { };
     virtual void sem() { };
 
     void unify() { st->unify(); }

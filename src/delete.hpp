@@ -10,7 +10,6 @@ public:
     Delete(Expr* expr): expr(expr) {}
 
     ~Delete() {
-	std::cout << "Delete deleted\n";
         delete expr;
     }
 
@@ -26,7 +25,6 @@ public:
 
 private:
     Expr* expr;
-
 };
 
 #endif

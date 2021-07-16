@@ -3,19 +3,19 @@
 
 #include "expr.hpp"
 #include "enums.hpp"
-#include "type.hpp"
+#include "type_variable.hpp"
 #include <iostream>
 
 class Unit : public Expr{
 public:
-    Unit() : Expr(new Type(TypeTag::Unit, this)) { }
+    Unit() : Expr(new TypeVariable(TypeTag::Unit)) { }
 
     virtual void print(std::ostream& out) const override{
         out << "Unit";
     }  
 
-    virtual Type* infer() override { 
-        return this->type;
+    virtual TypeVariable* infer() override { 
+        return this->type_variable;
     }  
 
 };

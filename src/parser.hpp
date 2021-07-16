@@ -118,7 +118,7 @@ union YYSTYPE
     Def* def;
     Par* par;
     Expr* expr;
-    Type* type;
+    TypeVariable* type;
     Block<Expr>* func_expr_list;
     Block<Expr>* expr_comma_list;
     Block<Par>* par_list;

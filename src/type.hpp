@@ -3,15 +3,14 @@
 
 #include <iostream>
 #include "enums.hpp"
+#include "type_variable.hpp"
 
-class AST;
+class TypeVariable;
 
-class Type{
+class Type {
 public:
-    Type() : tag(TypeTag::Unknown) { count = counter++; }
-    Type(TypeTag type) : tag(type) { count = counter++; }
-    Type(AST* parent) : tag(TypeTag::Unknown), parent(parent) { count = counter++; }
-    Type(TypeTag type, AST* parent) : tag(type), parent(parent) { count = counter++; }
+    Type() : tag(TypeTag::Unknown) {  }
+    Type(TypeTag type) : tag(type) {  }
 
     virtual ~Type() { }
 
@@ -20,22 +19,21 @@ public:
 
     
     virtual void print(std::ostream& out) const { 
-        out << "Type(";
         switch(tag){
             case TypeTag::Bool:
-                out << "Bool";
+                out << "bool";
                 break;
             case TypeTag::Char:
-                out << "Char";
+                out << "char";
                 break;
             case TypeTag::Int:
-                out << "Int";
+                out << "int";
                 break;
             case TypeTag::Unit:
-                out << "Unit";
+                out << "unit";
                 break;
             case TypeTag::Unknown:
-                out << "Unknown";
+                out << "unknown";
                 break;
             case TypeTag::Array:
                 this->print(out);
@@ -51,23 +49,15 @@ public:
                 exit(1);
                 break;
         }
-        out << ") ";
+        out << " ";
     }
 
-    virtual bool contains(Type* t1) {
-        return t1 == this;
+    virtual bool contains(TypeVariable* type_variable) {
+        return false;
     }
-
-    virtual AST* get_parent() { return this->parent; }
-    virtual void set_parent(AST* parent) { this->parent = parent; }
 
 protected:
     TypeTag tag;
-    AST* parent;
-
-private:
-    unsigned int count;
-    static unsigned int counter;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Type& type){
