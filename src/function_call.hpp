@@ -40,6 +40,12 @@ public:
                 Type* from_type = func_entry->get_from_type();
                 Type* to_type = func_entry->get_to_type();
 
+                //TODO: Not thought out
+                if(to_type == nullptr) {
+                    to_type = new Type(TypeTag::Unknown, this);
+                    func_entry->set_to_type(to_type);
+                }
+
                 Type* par_list_type = this->expr_list->infer();
 
                 this->st->add_constraint(from_type, par_list_type);

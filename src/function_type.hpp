@@ -10,9 +10,12 @@ public:
     FunctionType(Type* from_type, Type* to_type): from_type(from_type), to_type(to_type), Type(TypeTag::Function) {}
     FunctionType(Type* from_type, Type* to_type, AST* parent): from_type(from_type), to_type(to_type), Type(TypeTag::Function, parent) {}
     
+    //TODO: Cant delete for these to work fix function type creation.
     ~FunctionType() {
-        delete from_type;
-        delete to_type;
+        if (from_type != nullptr)
+            delete from_type;
+        if (to_type != nullptr)
+            delete to_type;
     }
 
     void set_from_type(TypeTag tag) { this->from_type->set_tag(tag); }

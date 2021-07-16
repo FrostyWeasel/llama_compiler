@@ -121,8 +121,7 @@ unsigned int SymbolTable::PJW_hash(std::string id) {
     return h;
 }
 
-//TODO: Fix let thrice f x = f (f (f (x+1)))
-//TODO: Fix let twice f x y = f (f (x+1) y) (y+1)
+//TODO: Fix let rec f x = f (x+1)
 void SymbolTable::unify() {
     bool matched_rule;
 
@@ -139,7 +138,7 @@ void SymbolTable::unify() {
         t2 = this->find_substitute(t2);
 
         //Check that they are not functions
-        if(t1->get_tag() != TypeTag::Unknown && t2->get_tag() != TypeTag::Unknown && (t1->get_tag() == t2->get_tag()) && (t1->get_tag() != TypeTag::Function)){
+        if((t1->get_tag() != TypeTag::Unknown && t2->get_tag() != TypeTag::Unknown && (t1->get_tag() == t2->get_tag()) && (t1->get_tag() != TypeTag::Function)) || (t1 == t2)){
             matched_rule = true;
         }
 
@@ -184,23 +183,22 @@ void SymbolTable::unify() {
                 FunctionType* t2 = dynamic_cast<FunctionType*>(bound_pair->second);
 
                 AST* parent_t1 = bound_pair->first->get_parent();
-                Type* new_type = new FunctionType(new Type(t2->get_from_type()->get_tag(), bound_pair->first->get_parent()), new Type(t2->get_to_type()->get_tag(), bound_pair->first->get_parent()), bound_pair->first->get_parent());
-                delete bound_pair->first;
+                // Type* new_type = new FunctionType(new Type(t2->get_from_type()->get_tag(), bound_pair->first->get_parent()), new Type(t2->get_to_type()->get_tag(), bound_pair->first->get_parent()), bound_pair->first->get_parent());
 
                 switch (parent_t1->get_node_type()) {
                     case NodeType::Expr: {
                         Expr* parent_node = dynamic_cast<Expr*>(parent_t1);
-                        parent_node->set_type(new_type);
+                        parent_node->set_type(t2);
                         break;
                     }
                     case NodeType::Par: {
                         Par* parent_node = dynamic_cast<Par*>(parent_t1);
-                        parent_node->set_type(new_type);
+                        parent_node->set_type(t2);
                         break;
                     }
                     case NodeType::Def: {
                         Def* parent_node = dynamic_cast<Def*>(parent_t1);
-                        parent_node->set_type(new_type);
+                        parent_node->set_type(t2);
                         break;
                     }
                     default:
