@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <unordered_map>
 
 class SymbolTable{
 public:
@@ -47,12 +48,17 @@ private:
 
     std::vector<Constraint> contraints;
     std::vector<std::pair<Type*, Type*>> bound_types;
+    std::unordered_map<Type*, Type*> substitutions;
 
     unsigned int PJW_hash(std::string id);
 
     void substitute(Type* type_variable, Type* type);
+    void constraint_substitute(Type* type_variable, Type* type, Type* constraint_type);
 
     void bind(Type* type_variable, Type* type);
+
+    Type* find_substitute(Type* type);
+
 };
 
 #endif 

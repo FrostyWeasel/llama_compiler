@@ -2,12 +2,14 @@
 #define __REFTYPE_HPP__
 
 #include "type.hpp"
-#include "includes.hpp"
+#include "enums.hpp"
 
+class AST;
 
 class RefType : public Type{
 public:
     RefType(Type* type) : type(type), Type(TypeTag::Reference) { }
+    RefType(Type* type, AST* parent) : type(type), Type(TypeTag::Reference, parent) { }
 
     ~RefType() {
         delete type;

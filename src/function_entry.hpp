@@ -10,16 +10,20 @@ class FunctionEntry : public SymbolEntry{
 public:
 
     FunctionEntry(std::string id, EntryType entry_type, Type* from_type, Type* to_type) : from_type(from_type), to_type(to_type),
-        SymbolEntry(id, entry_type) { this->counter++; }
+        SymbolEntry(id, entry_type) { count = FunctionEntry::counter++; }
     
     ~FunctionEntry() { }
 
     void set_from_type(Type* from_type) { this->from_type = from_type; }
     void set_to_type(Type* to_type) { this->to_type = to_type; }
 
+    Type* get_from_type() { return this->from_type; }
+    Type* get_to_type() { return this->to_type; }
+
 private:
     Type*               from_type;
     Type*               to_type;
+    unsigned int        count;
     static unsigned int counter;    /* Μοναδικός για κάθε συνάρτηση, για να ξεχωρίζουμε αυτές που έχουν το ίδιο όνομα */
 };
 

@@ -5,7 +5,6 @@
 
 //Forward declaration
 class SymbolEntry;
-
 class Scope {
 public:
     Scope(Scope* parent, SymbolEntry* entries, unsigned int nesting_level, bool is_hidden) : 

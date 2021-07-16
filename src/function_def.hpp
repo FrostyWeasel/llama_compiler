@@ -10,10 +10,13 @@
 #include "symbol_entry.hpp"
 #include "function_entry.hpp"
 #include <string>
+#include <iostream>
+
+class FunctionEntry;
 
 class FunctionDef : public Def{
 public:
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new Type(TypeTag::Unknown)), expr(expr) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new Type(TypeTag::Unknown, this)), expr(expr) {}
     FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, Type* type): id(*id), par_list(par_list), Def(type), expr(expr) {}
 
     ~FunctionDef() {
@@ -44,6 +47,7 @@ public:
 
     virtual Type* infer() override {
         FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, this->type, nullptr);
+
         this->st->insert_entry(entry);
 
         //Function scope includes parameters and body
@@ -55,11 +59,14 @@ public:
 
         Type* to_type = this->expr->infer();
 
+        //TODO: to type cannot be a function 
+
         //Function return type must be the same as its body expr type.
         this->st->add_constraint(this->type, to_type);
 
         this->st->scope_close();
 
+        return this->type;
     }
 
 private:

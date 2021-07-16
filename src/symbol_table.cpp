@@ -1,4 +1,11 @@
 #include "symbol_table.hpp"
+#include "function_type.hpp"
+#include "type.hpp"
+#include "enums.hpp"
+#include "expr.hpp"
+#include "par.hpp"
+#include "def.hpp"
+#include "ast.hpp"
 
 void SymbolTable::scope_open() {
     this->current_scope = new Scope(this->current_scope, nullptr, 
@@ -114,12 +121,7 @@ unsigned int SymbolTable::PJW_hash(std::string id) {
     return h;
 }
 
-//if function type then contraint(from type1, from type 2) and constraint(to type 1, to type 2)
-//if t1 array then make sure that t2 is also array
-//think about the possibility that one is a function and one is not(can the constraint be satisfied? do i need contains?)
-//if one is a ref? should the other be a reference too?
-//make enum that tells me what type it is t1 and t2 are
- 
+//TODO: Fix let rec f x = f (x+1)
 void SymbolTable::unify() {
     bool matched_rule;
 
@@ -132,21 +134,39 @@ void SymbolTable::unify() {
         Type* t1 = constraint.get_t1();
         Type* t2 = constraint.get_t2();
 
+        t1 = this->find_substitute(t1);
+        t2 = this->find_substitute(t2);
+
         //Check that they are not functions
-        if(t1->get_tag() != TypeTag::Unknown && t2->get_tag() != TypeTag::Unknown && (t1->get_tag() == t2->get_tag())){
+        if((t1->get_tag() != TypeTag::Unknown && t2->get_tag() != TypeTag::Unknown && (t1->get_tag() == t2->get_tag()) && (t1->get_tag() != TypeTag::Function)) || (t1 == t2)){
             matched_rule = true;
         }
 
-        if(!matched_rule && (t1->get_tag() == TypeTag::Unknown /*&& !t2->contains(t1)*/)) {
+        if(!matched_rule && (t1->get_tag() == TypeTag::Unknown && !t2->contains(t1))) {
             matched_rule = true;
             this->substitute(t1, t2);
             this->bind(t1, t2);
         }
 
-        if(!matched_rule && (t2->get_tag() == TypeTag::Unknown /*&& !t1->contains(t1)*/)) {
+        if(!matched_rule && (t2->get_tag() == TypeTag::Unknown && !t1->contains(t2))) {
             matched_rule = true;
             this->substitute(t2, t1);
             this->bind(t2, t1);
+        }
+
+        if(!matched_rule && ((t1->get_tag() == TypeTag::Function) && (t2->get_tag() == TypeTag::Function))) {
+            matched_rule = true;
+            FunctionType* t1_func = dynamic_cast<FunctionType*>(t1);
+            FunctionType* t2_func = dynamic_cast<FunctionType*>(t2);
+
+            Type* from_type_t1 = t1_func->get_from_type();
+            Type* to_type_t1 = t1_func->get_to_type();
+
+            Type* from_type_t2 = t2_func->get_from_type();
+            Type* to_type_t2 = t2_func->get_to_type();
+
+            this->add_constraint(from_type_t1, from_type_t2);
+            this->add_constraint(to_type_t1, to_type_t2);
         }
 
         if(!matched_rule){
@@ -155,22 +175,104 @@ void SymbolTable::unify() {
         }
     }
 
-    //All contraints unified now set inferred values to all bindings.
-    for(auto bound_pair = this->bound_types.begin(); bound_pair != this->bound_types.end(); bound_pair++){
-        bound_pair->first->set_tag(bound_pair->second->get_tag());
+    //All contraints unified now set inferred values to all bindings. (type_variable, type)
+    for(auto bound_pair = this->bound_types.rbegin(); bound_pair != this->bound_types.rend(); bound_pair++){
+        //TODO: Implement all typetags
+        switch (bound_pair->second->get_tag()) {
+            case TypeTag::Function: {
+                FunctionType* t2 = dynamic_cast<FunctionType*>(bound_pair->second);
+
+                AST* parent_t1 = bound_pair->first->get_parent();
+                // Type* new_type = new FunctionType(new Type(t2->get_from_type()->get_tag(), bound_pair->first->get_parent()), new Type(t2->get_to_type()->get_tag(), bound_pair->first->get_parent()), bound_pair->first->get_parent());
+
+                switch (parent_t1->get_node_type()) {
+                    case NodeType::Expr: {
+                        Expr* parent_node = dynamic_cast<Expr*>(parent_t1);
+                        parent_node->set_type(t2);
+                        break;
+                    }
+                    case NodeType::Par: {
+                        Par* parent_node = dynamic_cast<Par*>(parent_t1);
+                        parent_node->set_type(t2);
+                        break;
+                    }
+                    case NodeType::Def: {
+                        Def* parent_node = dynamic_cast<Def*>(parent_t1);
+                        parent_node->set_type(t2);
+                        break;
+                    }
+                    default:
+                        std::cerr << "Uknown node type\n";
+                        exit(1);
+                        break;
+                }
+                break;
+            }
+            default:
+                bound_pair->first->set_tag(bound_pair->second->get_tag());
+                break;
+        }
     }
 }
 
-//Substitute every instance of type_variable in constraints with type.
 void SymbolTable::substitute(Type* type_variable, Type* type) {
-    for(auto constraint_it = this->contraints.begin(); constraint_it != this->contraints.end(); constraint_it++) {
-        if (constraint_it->get_t1() == type_variable) 
-            constraint_it->set_t1(type);
-        
-        if (constraint_it->get_t2() == type_variable) 
-            constraint_it->set_t2(type);
-    }
+    this->substitutions.insert({type_variable, type});
 }
+
+
+Type* SymbolTable::find_substitute(Type* type) {
+    while (this->substitutions.find(type) != this->substitutions.end()) {
+        type = this->substitutions.find(type)->second;
+    }
+
+    return type;
+}
+
+//Substitute every instance of type_variable in constraints with type.
+// void SymbolTable::substitute(Type* type_variable, Type* type) {
+    // for(auto constraint_it = this->contraints.begin(); constraint_it != this->contraints.end(); constraint_it++) {
+    //     switch(constraint_it->get_t1()->get_tag()) {
+    //         //TODO: Propably wont work because it replaces types in the function type with other types with different parent
+    //         case TypeTag::Function:{
+    //             constraint_substitute(type_variable, type, constraint_it->get_t1());
+    //             break;
+    //         }
+    //         default:
+    //             if(constraint_it->get_t1() == type_variable)
+    //                 constraint_it->set_t1(type);
+    //             break;
+    //     }
+    //     switch(constraint_it->get_t2()->get_tag()) {
+    //         //TODO: Propably wont work because it replaces types in the function type with other types with different parent
+    //         case TypeTag::Function:{
+    //             constraint_substitute(type_variable, type, constraint_it->get_t2());
+    //             break;
+    //         }
+    //         default:
+    //             if(constraint_it->get_t2() == type_variable)
+    //                 constraint_it->set_t2(type);
+    //             break;
+    //     }
+    // }
+// }
+
+//TODO: Implement non type tags
+// void SymbolTable::constraint_substitute(Type* type_variable, Type* type, Type* constraint_type) {
+//     switch (constraint_type->get_tag()) {
+//         //TODO: Propably wont work because it replaces types in the function type with other types with different parent
+//         case TypeTag::Function:{
+//             FunctionType* func_constraint = dynamic_cast<FunctionType*>(constraint_type);
+//             if(func_constraint->get_to_type() == type_variable) {
+//                 func_constraint->get_to_type()->set_tag(type->get_tag());
+//             }
+//             constraint_substitute(type_variable, type, func_constraint->get_from_type());
+//             break;
+//         }
+//         default:
+//             std::cerr << "Substitution is not a function\n";
+//             break;
+//     }
+// }
 
 void SymbolTable::bind(Type* type_variable, Type* type) {
     //If t1->t2 and now we bind t2->t3 then make sure that you make t1->t3 so that when t3 gets a value both t2 and t1 copy it.

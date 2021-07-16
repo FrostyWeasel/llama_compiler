@@ -8,7 +8,7 @@
 
 class Unit : public Expr{
 public:
-    Unit() : Expr(new Type(TypeTag::Unit)) { }
+    Unit() : Expr(new Type(TypeTag::Unit, this)) { }
 
     virtual void print(std::ostream& out) const override{
         out << "Unit";

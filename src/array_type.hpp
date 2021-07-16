@@ -8,6 +8,8 @@ class ArrayType : public Type{
 public:
     ArrayType(Type* type): dimensions(1), type(type), Type(TypeTag::Array) {}
     ArrayType(Type* type, int dimensions): dimensions(dimensions), type(type), Type(TypeTag::Array) {}
+    ArrayType(Type* type, AST* parent): dimensions(1), type(type), Type(TypeTag::Array, parent) {}
+    ArrayType(Type* type, int dimensions, AST* parent): dimensions(dimensions), type(type), Type(TypeTag::Array, parent) {}
 
     ~ArrayType() { }
 

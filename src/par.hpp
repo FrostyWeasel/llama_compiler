@@ -10,11 +10,10 @@
 
 class Par : public AST{
 public:
-    Par(std::string* id): id(*id), type(new Type(TypeTag::Unknown)) {}
-    Par(std::string* id, Type* type): id(*id), type(type) {}
+    Par(std::string* id): id(*id), type(new Type(TypeTag::Unknown, this)), AST(NodeType::Par) {}
+    Par(std::string* id, Type* type): id(*id), type(type), AST(NodeType::Par) { type->set_parent(this); }
 
     ~Par() {
-	std::cout << "Par deleted\n";
         delete type;
     }
 
@@ -29,13 +28,15 @@ public:
         out << ") ";
     }
 
-    virtual Type* infer() {
+    virtual Type* infer() override {
         ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type);
 
         st->insert_entry(entry);
 
         return this->type;
     }
+
+    virtual void set_type(Type* type) { this->type = type; }
 
 private:
     std::string id;

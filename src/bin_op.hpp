@@ -94,7 +94,98 @@ public:
     }
 
     virtual Type* infer() {
-        
+        Type* res_type = nullptr;
+        Type* lval_type = nullptr;
+        Type* rval_type = nullptr;
+
+        switch(op) {
+            case OpType::And:
+                
+                break;
+            case OpType::Assign:
+                break;
+            case OpType::Concat:
+                break;
+            case OpType::Dereference:
+                break;
+            case OpType::Divide:
+                lval_type = this->lval->infer();
+                rval_type = this->rval->infer();
+                res_type = new Type(TypeTag::Int, this);
+
+                this->st->add_constraint(lval_type, res_type);
+                this->st->add_constraint(rval_type, res_type);
+                break;
+            case OpType::Equals:
+                
+                break;
+            case OpType::GreaterOrEqualThan:
+                
+                break;
+            case OpType::GreaterThan:
+                
+                break;
+            case OpType::LessOrEqualThan:
+                
+                break;
+            case OpType::LessThan:
+                
+                break;
+            case OpType::Minus:
+                lval_type = this->lval->infer();
+                rval_type = this->rval->infer();
+                res_type = new Type(TypeTag::Int, this);
+
+                this->st->add_constraint(lval_type, res_type);
+                this->st->add_constraint(rval_type, res_type);
+                break;
+            case OpType::Modulo:
+                lval_type = this->lval->infer();
+                rval_type = this->rval->infer();
+                res_type = new Type(TypeTag::Int, this);
+
+                this->st->add_constraint(lval_type, res_type);
+                this->st->add_constraint(rval_type, res_type);
+                break;
+            case OpType::NatEquals:
+                
+                break;
+            case OpType::NatNotEquals:
+                
+                break;
+            case OpType::Not:
+                
+                break;
+            case OpType::NotEquals:
+                
+                break;
+            case OpType::Or:
+                
+                break;
+            case OpType::Plus:
+                lval_type = this->lval->infer();
+                rval_type = this->rval->infer();
+                res_type = new Type(TypeTag::Int, this);
+
+                this->st->add_constraint(lval_type, res_type);
+                this->st->add_constraint(rval_type, res_type);
+                
+                break;
+            case OpType::Times:
+                lval_type = this->lval->infer();
+                rval_type = this->rval->infer();
+                res_type = new Type(TypeTag::Int, this);
+
+                this->st->add_constraint(lval_type, res_type);
+                this->st->add_constraint(rval_type, res_type);    
+                break;
+            default:
+                
+                exit(1);
+                break;
+        }
+
+        return res_type;
     }
 
 

@@ -4,16 +4,19 @@
 #include <iostream>
 #include <string>
 #include "ast.hpp"
-#include "includes.hpp"
-class Def : public AST{
+#include "enums.hpp"
+#include "type.hpp"
+
+class Def : public AST {
 public:    
-    Def() {}
-    Def(Type* type): type(type) {}
+    Def() :  AST(NodeType::Def) {}
+    Def(Type* type) : type(type), AST(NodeType::Def) { type->set_parent(this); }
 
     virtual ~Def() {
-	std::cout << "Def deleted\n";
         delete type;
     }
+
+    virtual void set_type(Type* type) { this->type = type; }
 
 protected:
     Type* type;

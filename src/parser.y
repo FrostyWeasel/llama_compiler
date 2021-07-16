@@ -113,6 +113,7 @@
 program:
     letdef_list { 
             // AST::make_table(); //Make a static symboltable
+            if(debug) std::cout << "AST: " << *$1 << std::endl;
             $1->infer();
             $1->unify();
             if(debug) std::cout << "AST: " << *$1 << std::endl;

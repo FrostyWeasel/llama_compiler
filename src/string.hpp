@@ -8,7 +8,7 @@
 
 class String : public Expr{
 public:
-    String(std::string* value): value(*value), Expr(new ArrayType(new Type(TypeTag::Char))) {  }
+    String(std::string* value): value(*value), Expr(new ArrayType(new Type(TypeTag::Char, this))) {  }
     virtual void print(std::ostream& out) const override{
         out << "String(";
         out << " Value: " << value;

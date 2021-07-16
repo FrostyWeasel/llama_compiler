@@ -5,7 +5,7 @@
 #include "enums.hpp"
 #include <string>
 
-
+//Forward Declaration
 class Scope; 
 class SymbolEntry {
 public:
