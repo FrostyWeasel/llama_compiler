@@ -1,0 +1,3 @@
+let main = let mutable m in
+           m := true;
+           !m

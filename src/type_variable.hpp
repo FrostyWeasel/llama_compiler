@@ -15,7 +15,7 @@ public:
     TypeVariable(TypeTag type_tag, TypeVariable* t1, TypeVariable* t2);
     TypeVariable(TypeTag type_tag, TypeVariable* t1, int dim);
 
-    ~TypeVariable() { }
+    ~TypeVariable() = default;
 
     void print(std::ostream& out) const;
 
@@ -24,6 +24,7 @@ public:
 
     TypeVariable* get_function_from_type();
     TypeVariable* get_function_to_type();
+    TypeVariable* get_referenced_type();
 
     TypeTag get_tag();
     TypeVariableTag get_variable_tag();

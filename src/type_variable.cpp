@@ -150,6 +150,17 @@ TypeVariable* TypeVariable::get_function_to_type() {
     }
 }
 
+TypeVariable* TypeVariable::get_referenced_type() {
+    if (this->type->get_tag() == TypeTag::Reference) {
+        auto reference_ptr = std::dynamic_pointer_cast<RefType>(this->type);
+        return reference_ptr->get_referenced_variable();
+    }
+    else{
+        std::cerr << "Requesting get_referenced_variable but type is not a reference\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
 TypeTag TypeVariable::get_tag() { return type->get_tag(); }
 TypeVariableTag TypeVariable::get_variable_tag() { return this->tag; }
 
@@ -159,7 +170,7 @@ void TypeVariable::print(std::ostream& out) const {
             out << "@" << id << " " << *this->type;
             break;
         case TypeVariableTag::Bound:
-            out << *this->type;
+            out << "@" << id << " " << *this->type;
             break;
         default:
             std::cerr << "Unknown TypeVariableTag\n";

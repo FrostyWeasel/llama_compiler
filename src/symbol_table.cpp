@@ -167,6 +167,15 @@ void SymbolTable::unify() {
             this->add_constraint(to_type_t1, to_type_t2);
         }
 
+      if(!matched_rule && ((t1->get_tag() == TypeTag::Reference) && (t2->get_tag() == TypeTag::Reference))) {
+            matched_rule = true;
+
+            TypeVariable* referenced_type_t1 = t1->get_referenced_type();
+            TypeVariable* referenced_type_t2 = t2->get_referenced_type();
+
+            this->add_constraint(referenced_type_t1, referenced_type_t2);
+        }
+
         if(!matched_rule){
             std::cerr << "Failed to unify : " << *t1 << "and " << *t2 << '\n'; 
             exit(1);
@@ -174,7 +183,7 @@ void SymbolTable::unify() {
     }
 
     //All contraints unified now set inferred values to all bindings. (type_variable, type)
-    for(auto bound_pair = this->bound_types.rbegin(); bound_pair != this->bound_types.rend(); bound_pair++){
+    for(auto bound_pair = this->bound_types.begin(); bound_pair != this->bound_types.end(); bound_pair++){
         bound_pair->first->bind(bound_pair->second);
     }
 }

@@ -15,6 +15,11 @@ public:
 
     virtual void print(std::ostream &out) const override {
         out << "UnOp(";
+        out << "Type: ";
+        if(type_variable != nullptr)
+            type_variable->print(out);
+        else
+            out << "null ";
         out << "Expr: ";
         if(expr != nullptr)
             expr->print(out);
@@ -113,13 +118,9 @@ public:
                 //TODO: Check that this is correct
 
                 expr_type = this->expr->infer(); //Type must be t ref
-                TypeVariable* referenced_type = new TypeVariable(TypeTag::Unknown);
-                TypeVariable* reference_type = new TypeVariable(TypeTag::Reference, referenced_type);
                 this->type_variable = new TypeVariable(); //Type must be t
 
-                
-                this->st->add_constraint(referenced_type, this->type_variable);
-                this->st->add_constraint(expr_type, reference_type);
+                this->st->add_constraint(expr_type, new TypeVariable(TypeTag::Reference, this->type_variable));
                 break;
             }
             default:

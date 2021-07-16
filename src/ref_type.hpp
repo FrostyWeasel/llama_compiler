@@ -18,6 +18,10 @@ public:
         return this->type_variable->contains(type_variable);
     }
 
+    TypeVariable* get_referenced_variable() {
+        return type_variable;
+    }
+
     virtual void print(std::ostream &out) const override{ 
         if (type_variable == nullptr)
             out << "TypeVariable: Null";

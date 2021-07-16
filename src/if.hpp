@@ -18,6 +18,11 @@ public:
 
     virtual void print(std::ostream &out) const override {
         out << "If(";
+        out << "Type: ";
+        if(type_variable != nullptr)
+            type_variable->print(out);
+        else
+            out << "null ";
         out << "Condition: ";
         if(condition != nullptr)
             condition->print(out);

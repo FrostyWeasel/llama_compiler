@@ -3,6 +3,7 @@
 
 #include "scope.hpp"
 #include "enums.hpp"
+#include "type_variable.hpp"
 #include <string>
 
 //Forward Declaration

@@ -17,6 +17,11 @@ public:
 
     virtual void print(std::ostream &out) const override {
         out << "BinOp(";
+        out << "Type: ";
+        if(type_variable != nullptr)
+            type_variable->print(out);
+        else
+            out << "null ";
         out << "lval: ";
         if(lval != nullptr)
             lval->print(out);
