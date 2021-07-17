@@ -25,22 +25,24 @@ public:
     }
 
     virtual void print(std::ostream& out) const override{
-        out << " " << id;
-        if(par_list != nullptr)
-            par_list->print(out);
-        else
-            out << "null ";
-        out << " :";
+        out << "FunctionDef(";
+        out << " Id: " << id;
+        out << " Type: ";
         if(type_variable != nullptr)
             type_variable->print(out);
         else
             out << "null ";
-
-        out << " = ";
+        out << ", Par_list: ";
+        if(par_list != nullptr)
+            par_list->print(out);
+        else
+            out << "null ";
+        out << ", Expr: ";
         if(expr != nullptr)
             expr->print(out);
         else
             out << "null ";
+        out << ") ";
     }
 
     virtual void add_to_symbol_table() override {

@@ -18,11 +18,19 @@ public:
     ~FunctionCall()  {}
 
     virtual void print(std::ostream &out) const override{
-        out << " " << id;
+        out << "FunctionCall(";
+        out << " Id: " << id << ", ";
+        out << "Type: ";
+        if(type_variable != nullptr)
+            type_variable->print(out);
+        else
+            out << "null ";
+        out << "Expr_list: ";
         if(expr_list != nullptr)
             expr_list->print(out);
         else
             out << "null ";
+        out << ") ";
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {

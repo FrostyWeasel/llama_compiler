@@ -211,7 +211,7 @@ void TypeVariable::print(std::ostream& out) const {
             out << " @" << id << ":" << *this->type;
             break;
         case TypeVariableTag::Bound:
-            out << " " << *this->type;
+            out << *this->type;
             break;
         default:
             std::cerr << "Unknown TypeVariableTag\n";

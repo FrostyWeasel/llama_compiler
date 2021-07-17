@@ -17,11 +17,14 @@ public:
     ~LetDef()  {}
   
     virtual void print(std::ostream &out) const override {
-        out << ((let_type == LetType::Rec) ? " rec" : " ");
+        out << "Let(";
+        out << "Type: " << ((let_type == LetType::Rec) ? "Rec" : "NonRec") << ", ";
+        out << "Def: ";
         if(def != nullptr)
             def->print(out);
         else
-            out << " null";
+            out << "null ";
+        out << ") ";
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {

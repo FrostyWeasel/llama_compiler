@@ -55,7 +55,6 @@ public:
         break;
       case BlockType::LetDef:
         for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
-          out << "let";
           (*element_it)->print(out);
           out << "\n";
         }

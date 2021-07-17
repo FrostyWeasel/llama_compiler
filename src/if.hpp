@@ -25,21 +25,29 @@ public:
         delete else_expr;
     }
 
-    virtual void print(std::ostream &out) const override {
-        out << " if";
+virtual void print(std::ostream &out) const override {
+        out << "If(";
+        out << "Type: ";
+        if(type_variable != nullptr)
+            type_variable->print(out);
+        else
+            out << "null ";
+        out << "Condition: ";
         if(condition != nullptr)
             condition->print(out);
         else
-            out << " null";
-        out << " then";
+            out << "null ";
+        out << "If_Expr: ";
         if(if_expr != nullptr)
             if_expr->print(out);
         else
-            out << " null";
-        if(else_expr != nullptr){
-            out << " else";
+            out << "null ";
+        out << "Else_Expr: ";
+        if(else_expr != nullptr)
             else_expr->print(out);
-        }
+        else
+            out << "null ";
+        out << ") ";
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {

@@ -17,17 +17,18 @@ public:
     }
 
     virtual void print(std::ostream &out) const override {
-        out << "while ";
+        out << "While(";
+        out << "Condition: ";
         if(condition != nullptr)
             condition->print(out);
         else
-            out << " null";
-        out << " do";
+            out << "null ";
+        out << "Expr: ";
         if(expr != nullptr)
             expr->print(out);
         else
-            out << " null";
-        out << " done";
+            out << "null ";
+        out << ") ";
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {

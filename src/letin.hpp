@@ -17,15 +17,18 @@ public:
     }
 
     virtual void print(std::ostream &out) const override {
+        out << "LetIn(";
+        out << "LetDef: ";
         if(let_def != nullptr)
             let_def->print(out);
         else
             out << "null ";
-        out << " in";
+        out << "Expr: ";
         if(expr != nullptr)
             expr->print(out);
         else
             out << "null ";
+        out << ") ";
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {

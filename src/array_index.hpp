@@ -19,12 +19,14 @@ public:
     }
 
     virtual void print(std::ostream &out) const override{
-        out << " " << id << "[";
+        out << "ArrayIndex( ";
+        out << "Id: " << id << ", ";
+        out << "Expr_list: ";
         if(expr_list != nullptr)
             expr_list->print(out);
         else
             out << "null ";
-        out << "]";
+        out << ") ";
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {
