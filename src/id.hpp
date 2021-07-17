@@ -18,10 +18,10 @@ public:
     // std::string get_id() { return id; }
 
     virtual void print(std::ostream& out) const override{
-        out << "Id(" << id << ") ";
+        out << " " << id;
     }
 
-    virtual TypeVariable* infer() override {
+    virtual std::shared_ptr<TypeVariable> infer() override {
         auto id_entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
 
         return id_entry->get_type();

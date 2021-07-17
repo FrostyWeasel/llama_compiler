@@ -8,14 +8,12 @@
 
 class String : public Expr{
 public:
-    String(std::string* value): value(*value), Expr(new TypeVariable(TypeTag::Array, new TypeVariable(TypeTag::Char))) {  }
+    String(std::string* value): value(*value), Expr(new TypeVariable(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char))) {  }
     virtual void print(std::ostream& out) const override{
-        out << "String(";
-        out << " Value: " << value;
-        out << ") ";
+        out << value;
     }
 
-    virtual TypeVariable* infer() override { 
+    virtual std::shared_ptr<TypeVariable> infer() override { 
         return this->type_variable;
     }
 

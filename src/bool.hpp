@@ -8,10 +8,10 @@ public:
     Bool(bool value) : value(value), Expr(new TypeVariable(TypeTag::Bool)) {}
 
     virtual void print(std::ostream& out) const override{
-        out << "Bool(" << value << ") ";
+        out << value;
     }
 
-    virtual TypeVariable* infer() override { 
+    virtual std::shared_ptr<TypeVariable> infer() override { 
         return this->type_variable;
     }
     

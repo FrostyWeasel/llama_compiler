@@ -21,22 +21,82 @@ public:
   }
 
   virtual void print(std::ostream &out) const override{
-    out << "Block(";
-    for(T* element: list){
-      if(element != nullptr)
-        element->print(out);
+    int i = 0;
+
+    switch (this->block_type) {
+      case BlockType::Par:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+          // if(i < list.size() - 1)
+          //   out << "";
+          i++;
+        }
+        break;
+      case BlockType::Expr:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+          if(i < list.size() - 1)
+            out << " ";
+          i++;
+        }
+        break;
+      case BlockType::ExprComma:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+          if(i < list.size() - 1)
+            out << ", ";
+          i++;
+        }
+        break;
+      case BlockType::Def:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+        }
+        break;
+      case BlockType::LetDef:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          out << "let";
+          (*element_it)->print(out);
+          out << "\n";
+        }
+        break;
+      default:
+        std::cerr << "Uknown block type\n";
+        exit(1); //TODO: Error handling.
+        break;
     }
-    out << ") ";
   }
 
   virtual void append(T* element) { list.push_back(element); }
   virtual void insert(typename std::vector<T*>::const_iterator it, T* element) { list.insert(it, element); }
   virtual const typename std::vector<T*>::const_iterator begin() const { return list.cbegin(); }
 
-  virtual TypeVariable* infer() override {
-    TypeVariable* block_type = nullptr;
+  virtual unsigned int block_size() { return list.size(); }
 
-    //TODO: Do all cases
+  virtual void add_to_symbol_table() {
+    switch (this->block_type) {
+          case BlockType::Def:
+            for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+              if(*element_it != nullptr){
+                (*element_it)->add_to_symbol_table();
+              }
+              else {
+                std::cerr << "Nullptr in block list.\n";
+                exit(1); //TODO: Error handling
+              }
+            }
+            break;
+
+      default:
+          std::cerr << "Attempting to add non definitions to symbol table.\n";
+          exit(1); //TODO: Error handling
+      break;
+    }
+  }
+
+  virtual std::shared_ptr<TypeVariable> infer() override {
+    std::shared_ptr<TypeVariable> block_type = nullptr;
+
     switch (this->block_type) {
       case BlockType::Par:
         if(this->list.size() == 0) {
@@ -47,8 +107,8 @@ public:
           block_type = list[0]->infer();
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
-                TypeVariable* new_type = (*element_it)->infer();
-                block_type = new TypeVariable(TypeTag::Function, block_type, new_type);
+                std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
+                block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type);
               }
               else {
                 std::cerr << "Nullptr in block list.\n";
@@ -67,8 +127,8 @@ public:
           block_type = list[0]->infer();
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
-                TypeVariable* new_type = (*element_it)->infer();
-                block_type = new TypeVariable(TypeTag::Function, block_type, new_type);
+                std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
+                block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type);
               }
               else {
                 std::cerr << "Nullptr in block list.\n";
@@ -76,15 +136,25 @@ public:
               }
           }
         }
-      break;
+        break;
 
+      case BlockType::ExprComma:
+          for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+            if(*element_it != nullptr){
+              std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
+              st->add_constraint(new_type, std::make_shared<TypeVariable>(TypeTag::Int));
+            }
+            else {
+              std::cerr << "Nullptr in block list.\n";
+              exit(1); //TODO: Error handling
+            }
+        }
+      break;
       default:
-          for(T* element: list){
+          for(T* element: list) {
             if(element != nullptr)
               element->infer();
           }
-        // std::cerr << "Unknown block type.\n"; //TODO: Error Handling.
-        // exit(1);
         break;
     }
 

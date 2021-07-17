@@ -7,15 +7,15 @@
 class ParameterEntry: public SymbolEntry{
 public:
 
-    ParameterEntry(std::string id, EntryType entry_type, TypeVariable* type) : type(type),
+    ParameterEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type) : type(type),
         SymbolEntry(id, entry_type) { }
 
     ~ParameterEntry() { }
 
-    virtual TypeVariable* get_type() const override { return type; }
+    virtual std::shared_ptr<TypeVariable> get_type() const override { return type; }
 
 private:
-    TypeVariable* type;  
+    std::shared_ptr<TypeVariable> type;  
  
 };
 

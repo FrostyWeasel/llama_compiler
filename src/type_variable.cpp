@@ -30,26 +30,14 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1) {
     switch (type_tag) {
         case TypeTag::Reference:
             this->type = std::make_shared<RefType>(t1);
-            if(t1->is_bound()){
-                this->tag = TypeVariableTag::Bound;
-                this->id = 0;
-            }
-            else{
-                this->tag = TypeVariableTag::Free;
-                this->id = ++counter; 
-            }
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
             break;
         
         case TypeTag::Array:
-            this->type = std::make_shared<ArrayType>(t1);
-            if(t1->is_bound()){
-                this->tag = TypeVariableTag::Bound;
-                this->id = 0;
-            }
-            else{
-                this->tag = TypeVariableTag::Free;
-                this->id = ++counter; 
-            }
+            this->type = std::make_shared<ArrayType>(t1, DimType::AtLeast);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
             break;
 
         default:
@@ -63,14 +51,8 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariab
     switch (type_tag) {
         case TypeTag::Function:
             this->type = std::make_shared<FunctionType>(from_type, to_type);
-            if(from_type->is_bound() && to_type->is_bound()){
-                this->tag = TypeVariableTag::Bound;
-                this->id = 0;
-            }
-            else{
-                this->tag = TypeVariableTag::Free;
-                this->id = ++counter; 
-            }
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
             break;
 
         default:
@@ -80,18 +62,12 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariab
     }
 }
 
-TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1, int dim) {
+TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1, unsigned int dim) {
     switch (type_tag) {
         case TypeTag::Array:
-            this->type = std::make_shared<ArrayType>(t1, dim);
-            if(t1->is_bound()){
-                this->tag = TypeVariableTag::Bound;
-                this->id = 0;
-            }
-            else{
-                this->tag = TypeVariableTag::Free;
-                this->id = ++counter; 
-            }
+            this->type = std::make_shared<ArrayType>(t1, dim, DimType::Exact);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
             break;
 
         default:
@@ -101,34 +77,88 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1, int dim) {
     }
 }
 
-bool TypeVariable::contains(TypeVariable* type_variable) {
+TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1) {
+    switch (type_tag) {
+        case TypeTag::Reference:
+            this->type = std::make_shared<RefType>(t1);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            
+            break;
+        
+        case TypeTag::Array:
+            this->type = std::make_shared<ArrayType>(t1, DimType::AtLeast);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+            std::cerr << "Invalid TypeVariableTag for constractor taking one type variable\n";
+            exit(1);
+            break;
+    }
+}
+
+TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type) {
+    switch (type_tag) {
+        case TypeTag::Function:
+            this->type = std::make_shared<FunctionType>(from_type, to_type);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
+            exit(1);
+            break;
+    }
+}
+
+TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, unsigned int dim, DimType dim_type) {
+    switch (type_tag) {
+        case TypeTag::Array:
+            this->type = std::make_shared<ArrayType>(t1, dim, dim_type);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+
+            break;
+
+        default:
+            std::cerr << "Invalid TypeVariableTag for constractor taking one type variable\n";
+            exit(1);
+            break;
+    }
+}
+
+TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, DimType dim_type) {
+    switch (type_tag) {
+        case TypeTag::Array:
+            this->type = std::make_shared<ArrayType>(t1, dim_type);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+            std::cerr << "Invalid TypeVariableTag for constractor taking DimType\n";
+            exit(1);
+            break;
+    }
+}
+
+bool TypeVariable::contains(std::shared_ptr<TypeVariable> type_variable) {
     if (this->id == type_variable->id)
         return true;
     else 
         return this->type->contains(type_variable);
 }
 
-void TypeVariable::bind(TypeVariable* bound_type) {
-        switch (this->tag) {
-        case TypeVariableTag::Free:
-            //TODO: Remove from free list if i make one during error handling.
-            this->type = bound_type->type;
-            this->tag = bound_type->tag;
-            break;
+void TypeVariable::bind(std::shared_ptr<TypeVariable> bound_type) {
+    //TODO: Remove from free list if i make one during error handling.
+    this->type = bound_type->type;
+    this->tag = bound_type->tag;
+}
 
-        case TypeVariableTag::Bound:
-            std::cerr << "Attempting to bind already bound TypeVariable with Type: " << *type;
-            exit(1); //TODO: Error handling
-            break;
-        
-        default:
-            std::cerr << "Unkown TypeVariableTag\n";
-            exit(1); //TODO: Error handling
-            break;
-        }
-    }
-
-TypeVariable* TypeVariable::get_function_from_type() {
+std::shared_ptr<TypeVariable> TypeVariable::get_function_from_type() {
     if (this->type->get_tag() == TypeTag::Function) {
         auto function_ptr = std::dynamic_pointer_cast<FunctionType>(this->type);
         return function_ptr->get_from_type_variable();
@@ -139,7 +169,7 @@ TypeVariable* TypeVariable::get_function_from_type() {
     }
 }
 
-TypeVariable* TypeVariable::get_function_to_type() {
+std::shared_ptr<TypeVariable> TypeVariable::get_function_to_type() {
     if (this->type->get_tag() == TypeTag::Function) {
         auto function_ptr = std::dynamic_pointer_cast<FunctionType>(this->type);
         return function_ptr->get_to_type_variable();
@@ -150,7 +180,7 @@ TypeVariable* TypeVariable::get_function_to_type() {
     }
 }
 
-TypeVariable* TypeVariable::get_referenced_type() {
+std::shared_ptr<TypeVariable> TypeVariable::get_referenced_type() {
     if (this->type->get_tag() == TypeTag::Reference) {
         auto reference_ptr = std::dynamic_pointer_cast<RefType>(this->type);
         return reference_ptr->get_referenced_variable();
@@ -161,16 +191,27 @@ TypeVariable* TypeVariable::get_referenced_type() {
     }
 }
 
+std::shared_ptr<TypeVariable> TypeVariable::get_array_type() {
+    if (this->type->get_tag() == TypeTag::Array) {
+        auto array_ptr = std::dynamic_pointer_cast<ArrayType>(this->type);
+        return array_ptr->get_array_type();
+    }
+    else{
+        std::cerr << "Requesting get_array_type but type is not an array\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
 TypeTag TypeVariable::get_tag() { return type->get_tag(); }
 TypeVariableTag TypeVariable::get_variable_tag() { return this->tag; }
 
 void TypeVariable::print(std::ostream& out) const { 
     switch(tag){
         case TypeVariableTag::Free:
-            out << "@" << id << " " << *this->type;
+            out << " @" << id << ":" << *this->type;
             break;
         case TypeVariableTag::Bound:
-            out << "@" << id << " " << *this->type;
+            out << " " << *this->type;
             break;
         default:
             std::cerr << "Unknown TypeVariableTag\n";
@@ -181,4 +222,49 @@ void TypeVariable::print(std::ostream& out) const {
 
 bool TypeVariable::is_bound() {
     return this->tag == TypeVariableTag::Bound;
+}
+
+
+unsigned int TypeVariable::get_array_dim() {
+    if(this->type->get_tag() == TypeTag::Array) {
+        auto array_ptr = std::dynamic_pointer_cast<ArrayType>(this->type);
+        return array_ptr->get_dim();
+    }
+    else{
+        std::cerr << "Requesting get_array_dim but type is not an array\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+void TypeVariable::set_array_dim(unsigned int dim) {
+    if(this->type->get_tag() == TypeTag::Array) {
+        auto array_ptr = std::dynamic_pointer_cast<ArrayType>(this->type);
+        return array_ptr->set_dim(dim);
+    }
+    else{
+        std::cerr << "Requesting set_array_dim but type is not an array\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+DimType TypeVariable::get_array_dim_type() {
+    if(this->type->get_tag() == TypeTag::Array) {
+        auto array_ptr = std::dynamic_pointer_cast<ArrayType>(this->type);
+        return array_ptr->get_dim_type();
+    }
+    else{
+        std::cerr << "Requesting get_array_dim_type but type is not an array\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+void TypeVariable::set_array_dim_type(DimType dim_type) {
+    if(this->type->get_tag() == TypeTag::Array) {
+        auto array_ptr = std::dynamic_pointer_cast<ArrayType>(this->type);
+        return array_ptr->set_dim_type(dim_type);
+    }
+    else{
+        std::cerr << "Requesting set_array_dim_type but type is not an array\n";
+        exit(1); //TODO: Error handling
+    }
 }

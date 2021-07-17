@@ -4,6 +4,7 @@
 #include "expr.hpp"
 #include "type_variable.hpp"
 #include "enums.hpp"
+#include <iostream>
 
 class BinOp : public Expr {
 public:
@@ -16,122 +17,106 @@ public:
     }
 
     virtual void print(std::ostream &out) const override {
-        out << "BinOp(";
-        out << "Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << "lval: ";
         if(lval != nullptr)
             lval->print(out);
         else
-            out << "null ";
-        out << "rval: ";
-        if(rval != nullptr)
-            rval->print(out);
-        else
-            out << "null ";
-        out << "OpType: ";
+            out << " null";
+
         switch(op){
             case OpType::And:
-                out << "And ";
+                out << " &&";
                 break;
             case OpType::Assign:
-                out << "Assign ";
+                out << " :=";
                 break;
             case OpType::Concat:
-                out << "Concat ";
-                break;
-            case OpType::Dereference:
-                out << "Dereference ";
+                out << " ;";
                 break;
             case OpType::Divide:
-                out << "Divide ";
+                out << " /";
                 break;
             case OpType::Equals:
-                out << "Equals ";
+                out << " =";
                 break;
             case OpType::GreaterOrEqualThan:
-                out << "GreaterOrEqualThan ";
+                out << " >=";
                 break;
             case OpType::GreaterThan:
-                out << "GreaterThan ";
+                out << " >";
                 break;
             case OpType::LessOrEqualThan:
-                out << "LessOrEqualThan ";
+                out << " <=";
                 break;
             case OpType::LessThan:
-                out << "LessThan ";
+                out << " <";
                 break;
             case OpType::Minus:
-                out << "Minus ";
+                out << " -";
                 break;
             case OpType::Modulo:
-                out << "Modulo ";
+                out << " %";
                 break;
             case OpType::NatEquals:
-                out << "NatEquals ";
+                out << " ==";
                 break;
             case OpType::NatNotEquals:
-                out << "NatNotEquals ";
-                break;
-            case OpType::Not:
-                out << "Not ";
+                out << " !=";
                 break;
             case OpType::NotEquals:
-                out << "NotEquals ";
+                out << " <>";
                 break;
             case OpType::Or:
-                out << "Or ";
+                out << " ||";
                 break;
             case OpType::Plus:
-                out << "Plus ";
+                out << " +";
                 break;
             case OpType::Times:
-                out << "Times ";
+                out << " *";
                 break;
             default:
                 out << "ERROR: No known type "; //TODO: Error: Replace by error handling
                 exit(1);
                 break;
         }
-        out << ") ";
+        if(rval != nullptr)
+            rval->print(out);
+        else
+            out << "null ";
     }
 
-    virtual TypeVariable* infer() {
-        TypeVariable* lval_type = nullptr;
-        TypeVariable* rval_type = nullptr;
+    virtual std::shared_ptr<TypeVariable> infer() {
+        std::shared_ptr<TypeVariable> lval_type = nullptr;
+        std::shared_ptr<TypeVariable> rval_type = nullptr;
 
         switch(op) {
             case OpType::And:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 //TODO: This and all other expressions like this leaks the new TypeVariable to fix replace all TV creations with shared pointers (cant be only in contraints cause when the constraint is gone the type will be deleted!).
-                this->st->add_constraint(lval_type, new TypeVariable(TypeTag::Bool));
+                this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool));
                 break;
             case OpType::Assign:
                 lval_type = this->lval->infer(); //Type must be t ref
                 rval_type = this->rval->infer(); //Type must be t
-                this->type_variable = new TypeVariable(TypeTag::Unit);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Unit);
 
                 //TODO: Check that this is right
-                this->st->add_constraint(lval_type, new TypeVariable(TypeTag::Reference, rval_type));
+                this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Reference, rval_type));
                 break;
             case OpType::Concat:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Unknown);
+                this->type_variable = rval_type;
 
-                this->st->add_constraint(rval_type, this->type_variable);
                 break;
             case OpType::Divide:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(lval_type, this->type_variable);
                 this->st->add_constraint(rval_type, this->type_variable);
@@ -140,7 +125,7 @@ public:
                 //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
@@ -148,7 +133,7 @@ public:
                 //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
@@ -156,7 +141,7 @@ public:
                 //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
@@ -164,7 +149,7 @@ public:
                 //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
@@ -172,14 +157,14 @@ public:
                 //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::Minus:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(lval_type, this->type_variable);
                 this->st->add_constraint(rval_type, this->type_variable);
@@ -187,7 +172,7 @@ public:
             case OpType::Modulo:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(lval_type, this->type_variable);
                 this->st->add_constraint(rval_type, this->type_variable);
@@ -196,7 +181,7 @@ public:
                 //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
@@ -204,7 +189,7 @@ public:
                 //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
@@ -212,22 +197,22 @@ public:
                 //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::Or:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
-                this->st->add_constraint(lval_type, new TypeVariable(TypeTag::Bool));
+                this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool));
                 break;
             case OpType::Plus:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(lval_type, this->type_variable);
                 this->st->add_constraint(rval_type, this->type_variable);  
@@ -235,7 +220,7 @@ public:
             case OpType::Times:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(lval_type, this->type_variable);
                 this->st->add_constraint(rval_type, this->type_variable); 

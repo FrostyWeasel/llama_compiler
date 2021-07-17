@@ -10,25 +10,21 @@
 
 class Par : public AST{
 public:
-    Par(std::string* id): id(*id), type_variable(new TypeVariable()), AST(NodeType::Par) {}
-    Par(std::string* id, TypeVariable* type_variable): id(*id), type_variable(type_variable), AST(NodeType::Par) {  }
+    Par(std::string* id): id(*id), type_variable(std::make_shared<TypeVariable>()), AST(NodeType::Par) {}
+    Par(std::string* id, std::shared_ptr<TypeVariable> type_variable): id(*id), type_variable(type_variable), AST(NodeType::Par) {  }
 
-    ~Par() {
-        delete type_variable;
-    }
+    ~Par() {}
 
     virtual void print(std::ostream &out) const override { 
-        out << "Par(";
-        out << "Id: " << id << " ";
-        out << "TypeVariable: ";
+        out << "(" << id << " :";
         if(type_variable != nullptr)
             type_variable->print(out);
         else
-            out << "null ";
-        out << ") ";
+            out << " null";
+        out << ")";
     }
 
-    virtual TypeVariable* infer() override {
+    virtual std::shared_ptr<TypeVariable> infer() override {
         ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
 
         st->insert_entry(entry);
@@ -36,11 +32,11 @@ public:
         return this->type_variable;
     }
 
-    virtual void set_type(TypeVariable* type_variable) { this->type_variable = type_variable; }
+    virtual void set_type(std::shared_ptr<TypeVariable> type_variable) { this->type_variable = type_variable; }
 
 private:
     std::string id;
-    TypeVariable* type_variable;
+    std::shared_ptr<TypeVariable> type_variable;
 };
 
 #endif

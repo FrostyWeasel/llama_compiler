@@ -35,7 +35,7 @@ public:
     void            insert_entry   (SymbolEntry* entry);
     SymbolEntry*    lookup_entry   (std::string id, LookupType lookup_type);
 
-    inline void add_constraint (TypeVariable* t1, TypeVariable* t2) {
+    inline void add_constraint (std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2) {
         contraints.push_back(Constraint(t1, t2));
     }
 
@@ -47,14 +47,14 @@ private:
     Scope*          current_scope;
 
     std::vector<Constraint> contraints;
-    std::vector<std::pair<TypeVariable*, TypeVariable*>> bound_types;
-    std::unordered_map<TypeVariable*, TypeVariable*> substitutions;
+    std::vector<std::pair<std::shared_ptr<TypeVariable>, std::shared_ptr<TypeVariable>>> bound_types;
+    std::unordered_map<std::shared_ptr<TypeVariable>, std::shared_ptr<TypeVariable>> substitutions;
 
     unsigned int PJW_hash(std::string id);
 
-    void substitute(TypeVariable* type_variable, TypeVariable* type);
-    void bind(TypeVariable* type_variable, TypeVariable* type);
-    TypeVariable* find_substitute(TypeVariable* type);
+    void substitute(std::shared_ptr<TypeVariable> type_variable, std::shared_ptr<TypeVariable> type);
+    void bind(std::shared_ptr<TypeVariable> type_variable, std::shared_ptr<TypeVariable> type);
+    std::shared_ptr<TypeVariable> find_substitute(std::shared_ptr<TypeVariable> type);
 
 };
 

@@ -2,125 +2,67 @@
 #define __UNOP_HPP__
 
 #include "expr.hpp"
-#include "includes.hpp"
-
+#include "type_variable.hpp"
+#include "enums.hpp"
+#include <iostream>
+#include <memory>
 
 class UnOp : public Expr{
 public:
     UnOp(Expr* expr, OpType op): expr(expr), op(op) {}
 
-    ~UnOp() {
-        delete expr;
-    }
+    ~UnOp()  {}
 
     virtual void print(std::ostream &out) const override {
-        out << "UnOp(";
-        out << "Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << "Expr: ";
-        if(expr != nullptr)
-            expr->print(out);
-        else
-            out << "null ";
-        out << "OpType: ";
         switch(op){
-            case OpType::And:
-                out << "And ";
-                break;
-            case OpType::Assign:
-                out << "Assign ";
-                break;
-            case OpType::Concat:
-                out << "Concat ";
-                break;
             case OpType::Dereference:
-                out << "Dereference ";
-                break;
-            case OpType::Divide:
-                out << "Divide ";
-                break;
-            case OpType::Equals:
-                out << "Equals ";
-                break;
-            case OpType::GreaterOrEqualThan:
-                out << "GreaterOrEqualThan ";
-                break;
-            case OpType::GreaterThan:
-                out << "GreaterThan ";
-                break;
-            case OpType::LessOrEqualThan:
-                out << "LessOrEqualThan ";
-                break;
-            case OpType::LessThan:
-                out << "LessThan ";
+                out << " !";
                 break;
             case OpType::Minus:
-                out << "Minus ";
-                break;
-            case OpType::Modulo:
-                out << "Modulo ";
-                break;
-            case OpType::NatEquals:
-                out << "NatEquals ";
-                break;
-            case OpType::NatNotEquals:
-                out << "NatNotEquals ";
+                out << " -";
                 break;
             case OpType::Not:
-                out << "Not ";
-                break;
-            case OpType::NotEquals:
-                out << "NotEquals ";
-                break;
-            case OpType::Or:
-                out << "Or ";
+                out << " not";
                 break;
             case OpType::Plus:
-                out << "Plus ";
-                break;
-            case OpType::Times:
-                out << "Times ";
+                out << " +";
                 break;
             default:
-                out << "ERROR: No known op "; //TODO: Error: Replace by error handling
+                std::cerr << "ERROR: No known op "; //TODO: Error: Replace by error handling
                 exit(1);
                 break;
         }
-        out << ") ";
+        if(expr != nullptr)
+            expr->print(out);
     }
 
-    virtual TypeVariable* infer() {
-        TypeVariable* expr_type = nullptr;
+    virtual std::shared_ptr<TypeVariable> infer() {
+        std::shared_ptr<TypeVariable> expr_type = nullptr;
 
         switch(op) {
             case OpType::Not:
                 expr_type = this->expr->infer();
-                this->type_variable = new TypeVariable(TypeTag::Bool);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(expr_type, this->type_variable);
                 break;
             case OpType::Plus:
                 expr_type = this->expr->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(expr_type, this->type_variable);
                 break;
             case OpType::Minus:
                 expr_type = this->expr->infer();
-                this->type_variable = new TypeVariable(TypeTag::Int);
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
                 this->st->add_constraint(expr_type, this->type_variable);
                 break;
             case OpType::Dereference:{
-                //TODO: Check that this is correct
-
                 expr_type = this->expr->infer(); //Type must be t ref
-                this->type_variable = new TypeVariable(); //Type must be t
+                this->type_variable = std::make_shared<TypeVariable>(); //Type must be t
 
-                this->st->add_constraint(expr_type, new TypeVariable(TypeTag::Reference, this->type_variable));
+                this->st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Reference, this->type_variable));
                 break;
             }
             default:

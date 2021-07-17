@@ -8,18 +8,16 @@
 class Expr : public AST{
 public:  
     Expr() : AST(NodeType::Expr) {}
-    Expr(TypeVariable* type_variable): type_variable(type_variable), AST(NodeType::Expr) { }
+    Expr(TypeVariable* type_variable): type_variable(std::make_shared<TypeVariable>(*type_variable)), AST(NodeType::Expr) { }
 
-    virtual ~Expr(){
-        delete type_variable;
-    }
+    virtual ~Expr() {}
 
     virtual void print(std::ostream &out) const override = 0;
 
-    virtual void set_type(TypeVariable* type_variable) { this->type_variable = type_variable; }
+    virtual void set_type(std::shared_ptr<TypeVariable> type_variable) { this->type_variable = type_variable; }
 
 protected:
-    TypeVariable* type_variable;
+    std::shared_ptr<TypeVariable> type_variable;
 };
 
 #endif

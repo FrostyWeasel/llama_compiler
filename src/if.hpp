@@ -5,6 +5,15 @@
 #include "enums.hpp"
 #include "type_variable.hpp"
 
+//TODO:
+/*
+Η αποτίμησή της γίνεται ξεκινώντας από την αποτίμηση της e. Αν η τιμή
+αυτής είναι true, τότε αποτιμάται η e1 και η τιμή αυτής είναι το αποτέλεσμα. Διαφορετικά, αποτιμάται
+η e2 και η τιμή αυτής είναι το αποτέλεσμα. Σε κάθε περίπτωση, αποτιμάται μόνο ένα από τα τελούμενα
+e1 και e2.
+Το σκέλος else e2 μπορεί να παραλειφθεί, στην περίπτωση που η έκφραση e1 είναι τύπου unit.
+Στην περίπτωση αυτή αν η συνθήκη είναι ψευδής δε γίνεται τίποτα.
+*/
 class If : public Expr{
 public:
     If(Expr* condition, Expr* if_expr): condition(condition), if_expr(if_expr), else_expr(nullptr), Expr(new TypeVariable(TypeTag::Unit)) {}
@@ -17,31 +26,23 @@ public:
     }
 
     virtual void print(std::ostream &out) const override {
-        out << "If(";
-        out << "Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << "Condition: ";
+        out << " if";
         if(condition != nullptr)
             condition->print(out);
         else
-            out << "null ";
-        out << "If_Expr: ";
+            out << " null";
+        out << " then";
         if(if_expr != nullptr)
             if_expr->print(out);
         else
-            out << "null ";
-        out << "Else_Expr: ";
-        if(else_expr != nullptr)
+            out << " null";
+        if(else_expr != nullptr){
+            out << " else";
             else_expr->print(out);
-        else
-            out << "null ";
-        out << ") ";
+        }
     }
 
-    virtual TypeVariable* infer() override {
+    virtual std::shared_ptr<TypeVariable> infer() override {
         auto if_expr_type = this->if_expr->infer();
         
         if (else_expr != nullptr) {
@@ -50,12 +51,12 @@ public:
             st->add_constraint(if_expr_type, else_expr_type);
         }
         else {
-            st->add_constraint(if_expr_type, new TypeVariable(TypeTag::Unit));
+            st->add_constraint(if_expr_type, std::make_shared<TypeVariable>(TypeTag::Unit));
         }
 
         auto condition_type = this->condition->infer();
 
-        st->add_constraint(condition_type, new TypeVariable(TypeTag::Bool));
+        st->add_constraint(condition_type, std::make_shared<TypeVariable>(TypeTag::Bool));
         st->add_constraint(this->type_variable, if_expr_type);
 
         return if_expr_type;

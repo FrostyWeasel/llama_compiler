@@ -14,29 +14,27 @@ class LetDef : public AST{
 public:    
     LetDef(Block<Def>* def, LetType let_type): def(def), let_type(let_type) {}
 
-    ~LetDef() {
-        delete def;
-    }
+    ~LetDef()  {}
   
     virtual void print(std::ostream &out) const override {
-        out << "Let(";
-        out << "Type: " << ((let_type == LetType::Rec) ? "Rec" : "NonRec") << ", ";
-        out << "Def: ";
+        out << ((let_type == LetType::Rec) ? " rec" : " ");
         if(def != nullptr)
             def->print(out);
         else
-            out << "null ";
-        out << ") ";
+            out << " null";
     }
 
-    virtual TypeVariable* infer() override {
+    virtual std::shared_ptr<TypeVariable> infer() override {
         AST::st->scope_open();
 
         if(let_type == LetType::NoRec)
             AST::st->scope_hide(true);
         
-        //TODO:Is the current scope always the same as the one just hidden upon return?
-        TypeVariable* type = def->infer();
+        //The definitions are first added to the symboltable and then type inference and semantic analysis happens
+        //This is to allow mutually recursive definitions ex.let rec even n = if n=0 then true else odd (n-1) and odd n = if n=0 then false else even (n-1)
+        this->def->add_to_symbol_table();
+
+        std::shared_ptr<TypeVariable> type = def->infer();
 
         if(let_type == LetType::NoRec)
             AST::st->scope_hide(false);

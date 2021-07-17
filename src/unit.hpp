@@ -11,10 +11,10 @@ public:
     Unit() : Expr(new TypeVariable(TypeTag::Unit)) { }
 
     virtual void print(std::ostream& out) const override{
-        out << "Unit";
+        out << "()";
     }  
 
-    virtual TypeVariable* infer() override { 
+    virtual std::shared_ptr<TypeVariable> infer() override { 
         return this->type_variable;
     }  
 

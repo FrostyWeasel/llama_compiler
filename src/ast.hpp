@@ -15,16 +15,24 @@ public:
     AST(NodeType node_type) : node_type(node_type) { }
     virtual ~AST() { }
     virtual void print(std::ostream& out) const = 0;
-    virtual TypeVariable* infer() { };
+    virtual std::shared_ptr<TypeVariable> infer() { };
     virtual void sem() { };
 
     void unify() { st->unify(); }
+    void add_library_functions();
+    void close_library_function_scope();
 
     virtual NodeType get_node_type() { return node_type; }
+
+    virtual void add_to_symbol_table() { }
+
 
 protected:
     static SymbolTable* st;
     NodeType node_type;
+
+private:
+    static unsigned int tab_level;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){

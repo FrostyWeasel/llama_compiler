@@ -17,21 +17,18 @@ public:
     }
 
     virtual void print(std::ostream &out) const override {
-        out << "LetIn(";
-        out << "LetDef: ";
         if(let_def != nullptr)
             let_def->print(out);
         else
             out << "null ";
-        out << "Expr: ";
+        out << " in";
         if(expr != nullptr)
             expr->print(out);
         else
             out << "null ";
-        out << ") ";
     }
 
-    virtual TypeVariable* infer() override {
+    virtual std::shared_ptr<TypeVariable> infer() override {
         //Opens but does not close scope.
         //* Let def type thrown away.
         this->let_def->infer(); 

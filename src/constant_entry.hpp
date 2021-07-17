@@ -8,15 +8,15 @@
 class ConstantEntry: public SymbolEntry {
 public:
 
-   ConstantEntry(std::string id, EntryType entry_type, TypeVariable* type) : type(type),
+   ConstantEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type) : type(type),
       SymbolEntry(id, entry_type) { }
 
    ~ConstantEntry() { }
 
-   virtual TypeVariable* get_type() const override { return this->type; }
+   virtual std::shared_ptr<TypeVariable> get_type() const override { return this->type; }
 
 private:
-   TypeVariable* type;                  
+   std::shared_ptr<TypeVariable> type;                  
    // T*            value;                
 };
 

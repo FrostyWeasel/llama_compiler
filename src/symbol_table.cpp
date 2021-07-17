@@ -121,7 +121,6 @@ unsigned int SymbolTable::PJW_hash(std::string id) {
     return h;
 }
 
-//TODO: Fix let rec f x = f (x+1)
 void SymbolTable::unify() {
     bool matched_rule;
 
@@ -131,37 +130,20 @@ void SymbolTable::unify() {
         Constraint constraint = this->contraints[this->contraints.size()-1]; 
         this->contraints.pop_back();
 
-        TypeVariable* t1 = constraint.get_t1();
-        TypeVariable* t2 = constraint.get_t2();
+        std::shared_ptr<TypeVariable> t1 = constraint.get_t1();
+        std::shared_ptr<TypeVariable> t2 = constraint.get_t2();
 
         t1 = this->find_substitute(t1);
         t2 = this->find_substitute(t2);
 
-        //Check that they are not functions
-        if((((t1->get_variable_tag() == TypeVariableTag::Bound) && (t2->get_variable_tag() == TypeVariableTag::Bound)) && (t1->get_tag() == t2->get_tag())) || (t1 == t2)) {
-            matched_rule = true;
-        }
-
-        if(!matched_rule && (t1->get_tag() == TypeTag::Unknown && !t2->contains(t1))) {
-            matched_rule = true;
-            this->substitute(t1, t2);
-            this->bind(t1, t2);
-        }
-
-        if(!matched_rule && (t2->get_tag() == TypeTag::Unknown && !t1->contains(t2))) {
-            matched_rule = true;
-            this->substitute(t2, t1);
-            this->bind(t2, t1);
-        }
-
         if(!matched_rule && ((t1->get_tag() == TypeTag::Function) && (t2->get_tag() == TypeTag::Function))) {
             matched_rule = true;
 
-            TypeVariable* from_type_t1 = t1->get_function_from_type();
-            TypeVariable* to_type_t1 = t1->get_function_to_type();
+            std::shared_ptr<TypeVariable> from_type_t1 = t1->get_function_from_type();
+            std::shared_ptr<TypeVariable> to_type_t1 = t1->get_function_to_type();
 
-            TypeVariable* from_type_t2 = t2->get_function_from_type();
-            TypeVariable* to_type_t2 = t2->get_function_to_type();
+            std::shared_ptr<TypeVariable> from_type_t2 = t2->get_function_from_type();
+            std::shared_ptr<TypeVariable> to_type_t2 = t2->get_function_to_type();
 
             this->add_constraint(from_type_t1, from_type_t2);
             this->add_constraint(to_type_t1, to_type_t2);
@@ -170,10 +152,92 @@ void SymbolTable::unify() {
       if(!matched_rule && ((t1->get_tag() == TypeTag::Reference) && (t2->get_tag() == TypeTag::Reference))) {
             matched_rule = true;
 
-            TypeVariable* referenced_type_t1 = t1->get_referenced_type();
-            TypeVariable* referenced_type_t2 = t2->get_referenced_type();
+            std::shared_ptr<TypeVariable> referenced_type_t1 = t1->get_referenced_type();
+            std::shared_ptr<TypeVariable> referenced_type_t2 = t2->get_referenced_type();
 
             this->add_constraint(referenced_type_t1, referenced_type_t2);
+        }
+
+      if(!matched_rule && ((t1->get_tag() == TypeTag::Array) && (t2->get_tag() == TypeTag::Array))) {
+            matched_rule = true;
+
+            DimType dim_type_t1 = t1->get_array_dim_type();
+            DimType dim_type_t2 = t2->get_array_dim_type();
+
+            unsigned int dim_t1 = t1->get_array_dim();
+            unsigned int dim_t2 = t2->get_array_dim();
+
+            if(dim_type_t1 == dim_type_t2) {
+                //t1 and t2 are exact
+                if(dim_type_t1 == DimType::Exact){
+                    if(dim_t1 != dim_t2) {
+                        std::cerr << "Failed to unify : " << *t1 << "and " << *t2 << '\n'; 
+                        exit(1); //TODO: Handle errors.
+                    }
+                }
+                else {
+                    //t1 and t2 are AtLeast
+                    if(dim_t1 > dim_t2){
+                        t1->set_array_dim(dim_t1);
+                        t2->set_array_dim(dim_t1);
+                    }
+                    else {
+                        t1->set_array_dim(dim_t2);
+                        t2->set_array_dim(dim_t2);
+                    }
+                }
+            }
+            else {
+                //t1 is exact and t2 is atleast
+                if(dim_type_t1 == DimType::Exact) {
+                    if(dim_t1 >= dim_t2) {
+                        t1->set_array_dim(dim_t1);
+                        t2->set_array_dim(dim_t1);
+                        t1->set_array_dim_type(DimType::Exact);
+                        t2->set_array_dim_type(DimType::Exact);
+                    }
+                    else {
+                        std::cerr << "Failed to unify arrays : " << *t1 << "and " << *t2 << '\n'; 
+                        exit(1); //TODO: Handle errors.
+                    }
+                }
+                //t2 is exact and t1 is atleast
+                else {
+                  if(dim_t2 >= dim_t1) {
+                        t1->set_array_dim(dim_t2);
+                        t2->set_array_dim(dim_t2);
+                        t1->set_array_dim_type(DimType::Exact);
+                        t2->set_array_dim_type(DimType::Exact);
+                    }
+                    else {
+                        std::cerr << "Failed to unify arrays : " << *t1 << "and " << *t2 << '\n'; 
+                        exit(1); //TODO: Handle errors.
+                    }
+                }
+            }
+
+            std::shared_ptr<TypeVariable> array_type_t1 = t1->get_array_type();
+            std::shared_ptr<TypeVariable> array_type_t2 = t2->get_array_type();
+
+            this->add_constraint(array_type_t1, array_type_t2);
+        }
+
+        if(!matched_rule && ((t1->get_tag() == TypeTag::Unknown))) {
+            matched_rule = true;
+            if(!t2->contains(t1))
+                this->substitute(t1, t2);
+            this->bind(t1, t2);
+        }
+
+        if(!matched_rule && ((t2->get_tag() == TypeTag::Unknown))) {
+            matched_rule = true;
+            if(!t1->contains(t2))
+                this->substitute(t2, t1);
+            this->bind(t2, t1);
+        }
+
+        if(!matched_rule && ((((t1->get_tag() != TypeTag::Unknown) && (t2->get_tag() != TypeTag::Unknown)) && (t1->get_tag() == t2->get_tag())) || (t1 == t2))) {
+            matched_rule = true;
         }
 
         if(!matched_rule){
@@ -188,12 +252,12 @@ void SymbolTable::unify() {
     }
 }
 
-void SymbolTable::substitute(TypeVariable* type_variable, TypeVariable* type) {
+void SymbolTable::substitute(std::shared_ptr<TypeVariable> type_variable, std::shared_ptr<TypeVariable> type) {
     this->substitutions.insert({type_variable, type});
 }
 
 
-TypeVariable* SymbolTable::find_substitute(TypeVariable* type) {
+std::shared_ptr<TypeVariable> SymbolTable::find_substitute(std::shared_ptr<TypeVariable> type) {
     while (this->substitutions.find(type) != this->substitutions.end()) {
         type = this->substitutions.find(type)->second;
     }
@@ -201,7 +265,7 @@ TypeVariable* SymbolTable::find_substitute(TypeVariable* type) {
     return type;
 }
 
-void SymbolTable::bind(TypeVariable* type_variable, TypeVariable* type) {
+void SymbolTable::bind(std::shared_ptr<TypeVariable> type_variable, std::shared_ptr<TypeVariable> type) {
     //If t1->t2 and now we bind t2->t3 then make sure that you make t1->t3 so that when t3 gets a value both t2 and t1 copy it.
     for(auto bound_pair = this->bound_types.begin(); bound_pair != this->bound_types.end(); bound_pair++){
         if(bound_pair->second == type_variable)
@@ -209,5 +273,5 @@ void SymbolTable::bind(TypeVariable* type_variable, TypeVariable* type) {
     }
 
     //Add new binding type_variable->type.
-    bound_types.push_back(std::pair<TypeVariable*, TypeVariable*>(type_variable, type));
+    bound_types.push_back(std::pair<std::shared_ptr<TypeVariable>, std::shared_ptr<TypeVariable>>(type_variable, type));
 }

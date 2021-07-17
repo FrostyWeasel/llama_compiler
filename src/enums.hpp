@@ -26,7 +26,8 @@ enum class BlockType    {
                             LetDef,
                             Def,
                             Par,
-                            Expr
+                            Expr,
+                            ExprComma
                         };
 
 enum class NodeType     {
@@ -35,5 +36,9 @@ enum class NodeType     {
                             Def
                         };   
 
+enum class DimType      {
+                            Exact, //Array has exactly this dimension
+                            AtLeast //Array has at least this dimension
+                        };
 
 #endif

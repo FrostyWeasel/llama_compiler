@@ -17,7 +17,7 @@ class FunctionEntry;
 class FunctionDef : public Def {
 public:
     FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr) {}
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, TypeVariable* type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr) {}
 
     ~FunctionDef() {
         delete expr;
@@ -25,45 +25,51 @@ public:
     }
 
     virtual void print(std::ostream& out) const override{
-        out << "FunctionDef(";
-        out << " Id: " << id;
-        out << " Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << ", Par_list: ";
+        out << " " << id;
         if(par_list != nullptr)
             par_list->print(out);
         else
             out << "null ";
-        out << ", Expr: ";
+        out << " :";
+        if(type_variable != nullptr)
+            type_variable->print(out);
+        else
+            out << "null ";
+
+        out << " = ";
         if(expr != nullptr)
             expr->print(out);
         else
             out << "null ";
-        out << ") ";
     }
 
-    virtual TypeVariable* infer() override {
-        FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, nullptr, this->type_variable);
+    virtual void add_to_symbol_table() override {
+        FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, std::make_shared<TypeVariable>(), this->type_variable);
+        
+        st->insert_entry(entry);
 
-        this->st->insert_entry(entry);
+        this->entry = entry;
+    }
+
+    virtual std::shared_ptr<TypeVariable> infer() override {
+        FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
 
         //Function scope includes parameters and body
-        this->st->scope_open(); 
+        st->scope_open(); 
 
-        TypeVariable* from_type = this->par_list->infer();
-        entry->set_from_type(from_type);
+        std::shared_ptr<TypeVariable> from_type = this->par_list->infer();
 
-        TypeVariable* to_type = this->expr->infer();
+        //Function from type must be the same as the type of its parameter list.
+        st->add_constraint(func_entry->get_from_type(), from_type);
+
+        std::shared_ptr<TypeVariable> to_type = this->expr->infer();
 
         //TODO:Sem to type cannot be a function 
 
         //Function return type must be the same as its body expr type.
-        this->st->add_constraint(this->type_variable, to_type);
+        st->add_constraint(this->type_variable, to_type);
 
-        this->st->scope_close();
+        st->scope_close();
 
         return this->type_variable;
     }

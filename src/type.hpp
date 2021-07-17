@@ -21,19 +21,19 @@ public:
     virtual void print(std::ostream& out) const { 
         switch(tag){
             case TypeTag::Bool:
-                out << "bool";
+                out << " bool";
                 break;
             case TypeTag::Char:
-                out << "char";
+                out << " char";
                 break;
             case TypeTag::Int:
-                out << "int";
+                out << " int";
                 break;
             case TypeTag::Unit:
-                out << "unit";
+                out << " unit";
                 break;
             case TypeTag::Unknown:
-                out << "unknown";
+                out << " unknown";
                 break;
             case TypeTag::Array:
                 this->print(out);
@@ -52,7 +52,7 @@ public:
         out << " ";
     }
 
-    virtual bool contains(TypeVariable* type_variable) {
+    virtual bool contains(std::shared_ptr<TypeVariable> type_variable) {
         return false;
     }
 

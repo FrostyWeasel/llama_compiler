@@ -2,23 +2,38 @@
 #define __DIM_HPP__
 
 #include "expr.hpp"
-#include "includes.hpp"
+#include "variable_entry.hpp"
+#include "type_variable.hpp"
+#include <iostream>
+#include <memory>
+#include <string>
 
-
+//TODO: Sem check that array exists and that the dimension is less than the dimension of the dim value
+//TODO: Sem Array could be a VariableEntry or a Par.
 class Dim : public Expr{
 public:
     Dim(std::string* id): id(*id), dimension(1) {}
-    Dim(std::string* id, int dimension): id(*id), dimension(dimension) {}
+    Dim(std::string* id, unsigned int dimension): id(*id), dimension(dimension) {}
 
     virtual void print(std::ostream &out) const override {
-        out << "Dim(";
-        out << "Id: " << id << ", Dimension: " << dimension << ") ";
+        out << " dim " << dimension << " " << id;
+    }
+
+    virtual std::shared_ptr<TypeVariable> infer() override {
+        this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
+
+        SymbolEntry* entry = st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES);
+
+        st->add_constraint(entry->get_type(), std::make_shared<TypeVariable>(TypeTag::Array,
+            std::make_shared<TypeVariable>(TypeTag::Unknown), this->dimension, DimType::AtLeast));
+
+        return this->type_variable;
     }
 
 
 private:
     std::string id;
-    int dimension;
+    unsigned int dimension;
 
 };
 

@@ -10,10 +10,10 @@ class Char : public Expr{
 public:
     Char(char value): value(value), Expr(new TypeVariable(TypeTag::Char)) { }
     virtual void print(std::ostream& out) const override {
-        out << "Char(" << value << ") ";
+        out << value;
     }
 
-    virtual TypeVariable* infer() override { 
+    virtual std::shared_ptr<TypeVariable> infer() override { 
         return this->type_variable;
     }
 

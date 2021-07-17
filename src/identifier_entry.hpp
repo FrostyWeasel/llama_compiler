@@ -9,15 +9,15 @@
 class IdentifierEntry: public SymbolEntry {
 public:
 
-    IdentifierEntry(std::string id, EntryType entry_type, TypeVariable* type) : type(type),
+    IdentifierEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type) : type(type),
         SymbolEntry(id, entry_type) { }
 
     ~IdentifierEntry() { }
 
-    virtual TypeVariable* get_type() const override { return this->type; }
+    virtual std::shared_ptr<TypeVariable> get_type() const override { return this->type; }
 
 private:
-    TypeVariable* type;
+    std::shared_ptr<TypeVariable> type;
 
 };
 
