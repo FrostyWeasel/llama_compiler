@@ -78,13 +78,14 @@ public:
         FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
         auto to_type = func_entry->get_to_type();
 
-        if(to_type->get_tag() == TypeTag::Function) {
-            std::cerr << "Function return type cannot be a function";
-            exit(1); //TODO: Error handling
-        }
-
         this->par_list->sem();
         this->expr->sem();
+
+        if((sa->is_same_tag(to_type, TypeTag::Function))) {
+            
+            std::cerr << "Function return type can not be of type function\n" << "offending type is: " << *to_type;
+            exit(1); //TODO: Error handling.
+        }
     }
 
 

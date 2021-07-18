@@ -35,6 +35,27 @@ public:
     virtual void set_type(std::shared_ptr<TypeVariable> type_variable) { this->type_variable = type_variable; }
     virtual std::shared_ptr<TypeVariable> get_type() { return this->type_variable; }
 
+    virtual void sem() override {
+        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
+
+        st->insert_entry(entry);
+
+        switch(this->type_variable->get_tag()) {
+            case TypeTag::Function : {
+                auto to_type = this->type_variable->get_function_to_type();
+                if((sa->is_same_tag(to_type, TypeTag::Function))) {
+                    //TODO: This prints recursively figure out why: let f g x = g x ; g x x
+                    // std::cerr << "Function return type can not be of type function\n" << "offending type is: " << *to_type;
+                    exit(1); //TODO: Error handling.
+                }
+            }
+            break;
+            default:
+
+            break;
+        }
+    }
+
 private:
     std::string id;
     std::shared_ptr<TypeVariable> type_variable;

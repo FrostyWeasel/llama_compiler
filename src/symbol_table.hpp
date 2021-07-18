@@ -30,6 +30,7 @@ public:
     void        scope_close   ();
     void        scope_hide    (Scope* scope, bool flag);
     void        scope_hide    (bool flag);
+    void        close_all_program_scopes();
 
 
     void            insert_entry   (SymbolEntry* entry);

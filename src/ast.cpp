@@ -12,6 +12,10 @@ void AST::close_library_function_scope() {
     st->scope_close();
 }
 
+void AST::close_all_program_scopes() {
+    st->close_all_program_scopes();
+}
+
 void AST::add_library_functions() {
     std::shared_ptr<TypeVariable> from_type = nullptr;
     std::shared_ptr<TypeVariable> to_type = nullptr;

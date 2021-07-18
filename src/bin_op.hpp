@@ -109,7 +109,9 @@ public:
             case OpType::Concat:
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
-                this->type_variable = rval_type;
+                this->type_variable = std::make_shared<TypeVariable>(TypeTag::Unknown);
+
+                this->st->add_constraint(rval_type, this->type_variable);
 
                 break;
             case OpType::Divide:

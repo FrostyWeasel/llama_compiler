@@ -118,6 +118,7 @@ program:
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             $1->infer();
             $1->unify();
+            $1->close_all_program_scopes();
             $1->sem();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             $1->close_library_function_scope();

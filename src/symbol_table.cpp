@@ -30,6 +30,14 @@ void SymbolTable::scope_close() {
     delete current_scope;
 }
 
+void SymbolTable::close_all_program_scopes() {
+    if(this->current_scope != nullptr) {
+        while(this->current_scope->get_nesting_level() > 1) {
+            this->scope_close();
+        }
+    }
+}
+
 void SymbolTable::scope_hide(Scope* scope, bool flag) {
     if(scope == nullptr)
         exit(1); //TODO: Error Handling
@@ -136,6 +144,9 @@ void SymbolTable::unify() {
         t1 = this->find_substitute(t1);
         t2 = this->find_substitute(t2);
 
+        if(t1 == t2)
+            matched_rule = true;
+
         if(!matched_rule && ((t1->get_tag() == TypeTag::Function) && (t2->get_tag() == TypeTag::Function))) {
             matched_rule = true;
 
@@ -236,7 +247,7 @@ void SymbolTable::unify() {
             this->bind(t2, t1);
         }
 
-        if(!matched_rule && ((((t1->get_tag() != TypeTag::Unknown) && (t2->get_tag() != TypeTag::Unknown)) && (t1->get_tag() == t2->get_tag())) || (t1 == t2))) {
+        if(!matched_rule && ((((t1->get_tag() != TypeTag::Unknown) && (t2->get_tag() != TypeTag::Unknown)) && (t1->get_tag() == t2->get_tag())))) {
             matched_rule = true;
         }
 
