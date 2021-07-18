@@ -16,6 +16,8 @@ public:
 
     virtual void set_type(std::shared_ptr<TypeVariable> type_variable) { this->type_variable = type_variable; }
 
+    virtual std::shared_ptr<TypeVariable> get_type() { return this->type_variable; }
+
 protected:
     std::shared_ptr<TypeVariable> type_variable;
 };

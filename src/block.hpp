@@ -161,7 +161,10 @@ public:
   }
 
   virtual void sem() override {
-    
+    for(T* element: list) {
+      if(element != nullptr)
+        element->sem();
+    }
   }
 
 

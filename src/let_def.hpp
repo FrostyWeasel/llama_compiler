@@ -51,6 +51,10 @@ public:
         if(let_type == LetType::NoRec)
             AST::st->scope_hide(true);
         
+        //The definitions are first added to the symboltable and then type inference and semantic analysis happens
+        //This is to allow mutually recursive definitions ex.let rec even n = if n=0 then true else odd (n-1) and odd n = if n=0 then false else even (n-1)
+        this->def->add_to_symbol_table();
+
         def->sem();
 
         if(let_type == LetType::NoRec)

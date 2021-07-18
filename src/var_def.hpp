@@ -7,21 +7,20 @@
 #include "def.hpp"
 #include <memory>
 
-//TODO: Symboltable: Should have a memory slot capable of holding an elements of its type.
-//TODO: TypeCheck: Type can be whatever.
-//TODO: TypeInference: Type is type ref
-
 class VarDef : public Def{
 public:
     VarDef(std::string* id): id(*id), Def(new TypeVariable(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Unknown))) {}
     VarDef(std::string* id, std::shared_ptr<TypeVariable> type_variable): id(*id), Def(new TypeVariable(TypeTag::Reference, type_variable)) {}
 
     virtual void print(std::ostream& out) const override{
-        out << " mutable " << id;
+        out << "VarDef(";
+        out << " Id: " << id;
+        out << " TypeVariable: ";
         if(type_variable != nullptr)
             type_variable->print(out);
         else
-            out << " null";
+            out << "null ";
+        out << ") ";
     }
 
     virtual void add_to_symbol_table() override {
@@ -36,9 +35,8 @@ public:
         return this->type_variable;
     }
 
-    virtual void sem() override {
-        
-    }
+    virtual void sem() override { /* No need for further checks */ }
+
 
 private:
     std::string id;

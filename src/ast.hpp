@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include "symbol_table.hpp"
-#include "type.hpp"
+#include "type_variable.hpp"
 #include "enums.hpp"
+#include "semantic_analyzer.hpp"
 
-class Type;
 
 class AST{
 public:
@@ -15,8 +15,8 @@ public:
     AST(NodeType node_type) : node_type(node_type) { }
     virtual ~AST() { }
     virtual void print(std::ostream& out) const = 0;
-    virtual std::shared_ptr<TypeVariable> infer() { };
-    virtual void sem() { };
+    virtual std::shared_ptr<TypeVariable> infer() = 0;
+    virtual void sem() { }
 
     void unify() { st->unify(); }
     void add_library_functions();
@@ -29,10 +29,11 @@ public:
 
 protected:
     static SymbolTable* st;
+    static SemanticAnalyzer* sa;
     NodeType node_type;
 
-private:
-    static unsigned int tab_level;
+// private:
+    // static unsigned int tab_level;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){

@@ -74,6 +74,33 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override { 
+        switch(op) {
+            case OpType::Not:
+                this->expr->sem();
+                
+                break;
+            case OpType::Plus:
+                this->expr->sem();
+
+                break;
+            case OpType::Minus:
+                this->expr->sem();
+
+                break;
+            case OpType::Dereference:{
+                this->expr->sem(); //Type must be t ref
+
+                break;
+            }
+            default:
+                std::cerr << "Unknown binary operator type\n";
+                exit(1); //TODO:Error handling
+                break;
+        }  
+    }
+
+
 private:
     Expr* expr;
     OpType op;

@@ -145,6 +145,42 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, D
     }
 }
 
+bool TypeVariable::operator== (const TypeVariable& rhs) const {
+    if(this->type->get_tag() != rhs.type->get_tag()) {
+        return false;
+    }
+    else {
+        switch (this->type->get_tag()) {
+            case TypeTag::Array: {
+                auto array_ptr_t1 = std::dynamic_pointer_cast<ArrayType>(this->type);
+                auto array_ptr_t2 = std::dynamic_pointer_cast<ArrayType>(rhs.type);
+
+                return ((array_ptr_t1->get_dim() == array_ptr_t2->get_dim()) &&
+                        (array_ptr_t1->get_array_type() == array_ptr_t2->get_array_type()));
+            }
+            break;
+            case TypeTag::Function: {
+                auto func_ptr_t1 = std::dynamic_pointer_cast<FunctionType>(this->type);
+                auto func_ptr_t2 = std::dynamic_pointer_cast<FunctionType>(rhs.type);
+
+                return ((func_ptr_t1->get_from_type_variable() == func_ptr_t2->get_from_type_variable()) &&
+                        (func_ptr_t1->get_to_type_variable() == func_ptr_t2->get_to_type_variable()));
+            }
+            break;
+            case TypeTag::Reference: {
+                auto ref_ptr_t1 = std::dynamic_pointer_cast<RefType>(this->type);
+                auto ref_ptr_t2 = std::dynamic_pointer_cast<RefType>(rhs.type);
+
+                return ((ref_ptr_t1->get_referenced_variable() == ref_ptr_t2->get_referenced_variable()));
+            }
+            break;
+            default:
+                return true;
+            break;
+        }
+    }
+}
+
 bool TypeVariable::contains(std::shared_ptr<TypeVariable> type_variable) {
     if (this->id == type_variable->id)
         return true;

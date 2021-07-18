@@ -14,11 +14,11 @@ public:
     virtual std::shared_ptr<TypeVariable> infer() override { 
         return this->type_variable;
     }
+
+    virtual void sem() override { /* No need for further checks */ }
     
 private:
     bool value;
-    
-
 };
 
 #endif

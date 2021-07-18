@@ -66,8 +66,6 @@ public:
 
         std::shared_ptr<TypeVariable> to_type = this->expr->infer();
 
-        //TODO:Sem to type cannot be a function 
-
         //Function return type must be the same as its body expr type.
         st->add_constraint(this->type_variable, to_type);
 
@@ -75,6 +73,20 @@ public:
 
         return this->type_variable;
     }
+
+    virtual void sem() override { 
+        FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
+        auto to_type = func_entry->get_to_type();
+
+        if(to_type->get_tag() == TypeTag::Function) {
+            std::cerr << "Function return type cannot be a function";
+            exit(1); //TODO: Error handling
+        }
+
+        this->par_list->sem();
+        this->expr->sem();
+    }
+
 
 private:
     std::string id;

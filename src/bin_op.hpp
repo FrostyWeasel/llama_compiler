@@ -5,6 +5,7 @@
 #include "type_variable.hpp"
 #include "enums.hpp"
 #include <iostream>
+#include <vector>
 
 class BinOp : public Expr {
 public:
@@ -96,7 +97,6 @@ public:
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
                 this->st->add_constraint(lval_type, rval_type);
-                //TODO: This and all other expressions like this leaks the new TypeVariable to fix replace all TV creations with shared pointers (cant be only in contraints cause when the constraint is gone the type will be deleted!).
                 this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool));
                 break;
             case OpType::Assign:
@@ -104,7 +104,6 @@ public:
                 rval_type = this->rval->infer(); //Type must be t
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Unit);
 
-                //TODO: Check that this is right
                 this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Reference, rval_type));
                 break;
             case OpType::Concat:
@@ -122,7 +121,6 @@ public:
                 this->st->add_constraint(rval_type, this->type_variable);
                 break;
             case OpType::Equals:
-                //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -130,7 +128,6 @@ public:
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::GreaterOrEqualThan:
-                //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -138,7 +135,6 @@ public:
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::GreaterThan:
-                //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -146,7 +142,6 @@ public:
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::LessOrEqualThan:
-                //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -154,7 +149,6 @@ public:
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::LessThan:
-                //TODO: Sem this must be an int float or char
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -178,7 +172,6 @@ public:
                 this->st->add_constraint(rval_type, this->type_variable);
                 break;
             case OpType::NatEquals:
-                //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -186,7 +179,6 @@ public:
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::NatNotEquals:
-                //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -194,7 +186,6 @@ public:
                 this->st->add_constraint(lval_type, rval_type);
                 break;
             case OpType::NotEquals:
-                //TODO: Sem this can't be an array of a function type
                 lval_type = this->lval->infer();
                 rval_type = this->rval->infer();
                 this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
@@ -234,6 +225,248 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override { 
+        switch(op) {
+            case OpType::And:
+                this->lval->sem();
+                this->rval->sem();
+                                
+                break;
+            case OpType::Assign:
+                this->lval->sem(); //Type must be t ref
+                this->rval->sem(); //Type must be t
+                
+                break;
+            case OpType::Concat:
+                this->lval->sem();
+                this->rval->sem();
+
+                break;
+            case OpType::Divide:
+                this->lval->sem();
+                this->rval->sem();
+                
+                break;
+            case OpType::Equals:
+                this->lval->sem();
+                this->rval->sem();
+                
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Function))) {
+                    
+                    std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Function))) {
+                    
+                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+            break;
+            case OpType::GreaterOrEqualThan:
+                //TODO: Sem float same for other comp
+                this->lval->sem();
+                this->rval->sem();
+
+               if((sa->is_not_same_tag(this->lval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+               if((sa->is_not_same_tag(this->rval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                break;
+            case OpType::GreaterThan:
+                this->lval->sem();
+                this->rval->sem();
+
+                if((sa->is_not_same_tag(this->lval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+               if((sa->is_not_same_tag(this->rval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                break;
+            case OpType::LessOrEqualThan:
+                this->lval->sem();
+                this->rval->sem();
+ 
+               if((sa->is_not_same_tag(this->lval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+               if((sa->is_not_same_tag(this->rval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                break;
+            case OpType::LessThan:
+                this->lval->sem();
+                this->rval->sem();
+
+               if((sa->is_not_same_tag(this->lval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+               if((sa->is_not_same_tag(this->rval->get_type(),
+                    std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                    
+                    std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }             
+                break;
+            case OpType::Minus:
+                this->lval->sem();
+                this->rval->sem();
+                
+                break;
+            case OpType::Modulo:
+                this->lval->sem();
+                this->rval->sem();    
+                
+                break;
+            case OpType::NatEquals:
+                this->lval->sem();
+                this->rval->sem();
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Function))) {
+                    
+                    std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Function))) {
+                    
+                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                } 
+
+                
+                break;
+            case OpType::NatNotEquals:
+                this->lval->sem();
+                this->rval->sem();
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Function))) {
+                    
+                    std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Function))) {
+                    
+                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+
+                break;
+            case OpType::NotEquals:
+                this->lval->sem();
+                this->rval->sem();
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Function))) {
+                    
+                    std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->lval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Function))) {
+                    
+                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+                if((sa->is_same_tag(this->rval->get_type(),
+                    TypeTag::Array))) {
+                    
+                    std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
+                    exit(1); //TODO: Error handling.
+                }
+
+                
+                break;
+            case OpType::Or:
+                this->lval->sem();
+                this->rval->sem();
+
+                
+                break;
+            case OpType::Plus:
+                this->lval->sem();
+                this->rval->sem();
+  
+                
+                break;
+            case OpType::Times:
+                this->lval->sem();
+                this->rval->sem(); 
+                
+                break;
+            default:
+                std::cerr << "Unknown binary operator type\n";
+                exit(1); //TODO:Error handling
+                break;
+        }  
+    }
 
 private:
     Expr* lval;

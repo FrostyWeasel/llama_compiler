@@ -24,7 +24,13 @@ public:
     virtual std::shared_ptr<TypeVariable> infer() override {
         auto id_entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
 
+        this->type_variable = id_entry->get_type();
+
         return id_entry->get_type();
+    }
+
+    virtual void sem() override {
+
     }
 
 private:

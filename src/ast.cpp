@@ -2,10 +2,11 @@
 #include "function_entry.hpp"
 #include "type_variable.hpp"
 #include "enums.hpp"
+#include "semantic_analyzer.hpp"
 #include <iostream>
 
 SymbolTable* AST::st = new SymbolTable(20000);
-unsigned int AST::tab_level = 0;
+SemanticAnalyzer* AST::sa = new SemanticAnalyzer();
 
 void AST::close_library_function_scope() {
     st->scope_close();

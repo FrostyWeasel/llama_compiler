@@ -22,6 +22,8 @@ public:
 
     ~TypeVariable() = default;
 
+    bool operator== (const TypeVariable& rhs) const;
+
     void print(std::ostream& out) const;
 
     bool contains(std::shared_ptr<TypeVariable> type_variable);
