@@ -6,6 +6,9 @@
 #include "includes.hpp"
 #include "lexer.hpp"
 #include <memory>
+#include <vector>
+
+std::vector<std::string*> str_to_delete;
 
 %}
 
@@ -121,6 +124,7 @@ program:
             $1->close_all_program_scopes();
             $1->sem();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
+            $1->close_all_program_scopes();
             $1->close_library_function_scope();
             delete $1;
         }  
@@ -142,14 +146,14 @@ def_list:
 ;
 
 def:
-    T_ID '=' expr                                           { $$ = new ConstDef($1, $3); }
-|   T_ID ':' type '=' expr                                  { $$ = new ConstDef($1, std::make_shared<TypeVariable>(*$3), $5); }
-|   T_ID par par_list ':' type '=' expr                     { $3->insert($3->begin(), $2); $$ = new FunctionDef($1, $3, $7, std::make_shared<TypeVariable>(*$5)); }
-|   T_ID par par_list '=' expr                              { $3->insert($3->begin(), $2); $$ = new FunctionDef($1, $3, $5); }
-|   "mutable" T_ID                                          { $$ = new VarDef($2); }
-|   "mutable" T_ID ':' type                                 { $$ = new VarDef($2, std::make_shared<TypeVariable>(*$4)); }
-|   "mutable" T_ID '[' expr expr_comma_list ']'             { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5); }
-|   "mutable" T_ID '[' expr expr_comma_list ']' ':' type    { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5, std::make_shared<TypeVariable>(*$8)); }
+    T_ID '=' expr                                           { $$ = new ConstDef($1, $3); str_to_delete.push_back($1); }
+|   T_ID ':' type '=' expr                                  { $$ = new ConstDef($1, std::shared_ptr<TypeVariable>($3), $5); str_to_delete.push_back($1); }
+|   T_ID par par_list ':' type '=' expr                     { $3->insert($3->begin(), $2); $$ = new FunctionDef($1, $3, $7, std::shared_ptr<TypeVariable>($5)); str_to_delete.push_back($1); }
+|   T_ID par par_list '=' expr                              { $3->insert($3->begin(), $2); $$ = new FunctionDef($1, $3, $5); str_to_delete.push_back($1); }
+|   "mutable" T_ID                                          { $$ = new VarDef($2); str_to_delete.push_back($2); }
+|   "mutable" T_ID ':' type                                 { $$ = new VarDef($2, std::shared_ptr<TypeVariable>($4)); str_to_delete.push_back($2); }
+|   "mutable" T_ID '[' expr expr_comma_list ']'             { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5); str_to_delete.push_back($2); }
+|   "mutable" T_ID '[' expr expr_comma_list ']' ':' type    { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5, std::shared_ptr<TypeVariable>($8)); str_to_delete.push_back($2); }
 ;
 
 par_list:
@@ -158,8 +162,8 @@ par_list:
 ;
 
 par:
-    T_ID                    { $$ = new Par($1); }
-|   '(' T_ID ':' type ')'   { $$ = new Par($2, std::make_shared<TypeVariable>(*$4)); }
+    T_ID                    { $$ = new Par($1); str_to_delete.push_back($1); }
+|   '(' T_ID ':' type ')'   { $$ = new Par($2, std::shared_ptr<TypeVariable>($4)); str_to_delete.push_back($2); }
 ;
 
 expr_comma_list:
@@ -169,18 +173,18 @@ expr_comma_list:
 
 expr:
     func_expr                                               { $$ = $1; }
-|   T_ID func_expr func_expr_list                           { $3->insert($3->begin(), $2); $$ = new FunctionCall($1, $3); }
-|   "dim" T_ID                                              { $$ = new Dim($2); }
-|   "dim" T_CONST_INT T_ID                                  { $$ = new Dim($3, $2); }
-|   "new" type                                              { $$ = new New(std::make_shared<TypeVariable>(*$2)); }
+|   T_ID func_expr func_expr_list                           { $3->insert($3->begin(), $2); $$ = new FunctionCall($1, $3); str_to_delete.push_back($1); }
+|   "dim" T_ID                                              { $$ = new Dim($2); str_to_delete.push_back($2); }
+|   "dim" T_CONST_INT T_ID                                  { $$ = new Dim($3, $2); str_to_delete.push_back($3); }
+|   "new" type                                              { $$ = new New(std::shared_ptr<TypeVariable>($2)); }
 |   "delete" expr                                           { $$ = new Delete($2); }
 |   letdef "in" expr                                        { $$ = new LetIn($1, $3); }
 |   "begin" expr "end"                                      { $$ = $2; }
 |   "if" expr "then" expr               %prec IF_THEN       { $$ = new If($2, $4); }
 |   "if" expr "then" expr "else" expr   %prec IF_THEN_ELSE  { $$ = new If($2, $4, $6); }
 |   "while" expr "do" expr "done"                           { $$ = new While($2, $4); }
-|   "for" T_ID '=' expr "to" expr "do" expr "done"          { $$ = new ForTo($2, $4, $6, $8); }
-|   "for" T_ID '=' expr "downto" expr "do" expr "done"      { $$ = new ForDownTo($2, $4, $6, $8); }
+|   "for" T_ID '=' expr "to" expr "do" expr "done"          { $$ = new ForTo($2, $4, $6, $8); str_to_delete.push_back($2); }
+|   "for" T_ID '=' expr "downto" expr "do" expr "done"      { $$ = new ForDownTo($2, $4, $6, $8); str_to_delete.push_back($2); }
 |   '+' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
 |   '-' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
 |   "not" expr                                              { $$ = new UnOp($2, $1); }
@@ -207,13 +211,13 @@ func_expr:
    '!' func_expr                                            { $$ = new UnOp($2, $1); }
 |   '(' expr ')'                                            { $$ = $2; }
 |   '(' ')'                                                 { $$ = new Unit(); }
-|   T_ID                                                    { $$ = new Id($1); }
+|   T_ID                                                    { $$ = new Id($1); str_to_delete.push_back($1); }
 |   T_CONST_INT                                             { $$ = new Int($1); }                                         
 |   T_CONST_CHAR                                            { $$ = new Char($1); }
-|   T_STRING_LITERAL                                        { $$ = new String($1); }
+|   T_STRING_LITERAL                                        { $$ = new String($1); str_to_delete.push_back($1); }
 |   "true"                                                  { $$ = new Bool(true); }
 |   "false"                                                 { $$ = new Bool(false); }
-|   T_ID '[' expr expr_comma_list ']'                       { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); }
+|   T_ID '[' expr expr_comma_list ']'                       { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); str_to_delete.push_back($1); }
 
 
 func_expr_list:          
@@ -226,10 +230,10 @@ type:
 |   "char"                                                  { $$ = new TypeVariable(TypeTag::Char); }
 |   "bool"                                                  { $$ = new TypeVariable(TypeTag::Bool); }
 |   '(' type ')'                                            { $$ = $2; }
-|   type "->" type                                          { $$ = new TypeVariable(TypeTag::Function, std::make_shared<TypeVariable>(*$1), std::make_shared<TypeVariable>(*$3)); }
-|   type "ref"                                              { $$ = new TypeVariable(TypeTag::Reference, std::make_shared<TypeVariable>(*$1)); }
-|   "array" "of" type                                       { $$ = new TypeVariable(TypeTag::Array, std::make_shared<TypeVariable>(*$3), 1, DimType::Exact); }
-|   "array" '[' asterisk_list ']' "of" type                 { $$ = new TypeVariable(TypeTag::Array, std::make_shared<TypeVariable>(*$6), $3, DimType::Exact); }
+|   type "->" type                                          { $$ = new TypeVariable(TypeTag::Function, std::shared_ptr<TypeVariable>($1), std::shared_ptr<TypeVariable>($3)); }
+|   type "ref"                                              { $$ = new TypeVariable(TypeTag::Reference, std::shared_ptr<TypeVariable>($1)); }
+|   "array" "of" type                                       { $$ = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>($3), 1, DimType::Exact); }
+|   "array" '[' asterisk_list ']' "of" type                 { $$ = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>($6), $3, DimType::Exact); }
 /* |   T_ID                                            { $$ = }  propably not possible due to no user defined types*/
 ;
 
@@ -243,6 +247,9 @@ asterisk_list:
 
 int main(){
     int result = yyparse();
+    for(auto string_ptr: str_to_delete) {
+        delete string_ptr;
+    }
     if(result == 0) 
         printf("Success.\n");
     return result;

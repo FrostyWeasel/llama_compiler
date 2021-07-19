@@ -9,7 +9,7 @@
 class Delete : public Expr{
 public:
     Delete(Expr* expr): expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
-    ~Delete()  {}
+    virtual ~Delete()  {}
 
     virtual void print(std::ostream &out) const override {
         out << " delete";

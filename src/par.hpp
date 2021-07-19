@@ -13,7 +13,7 @@ public:
     Par(std::string* id): id(*id), type_variable(std::make_shared<TypeVariable>()), AST(NodeType::Par) {}
     Par(std::string* id, std::shared_ptr<TypeVariable> type_variable): id(*id), type_variable(type_variable), AST(NodeType::Par) {  }
 
-    ~Par() {}
+    virtual ~Par() {}
 
     virtual void print(std::ostream &out) const override { 
         out << "(" << id << " :";

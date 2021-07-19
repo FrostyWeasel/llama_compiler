@@ -13,7 +13,7 @@ class ArrayIndex : public Expr{
 public:
     ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
 
-    ~ArrayIndex() {
+    virtual ~ArrayIndex() {
         delete expr_list;
     }
 

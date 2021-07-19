@@ -9,12 +9,14 @@
 #include "symbol_table.hpp"
 
 //TODO: After sem check that : let x = 5 let rec x = x + 6 does not work but let x = 5 let x = x + 5 does
-//TODO: Check that you can run infer without opening scopes (you propably cant)
+
 class LetDef : public AST{
 public:    
     LetDef(Block<Def>* def, LetType let_type): def(def), let_type(let_type) {}
 
-    ~LetDef()  {}
+    virtual ~LetDef() {
+        delete def;
+    }
   
     virtual void print(std::ostream &out) const override {
         out << "Let(";

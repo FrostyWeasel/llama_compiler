@@ -14,7 +14,7 @@ public:
     For() {}
     For(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr): id(*id), first_condition(first_condition), second_condition(second_condition), expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
 
-    ~For() {
+    virtual ~For() {
         delete first_condition;
         delete second_condition;
         delete expr;

@@ -10,6 +10,8 @@ SemanticAnalyzer* AST::sa = new SemanticAnalyzer();
 
 void AST::close_library_function_scope() {
     st->scope_close();
+    delete AST::sa;
+    delete AST::st;
 }
 
 void AST::close_all_program_scopes() {

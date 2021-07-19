@@ -13,7 +13,9 @@ public:
     ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new TypeVariable()) {}
     ConstDef(std::string* id, std::shared_ptr<TypeVariable> type_variable, Expr* expr): id(*id), Def(type_variable), expr(expr) {}
 
-    ~ConstDef()  {}
+    virtual ~ConstDef() {
+        delete expr;
+    }
 
     virtual void print(std::ostream& out) const override{
         out << " " << id;

@@ -11,11 +11,11 @@ class Type;
 
 class FunctionType : public Type {
 public:
-    FunctionType(TypeVariable* from_type_variable, TypeVariable* to_type_variable): from_type_variable(std::make_shared<TypeVariable>(*from_type_variable)), to_type_variable(std::make_shared<TypeVariable>(*to_type_variable)), Type(TypeTag::Function) {}
+    FunctionType(TypeVariable* from_type_variable, TypeVariable* to_type_variable): from_type_variable(std::shared_ptr<TypeVariable>(from_type_variable)), to_type_variable(std::shared_ptr<TypeVariable>(to_type_variable)), Type(TypeTag::Function) {}
     FunctionType(std::shared_ptr<TypeVariable> from_type_variable, std::shared_ptr<TypeVariable> to_type_variable): from_type_variable(from_type_variable), to_type_variable(to_type_variable), Type(TypeTag::Function) {}
 
 
-    ~FunctionType() { }
+    virtual ~FunctionType() { }
 
     virtual bool contains(std::shared_ptr<TypeVariable> type_variable) override {
         return from_type_variable->contains(type_variable) || to_type_variable->contains(type_variable);

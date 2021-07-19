@@ -10,7 +10,6 @@
 #include "constant_entry.hpp"
 #include "parameter_entry.hpp"
 
-//TODO: Search ST for type
 class Id : public Expr{
 public:
     Id(std::string* id): id(*id) {}

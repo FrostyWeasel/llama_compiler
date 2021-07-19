@@ -19,7 +19,7 @@ public:
     If(Expr* condition, Expr* if_expr): condition(condition), if_expr(if_expr), else_expr(nullptr), Expr(new TypeVariable(TypeTag::Unit)) {}
     If(Expr* condition, Expr* if_expr, Expr* else_expr): condition(condition), if_expr(if_expr), else_expr(else_expr), Expr(new TypeVariable()) {}
 
-    ~If() {
+    virtual ~If() {
         delete condition;
         delete if_expr;
         delete else_expr;

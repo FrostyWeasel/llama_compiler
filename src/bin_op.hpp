@@ -12,7 +12,7 @@ public:
 
     BinOp(Expr* lval, Expr* rval, OpType op): lval(lval), rval(rval), op(op) {}
 
-    ~BinOp() {
+    virtual ~BinOp() {
         delete lval;
         delete rval;
     }

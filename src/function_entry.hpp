@@ -12,7 +12,7 @@ public:
     FunctionEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type) : from_type(from_type), to_type(to_type),
         SymbolEntry(id, entry_type) { count = FunctionEntry::counter++; }
     
-    ~FunctionEntry() { }
+    virtual ~FunctionEntry() { }
 
     void set_from_type(std::shared_ptr<TypeVariable> from_type) { this->from_type = from_type; }
     void set_to_type(std::shared_ptr<TypeVariable> to_type) { this->to_type = to_type; }

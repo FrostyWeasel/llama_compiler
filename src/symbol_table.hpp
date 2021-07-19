@@ -21,7 +21,12 @@ public:
         }
     }
 
-    ~SymbolTable() {
+    virtual ~SymbolTable() {
+        for(unsigned int i = 0; i < hashtable_size; i++) {
+            SymbolEntry* entry = hashtable[i];
+            if(entry != nullptr)
+                delete entry;
+        }
         delete[] hashtable;
         delete current_scope;
     }

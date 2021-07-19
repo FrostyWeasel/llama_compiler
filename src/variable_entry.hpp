@@ -15,7 +15,7 @@ public:
     VariableEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type, unsigned int dim) : type(type),
         dim(dim), SymbolEntry(id, entry_type) { }
     
-    ~VariableEntry() { }
+    virtual ~VariableEntry() { }
 
     virtual std::shared_ptr<TypeVariable> get_type() const override { return this->type; }
     unsigned int get_dim() { return dim; }

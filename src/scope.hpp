@@ -10,6 +10,8 @@ public:
     Scope(Scope* parent, SymbolEntry* entries, unsigned int nesting_level, bool is_hidden) : 
         parent(parent), entries(entries), nesting_level(nesting_level), is_hidden(is_hidden) {}
 
+    ~Scope() { /* Handled by SymbolTable */}
+
     unsigned int get_nesting_level() { return nesting_level; }
     // void setNestingLevel(unsigned int nesting_level) { this->nesting_level = nesting_level; }
 

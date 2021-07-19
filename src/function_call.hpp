@@ -15,7 +15,9 @@ class FunctionCall : public Expr{
 public:
     FunctionCall(std::string* id, Block<Expr>* expr_list) : id(*id), expr_list(expr_list), Expr(new TypeVariable()) { }
 
-    ~FunctionCall()  {}
+    virtual ~FunctionCall() {
+        delete expr_list;
+    }
 
     virtual void print(std::ostream &out) const override{
         out << "FunctionCall(";

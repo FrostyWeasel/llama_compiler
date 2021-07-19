@@ -8,7 +8,8 @@
 class Expr : public AST{
 public:  
     Expr() : AST(NodeType::Expr) {}
-    Expr(TypeVariable* type_variable): type_variable(std::make_shared<TypeVariable>(*type_variable)), AST(NodeType::Expr) { }
+    Expr(TypeVariable* type_variable): type_variable(std::shared_ptr<TypeVariable>(type_variable)), AST(NodeType::Expr) { }
+    // Expr(std::shared_ptr<TypeVariable> type_variable): type_variable(type_variable), AST(NodeType::Expr) { }
 
     virtual ~Expr() {}
 

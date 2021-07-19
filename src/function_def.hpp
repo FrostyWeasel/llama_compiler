@@ -19,7 +19,7 @@ public:
     FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr) {}
     FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr) {}
 
-    ~FunctionDef() {
+    virtual ~FunctionDef() {
         delete expr;
         delete par_list;
     }

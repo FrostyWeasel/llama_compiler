@@ -10,7 +10,7 @@ public:
     ParameterEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type) : type(type),
         SymbolEntry(id, entry_type) { }
 
-    ~ParameterEntry() { }
+    virtual ~ParameterEntry() { }
 
     virtual std::shared_ptr<TypeVariable> get_type() const override { return type; }
 

@@ -136,13 +136,13 @@ W [ \t\n\r]
 "!="		{ yylval.op = OpType::NatNotEquals; return T_NAT_NOT_EQ_OP; }
 ":="		{ yylval.op = OpType::Assign; return T_ASSIGNMENT_OP; }
 
-{L_lower}({L}|{D}|_)*       { std::string* id = new std::string { yytext }; yylval.id = id; return T_ID; }
-{L_upper}({L}|{D}|_)*       { return T_CONSTRUCTOR_ID; }
+{L_lower}({L}|{D}|_)*       { std::string* id = new std::string(yytext); yylval.id = id; return T_ID; }
+{L_upper}({L}|{D}|_)*       { std::string* id = new std::string(yytext); yylval.id = id; return T_CONSTRUCTOR_ID; }
 
 {D}+    { yylval.number = atoi(yytext); return T_CONST_INT; }
 \'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x({D}|[A-Fa-f])({D}|[A-Fa-f]))\' { yylval.const_char = get_char(yytext); return T_CONST_CHAR; }
 
-\"([^\n\r\"]|\\\")*\" { std::string* str = new std::string { yytext }; yylval.string_literal = str; return T_STRING_LITERAL; }
+\"([^\n\r\"]|\\\")*\" { std::string* str = new std::string(yytext) ; yylval.string_literal = str; return T_STRING_LITERAL; }
 
 {W}+        { /* nothing */ }   /*White space*/
 

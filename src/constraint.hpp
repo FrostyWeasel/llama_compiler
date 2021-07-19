@@ -6,7 +6,7 @@ public:
     Constraint(std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2) : t1(t1), t2(t2) { 
 
     }
-    ~Constraint() { }
+    virtual ~Constraint() { }
 
     std::shared_ptr<TypeVariable> get_t1() { return t1; }
     std::shared_ptr<TypeVariable> get_t2() { return t2; }

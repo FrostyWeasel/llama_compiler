@@ -13,7 +13,7 @@ public:
 
     AST() = default;
     AST(NodeType node_type) : node_type(node_type) { }
-    virtual ~AST() { }
+    virtual ~AST() = default;
     virtual void print(std::ostream& out) const = 0;
     virtual std::shared_ptr<TypeVariable> infer() = 0;
     virtual void sem() = 0;

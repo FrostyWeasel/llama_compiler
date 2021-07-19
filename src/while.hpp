@@ -11,7 +11,7 @@ class While : public Expr{
 public:
     While(Expr* condition, Expr* expr): condition(condition), expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
 
-    ~While() {
+    virtual ~While() {
         delete condition;
         delete expr;
     }

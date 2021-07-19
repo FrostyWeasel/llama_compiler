@@ -12,7 +12,7 @@ public:
     IdentifierEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type) : type(type),
         SymbolEntry(id, entry_type) { }
 
-    ~IdentifierEntry() { }
+    virtual ~IdentifierEntry() { }
 
     virtual std::shared_ptr<TypeVariable> get_type() const override { return this->type; }
 

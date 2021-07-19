@@ -9,10 +9,10 @@ class Type;
 
 class RefType : public Type {
 public:
-    RefType(TypeVariable* type_variable) : type_variable(std::make_shared<TypeVariable>(*type_variable)), Type(TypeTag::Reference) { }
+    RefType(TypeVariable* type_variable) : type_variable(std::shared_ptr<TypeVariable>(type_variable)), Type(TypeTag::Reference) { }
     RefType(std::shared_ptr<TypeVariable> type_variable) : type_variable(type_variable), Type(TypeTag::Reference) { }
 
-    ~RefType() {  }
+    virtual ~RefType() {  }
 
     virtual bool contains(std::shared_ptr<TypeVariable> type_variable) override {
         return this->type_variable->contains(type_variable);

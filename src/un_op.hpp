@@ -11,7 +11,9 @@ class UnOp : public Expr{
 public:
     UnOp(Expr* expr, OpType op): expr(expr), op(op) {}
 
-    ~UnOp()  {}
+    virtual ~UnOp() {
+        delete expr;
+    }
 
     virtual void print(std::ostream &out) const override {
         switch(op){
