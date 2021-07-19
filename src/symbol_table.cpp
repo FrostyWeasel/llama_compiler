@@ -233,17 +233,17 @@ void SymbolTable::unify() {
             this->add_constraint(array_type_t1, array_type_t2);
         }
 
-        if(!matched_rule && ((t1->get_tag() == TypeTag::Unknown))) {
+        if((!matched_rule) && ((t1->get_tag() == TypeTag::Unknown)) && (!t2->contains(t1))) {
             matched_rule = true;
-            if(!t2->contains(t1))
-                this->substitute(t1, t2);
+
+            this->substitute(t1, t2);
             this->bind(t1, t2);
         }
 
-        if(!matched_rule && ((t2->get_tag() == TypeTag::Unknown))) {
+        if((!matched_rule) && ((t2->get_tag() == TypeTag::Unknown)) && (!t1->contains(t2))) {
             matched_rule = true;
-            if(!t1->contains(t2))
-                this->substitute(t2, t1);
+
+            this->substitute(t2, t1);
             this->bind(t2, t1);
         }
 
