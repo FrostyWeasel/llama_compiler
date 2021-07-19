@@ -9,7 +9,6 @@
 #include <string>
 #include <iostream>
 
-//TODO: Sem expr_list size must be the same as array dim array entry may be parameter or variable
 class ArrayIndex : public Expr{
 public:
     ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
@@ -43,6 +42,12 @@ public:
             array_element_type, this->expr_list->block_size(), DimType::Exact));
 
         return this->type_variable;
+    }
+
+    virtual void sem() override {
+
+        //All expressions in the expression comma list must be of type int and their count is the dimension of the array.
+        this->expr_list->sem();
     }
 
 private:

@@ -41,6 +41,11 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override {
+        this->condition->sem();
+        this->expr->sem();        
+    }
+
 private:
     Expr* condition;
     Expr* expr;

@@ -29,6 +29,10 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override {
+        this->expr->sem();
+    }
+
 private:
     Expr* expr;
 };

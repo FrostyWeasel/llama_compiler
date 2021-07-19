@@ -42,6 +42,21 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override {
+        this->first_condition->sem();
+        this->second_condition->sem();
+
+        //Only expression is in scope of iterator
+        st->scope_open();
+
+        ConstantEntry* entry = new ConstantEntry(id, EntryType::ENTRY_CONSTANT, std::make_shared<TypeVariable>(TypeTag::Int));
+        st->insert_entry(entry);
+
+        this->expr->sem();        
+
+        st->scope_close();
+    }
+
 protected:
     std::string id;
     Expr* first_condition;

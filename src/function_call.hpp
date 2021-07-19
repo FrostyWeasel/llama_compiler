@@ -45,6 +45,12 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override {     
+           
+        this->expr_list->sem();
+
+    }
+
 private:
     std::string id;
     Block<Expr>* expr_list;

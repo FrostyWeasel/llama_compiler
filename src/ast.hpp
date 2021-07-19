@@ -16,7 +16,7 @@ public:
     virtual ~AST() { }
     virtual void print(std::ostream& out) const = 0;
     virtual std::shared_ptr<TypeVariable> infer() = 0;
-    virtual void sem() { }
+    virtual void sem() = 0;
     virtual void close_all_program_scopes();
 
     void unify() { st->unify(); }

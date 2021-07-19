@@ -44,6 +44,16 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override {
+        //Opens but does not close scope.
+        this->let_def->sem(); 
+
+        this->expr->sem();
+
+        //Letdef scope only encompasses expression.
+        st->scope_close();
+    }
+
 private:
     LetDef* let_def;
     Expr* expr;

@@ -8,8 +8,6 @@
 #include <memory>
 #include <string>
 
-//TODO: Sem check that array exists and that the dimension is less than the dimension of the dim value
-//TODO: Sem Array could be a VariableEntry or a Par.
 class Dim : public Expr{
 public:
     Dim(std::string* id): id(*id), dimension(1) {}
@@ -28,6 +26,10 @@ public:
             std::make_shared<TypeVariable>(TypeTag::Unknown), this->dimension, DimType::AtLeast));
 
         return this->type_variable;
+    }
+
+    virtual void sem() override {
+
     }
 
 

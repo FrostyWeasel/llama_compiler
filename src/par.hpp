@@ -44,7 +44,7 @@ public:
             case TypeTag::Function : {
                 auto to_type = this->type_variable->get_function_to_type();
                 if((sa->is_same_tag(to_type, TypeTag::Function))) {
-                    std::cerr << "Function return type can not be of type function\n" << "offending type is: " << *to_type;
+                    std::cerr << "Function " << id << " return type can not be of type function\n" << "offending type is: " << *to_type;
                     exit(1); //TODO: Error handling.
                 }
             }

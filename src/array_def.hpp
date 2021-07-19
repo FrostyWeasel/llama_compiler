@@ -51,6 +51,12 @@ public:
         return this->type_variable;
     }
 
+    virtual void sem() override {
+        //All expressions in the expression comma list must be of type int and their count is the dimension of the array.
+        this->expr_list->sem();
+
+    }
+
 private:
     std::string id;
     Block<Expr>* expr_list;

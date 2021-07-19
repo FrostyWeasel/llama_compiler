@@ -70,6 +70,16 @@ virtual void print(std::ostream &out) const override {
         return if_expr_type;
     }
 
+    virtual void sem() override {
+        this->if_expr->sem();
+        
+        if (else_expr != nullptr) {
+            this->else_expr->sem();
+        }
+
+        this->condition->sem();
+    }
+
 private:
     Expr* condition;
     Expr* if_expr;
