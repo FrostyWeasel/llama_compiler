@@ -119,13 +119,20 @@ program:
             // AST::make_table(); //Make a static symboltable
             $1->add_library_functions();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
+            
             $1->infer();
             $1->unify();
             $1->close_all_program_scopes();
+
             $1->sem();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             $1->close_all_program_scopes();
+
+            $1->llvm_compile_and_dump();
+
+            $1->close_all_program_scopes();
             $1->close_library_function_scope();
+            
             delete $1;
         }  
 ;
@@ -250,8 +257,6 @@ int main(){
     for(auto string_ptr: str_to_delete) {
         delete string_ptr;
     }
-    if(result == 0) 
-        printf("Success.\n");
     return result;
 }
 

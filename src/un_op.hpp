@@ -102,6 +102,39 @@ public:
         }  
     }
 
+    virtual llvm::Value* codegen() const {
+        llvm::Value* rhs = nullptr;
+
+        switch(op) {
+            case OpType::Not:
+                rhs = this->expr->codegen();
+                
+                return Builder.CreateNot(rhs, "nottmp");
+                break;
+            case OpType::Plus:
+                rhs = this->expr->codegen();
+
+                return rhs;
+                break;
+            case OpType::Minus:
+                rhs = this->expr->codegen();
+
+                return Builder.CreateNeg(rhs, "negtmp");
+                break;
+            case OpType::Dereference:{
+                rhs = this->expr->codegen();
+
+                //TODO: Implement this
+                break;
+            }
+            default:
+                std::cerr << "Unknown binary operator type\n";
+                exit(1); //TODO:Error handling
+                break;
+        }  
+
+        return nullptr;
+    }
 
 private:
     Expr* expr;

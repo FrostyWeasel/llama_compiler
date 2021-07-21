@@ -470,6 +470,95 @@ public:
         }  
     }
 
+    virtual llvm::Value* codegen() const {
+        llvm::Value* lhs = nullptr;
+        llvm::Value* rhs = nullptr;
+
+        switch (op) {
+        case OpType::And:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateAnd(lhs, rhs, "andtmp");
+            break;
+        case OpType::Assign:
+            break;
+        case OpType::Concat:
+            break;
+        case OpType::Divide:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateSDiv(lhs, rhs, "divtmp");
+            break;
+        case OpType::Equals:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            switch(this->lval->get_type()->get_tag()) {
+                case TypeTag::Int:
+                    return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
+                break;
+                default:
+                break;
+            }
+            break;
+        case OpType::GreaterOrEqualThan:
+            break;
+        case OpType::GreaterThan:
+            break;
+        case OpType::LessOrEqualThan:
+            break;
+        case OpType::LessThan:
+            break;
+        case OpType::Minus:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateSub(lhs, rhs, "subtmp");
+            break;
+        case OpType::Modulo:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateSRem(lhs, rhs, "modtmp");
+            break;
+        case OpType::NatEquals:
+
+            break;
+        case OpType::NatNotEquals:
+
+            break;
+        case OpType::NotEquals:
+
+            break;
+        case OpType::Or:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateOr(lhs, rhs, "ortmp");
+            break;
+        case OpType::Plus:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateAdd(lhs, rhs, "addtmp");
+            break;
+        case OpType::Times:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateMul(lhs, rhs, "multtmp");
+            break;
+        default:
+            std::cerr << "Unknown binary operator type\n";
+            exit(1); //TODO:Error handling
+            break;
+        }
+
+        return nullptr;
+    }
+
 private:
     Expr* lval;
     Expr* rval;

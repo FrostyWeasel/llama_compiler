@@ -32,6 +32,13 @@ public:
 
     }
 
+    virtual llvm::Value* codegen() const override {
+        auto id_entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
+        auto allocation = id_entry->get_allocation();
+
+        return Builder.CreateLoad(allocation->getAllocatedType(), allocation, id);
+    }
+
 private:
     std::string id;
     

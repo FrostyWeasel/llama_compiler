@@ -167,6 +167,14 @@ public:
     }
   }
 
+  virtual llvm::Value* codegen() const override {
+    for (T *element : list) {
+      if (element != nullptr)
+        element->codegen();
+    }
+
+    return nullptr;
+  }
 
 private:
     std::vector<T*> list;

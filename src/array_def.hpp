@@ -23,17 +23,21 @@ public:
         delete expr_list;
     }
 
-    virtual void print(std::ostream& out) const override{
-        out << " mutable " << id << "[";
-        if(type_variable != nullptr)
+    virtual void print(std::ostream &out) const override
+    {
+        out << "ArrayDef(";
+        out << " Id: " << id;
+        out << " Type: ";
+        if (type_variable != nullptr)
             type_variable->print(out);
         else
             out << "null ";
-        if(expr_list != nullptr)
+        out << " Expr_list: ";
+        if (expr_list != nullptr)
             expr_list->print(out);
         else
             out << "null ";
-        out << "]";
+        out << ") ";
     }
 
     virtual void add_to_symbol_table() override {

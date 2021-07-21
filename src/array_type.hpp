@@ -31,7 +31,7 @@ public:
 
 
     virtual void print(std::ostream &out) const override{ 
-        out << "array "; 
+        out << " array "; 
         if(dimensions > 1){
             out << "[";
             for(unsigned int i = 0; i < dimensions; i++){

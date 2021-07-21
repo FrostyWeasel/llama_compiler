@@ -20,6 +20,11 @@ public:
     virtual void print(std::ostream &out) const override{
         out << "ArrayIndex( ";
         out << "Id: " << id << ", ";
+        out << "Type: ";
+        if (this->type_variable != nullptr)
+            this->type_variable->print(out);
+        else
+            out << "null ";
         out << "Expr_list: ";
         if(expr_list != nullptr)
             expr_list->print(out);

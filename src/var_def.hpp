@@ -35,7 +35,9 @@ public:
         return this->type_variable;
     }
 
-    virtual void sem() override { /* No need for further checks */ }
+    virtual void sem() override { 
+            
+    }
 
 
 private:

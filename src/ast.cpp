@@ -3,10 +3,29 @@
 #include "type_variable.hpp"
 #include "enums.hpp"
 #include "semantic_analyzer.hpp"
+#include <llvm/IR/Value.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Scalar/GVN.h>
+#include <llvm/Transforms/Utils.h>
 #include <iostream>
 
 SymbolTable* AST::st = new SymbolTable(20000);
 SemanticAnalyzer* AST::sa = new SemanticAnalyzer();
+
+llvm::LLVMContext AST::TheContext;
+llvm::IRBuilder<> AST::Builder(TheContext);
+std::unique_ptr<llvm::Module> AST::TheModule;
+std::unique_ptr<llvm::legacy::FunctionPassManager> AST::FPM;
+
+llvm::Type *AST::i1 = llvm::IntegerType::get(TheContext, 1);
+llvm::Type *AST::i8 = llvm::IntegerType::get(TheContext, 8);
+llvm::Type *AST::i16 = llvm::IntegerType::get(TheContext, 16);
+llvm::Type *AST::i32 = llvm::IntegerType::get(TheContext, 32);
+llvm::Type *AST::i64 = llvm::IntegerType::get(TheContext, 64);
 
 void AST::close_library_function_scope() {
     st->scope_close();
@@ -16,6 +35,48 @@ void AST::close_library_function_scope() {
 
 void AST::close_all_program_scopes() {
     st->close_all_program_scopes();
+}
+
+void AST::llvm_compile_and_dump(bool optimize) {
+    // Initialize
+    TheModule = std::make_unique<llvm::Module>("Llama program", TheContext);
+   
+    FPM = std::make_unique<llvm::legacy::FunctionPassManager>(TheModule.get());
+    if(optimize) {
+        FPM->add(llvm::createPromoteMemoryToRegisterPass()); //https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl07.html#memory-in-llvm
+        FPM->add(llvm::createInstructionCombiningPass());
+        FPM->add(llvm::createReassociatePass());
+        FPM->add(llvm::createGVNPass());
+        FPM->add(llvm::createCFGSimplificationPass());
+    }
+    FPM->doInitialization();
+
+    // Define and start the main function.
+    llvm::FunctionType* main_type = llvm::FunctionType::get(i32, {}, false);
+    llvm::Function *main =
+        llvm::Function::Create(main_type, llvm::Function::ExternalLinkage,
+                               "main", TheModule.get());
+
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(TheContext, "entry", main);
+    Builder.SetInsertPoint(BB);
+
+    // Emit the program code.
+    this->codegen();
+    Builder.CreateRet(c32(0));
+
+    // Verify the IR.
+    bool bad = verifyModule(*TheModule, &llvm::errs());
+    if (bad) {
+        std::cerr << "The IR is bad!" << std::endl;
+        TheModule->print(llvm::errs(), nullptr);
+        std::exit(1);
+    }
+
+    // Optimize!
+    FPM->run(*main);
+
+    // Print out the IR.
+    TheModule->print(llvm::outs(), nullptr);
 }
 
 void AST::add_library_functions() {

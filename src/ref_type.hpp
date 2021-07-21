@@ -26,7 +26,7 @@ public:
         if (type_variable == nullptr)
             out << "TypeVariable: Null";
         else
-            out << " " << *type_variable << " ref ";
+            out << " (" << *type_variable << ") ref ";
     }
     
 private:
