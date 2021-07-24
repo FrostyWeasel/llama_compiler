@@ -211,14 +211,12 @@ virtual llvm::Value* codegen()  override {
       //   break;
 
       case BlockType::ExprComma: {
-          std::vector<llvm::Constant*> dimension_values;
-          llvm::Constant* dimension_size;
+          std::vector<llvm::Value*> dimension_values;
 
           for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
             if(*element_it != nullptr){
               //Add result to vector of array index/dimension size
-              dimension_size = llvm::dyn_cast<llvm::Constant>((*element_it)->codegen());
-              dimension_values.push_back(dimension_size);
+              dimension_values.push_back((*element_it)->codegen());
             }
             else {
               std::cerr << "Nullptr in block list.\n";
@@ -226,11 +224,7 @@ virtual llvm::Value* codegen()  override {
             }
         }
 
-        auto dimension_sizes_array_type = llvm::ArrayType::get(i32, dimension_values.size());
-        auto global_array_dim_sizes = new llvm::GlobalVariable(*TheModule.get(), dimension_sizes_array_type, true, llvm::GlobalValue::LinkageTypes::PrivateLinkage, 
-            llvm::ConstantArray::get(dimension_sizes_array_type, dimension_values), "array_dim_sizes");
-
-        block_value = llvm::GetElementPtrInst::CreateInBounds(dimension_sizes_array_type, global_array_dim_sizes, { c32(0) }, "array_index_ptr", Builder.GetInsertBlock());
+        block_value = dimension_values;
       }
       break;
 
