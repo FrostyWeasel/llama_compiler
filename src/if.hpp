@@ -25,30 +25,30 @@ public:
         delete else_expr;
     }
 
-virtual void print(std::ostream &out) const override {
-        out << "If(";
-        out << "Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << "Condition: ";
-        if(condition != nullptr)
-            condition->print(out);
-        else
-            out << "null ";
-        out << "If_Expr: ";
-        if(if_expr != nullptr)
-            if_expr->print(out);
-        else
-            out << "null ";
-        out << "Else_Expr: ";
-        if(else_expr != nullptr)
-            else_expr->print(out);
-        else
-            out << "null ";
-        out << ") ";
-    }
+    virtual void print(std::ostream &out) const override {
+            out << "If(";
+            out << "Type: ";
+            if(type_variable != nullptr)
+                type_variable->print(out);
+            else
+                out << "null ";
+            out << "Condition: ";
+            if(condition != nullptr)
+                condition->print(out);
+            else
+                out << "null ";
+            out << "If_Expr: ";
+            if(if_expr != nullptr)
+                if_expr->print(out);
+            else
+                out << "null ";
+            out << "Else_Expr: ";
+            if(else_expr != nullptr)
+                else_expr->print(out);
+            else
+                out << "null ";
+            out << ") ";
+        }
 
     virtual std::shared_ptr<TypeVariable> infer() override {
         auto if_expr_type = this->if_expr->infer();
@@ -78,6 +78,17 @@ virtual void print(std::ostream &out) const override {
         }
 
         this->condition->sem();
+    }
+
+    virtual llvm::Value* codegen() override {
+        auto condition_value = this->condition->codegen();
+        auto condition_result = Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, condition_value, c1(1));
+
+        auto current_fuction = Builder.GetInsertBlock()->getParent();
+
+        auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_fuction);
+        auto else_BB = llvm::BasicBlock::Create(TheContext, "else", current_fuction);
+        auto if_end_BB = llvm::BasicBlock::Create(TheContext, "endif", current_fuction);
     }
 
 private:

@@ -22,6 +22,7 @@ public:
 
     virtual void sem() override { /* No need for further checks */ }
 
+    //TODO: Change to match all other arrays
     virtual llvm::Value* codegen() {
         std::vector<llvm::Constant*> chars;
 

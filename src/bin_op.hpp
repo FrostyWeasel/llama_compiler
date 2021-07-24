@@ -506,22 +506,6 @@ public:
                 rhs = this->rval->codegen();
 
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
-
-                // switch(this->lval->get_type()->get_tag()) {
-                //     case TypeTag::Int:
-                //         return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
-                //         break;
-                //     case TypeTag::Bool:
-                //         return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
-                //         break;
-                //     case TypeTag::Char:
-                //         return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
-                //         break;
-                //     default:
-                //         std::cerr << "Unimplemented type comparison\n";
-                //         exit(1);
-                //         break;
-                // }
                 break;
             case OpType::GreaterOrEqualThan:
                 lhs = this->lval->codegen();

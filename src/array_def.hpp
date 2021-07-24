@@ -64,7 +64,7 @@ public:
             array_size = Builder.CreateMul(array_size, dim_size, "dim_size_calc");
         }
 
-        llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(llvm::PointerType::get(map_to_llvm_type(this->type_variable), 0), array_size, id+"_array");
+        llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), array_size, id+"_array");
         this->entry->set_allocation(alloc_ptr);
 
         auto array_entry = dynamic_cast<VariableEntry*>(this->entry);

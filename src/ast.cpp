@@ -70,6 +70,8 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
         }
         break;
         default:
+            std::cerr << "Uknown type\n";
+            exit(1); //TODO: Error handling
             break;
     }
     return nullptr;
