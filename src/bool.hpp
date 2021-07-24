@@ -17,6 +17,10 @@ public:
 
     virtual void sem() override { /* No need for further checks */ }
     
+    virtual llvm::Value* codegen() {
+        return c1(this->value);
+    }
+
 private:
     bool value;
 };

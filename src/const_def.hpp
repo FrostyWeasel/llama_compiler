@@ -50,15 +50,15 @@ public:
         this->expr->sem();
     }
 
-    virtual llvm::Value* codegen() const override {
+    virtual llvm::Value* codegen() override {
         auto value = this->expr->codegen();
-        auto type_tag = this->type_variable->get_tag();
 
         llvm::AllocaInst* const_alloc_ptr = nullptr;
 
-        //TODO: Type might still be uknown
-        const_alloc_ptr = Builder.CreateAlloca(value->getType(), value, id);
-        this->entry->set_allocation(const_alloc_ptr);
+        if(value != nullptr) {
+            const_alloc_ptr = Builder.CreateAlloca(value->getType(), value, id);
+            this->entry->set_allocation(const_alloc_ptr);
+        }
 
         return const_alloc_ptr;
     }

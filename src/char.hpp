@@ -19,6 +19,10 @@ public:
 
     virtual void sem() override { /* No need for further checks */ }
 
+    virtual llvm::Value* codegen() {
+        return c8(this->value);
+    }
+
 private:
     char value;
     

@@ -61,6 +61,17 @@ public:
 
     }
 
+
+    virtual llvm::Value* codegen() override {
+        auto expr_list_ptr = this->expr_list->codegen();
+
+        // llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable, expr_list_ptr), nullptr, "array_"+id);
+
+        // this->entry->set_allocation(alloc_ptr);
+
+        // return alloc_ptr;
+    }
+
 private:
     std::string id;
     Block<Expr>* expr_list;

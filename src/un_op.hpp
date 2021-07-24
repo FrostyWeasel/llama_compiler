@@ -102,7 +102,7 @@ public:
         }  
     }
 
-    virtual llvm::Value* codegen() const {
+    virtual llvm::Value* codegen() {
         llvm::Value* rhs = nullptr;
 
         switch(op) {

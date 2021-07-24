@@ -470,7 +470,7 @@ public:
         }  
     }
 
-    virtual llvm::Value* codegen() const {
+    virtual llvm::Value* codegen() {
         llvm::Value* lhs = nullptr;
         llvm::Value* rhs = nullptr;
 

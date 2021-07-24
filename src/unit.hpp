@@ -20,6 +20,9 @@ public:
 
     virtual void sem() override { /* No need for further checks */ }
 
+    virtual llvm::Value* codegen() {
+        return nullptr;
+    }
 };
 
 #endif

@@ -304,3 +304,32 @@ void TypeVariable::set_array_dim_type(DimType dim_type) {
         exit(1); //TODO: Error handling
     }
 }
+
+//Complex types before we get to concrete types (int ref ref has depth of 2)
+unsigned int TypeVariable::get_complex_type_depth() {
+    switch(this->type->get_tag()){
+        case TypeTag::Reference: {
+            auto ref_ptr = std::dynamic_pointer_cast<RefType>(this->type);
+            return ref_ptr->get_depth();
+        }
+        break;
+        default:
+            std::cerr << "get_complex_type_depth not implemented for this type\n";
+            exit(1);
+        break;
+    } 
+}
+
+TypeTag TypeVariable::get_bottom_tag() {
+    switch(this->type->get_tag()){
+        case TypeTag::Reference: {
+            auto ref_ptr = std::dynamic_pointer_cast<RefType>(this->type);
+            return ref_ptr->get_bottom_tag();
+        }
+        break;
+        default:
+            std::cerr << "get_complex_type_depth not implemented for this type\n";
+            exit(1);
+        break;
+    } 
+}

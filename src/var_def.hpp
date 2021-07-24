@@ -39,6 +39,13 @@ public:
             
     }
 
+    virtual llvm::Value* codegen() override {
+        llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, "mutable_"+id);
+
+        this->entry->set_allocation(alloc_ptr);
+
+        return alloc_ptr;
+    }
 
 private:
     std::string id;

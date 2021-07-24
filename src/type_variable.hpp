@@ -42,6 +42,9 @@ public:
     TypeTag get_tag();
     TypeVariableTag get_variable_tag();
 
+    unsigned int get_complex_type_depth();
+    TypeTag get_bottom_tag();
+
 private:
     std::shared_ptr<Type> type;
     TypeVariableTag tag;

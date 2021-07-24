@@ -85,6 +85,10 @@ public:
             std::cerr << "Function " << id << " return type can not be of type function\n" << "offending type is: " << *to_type;
             exit(1); //TODO: Error handling.
         }
+        if((sa->is_same_tag(to_type, TypeTag::Array))) {
+            std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
+            exit(1); //TODO: Error handling.
+        }
     }
 
 

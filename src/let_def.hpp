@@ -63,7 +63,7 @@ public:
             AST::st->scope_hide(false);
     };
 
-    virtual llvm::Value* codegen() const override {
+    virtual llvm::Value* codegen() override {
         AST::st->scope_open();
 
         if(let_type == LetType::NoRec)

@@ -32,11 +32,14 @@ public:
 
     }
 
-    virtual llvm::Value* codegen() const override {
+    virtual llvm::Value* codegen() override {
         auto id_entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
         auto allocation = id_entry->get_allocation();
 
-        return Builder.CreateLoad(allocation->getAllocatedType(), allocation, id);
+        if(allocation != nullptr)
+            return Builder.CreateLoad(allocation->getAllocatedType(), allocation, id);
+
+        return nullptr;
     }
 
 private:

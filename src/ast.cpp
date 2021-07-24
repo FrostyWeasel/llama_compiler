@@ -3,6 +3,7 @@
 #include "type_variable.hpp"
 #include "enums.hpp"
 #include "semantic_analyzer.hpp"
+#include "ref_type.hpp"
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Verifier.h>
@@ -35,6 +36,54 @@ void AST::close_library_function_scope() {
 
 void AST::close_all_program_scopes() {
     st->close_all_program_scopes();
+}
+
+llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, llvm::Value* array_index) {
+    switch (type_variable->get_tag()) {
+        case TypeTag::Int:
+            return AST::i32;
+        break;
+        case TypeTag::Bool:
+            return AST::i1;
+        break;
+        case TypeTag::Char:
+            return AST::i8;
+        break;
+        case TypeTag::Unit:
+            return llvm::StructType::get(TheContext);
+        break;
+        case TypeTag::Unknown:
+            return llvm::StructType::get(TheContext);
+        break;
+        case TypeTag::Function:
+            //TODO: Implement
+            return AST::i1;
+        break;
+        case TypeTag::Reference: {
+            auto ref_ptr = type_variable->get_referenced_type();
+            auto referenced_llvm_type = map_to_llvm_type(ref_ptr);
+
+            return llvm::PointerType::get(referenced_llvm_type, 0);
+        }
+        case TypeTag::Array: {
+            // auto array_ptr = type_variable->get_array_type();
+            // auto array_llvm_type = map_to_llvm_type(array_ptr);
+
+            // auto array_type = llvm::ArrayType::get(array_llvm_type, type_variable->get_array_dim());   
+            
+            // auto element_ptr = dynamic_cast<llvm::GetElementPtrInst*>(array_index);
+            
+            // for(auto i = 1; i < type_variable->get_array_dim(); i++) {
+            //     array_type = llvm::ArrayType::get(array_type, element_ptr->);
+            // }
+
+            // return array_type;
+        }
+        break;
+        default:
+            break;
+    }
+    return nullptr;
 }
 
 void AST::llvm_compile_and_dump(bool optimize) {
@@ -124,9 +173,9 @@ void AST::add_library_functions() {
     // to_type = std::make_shared<TypeVariable>(TypeTag::Float);
     // st->insert_entry(new FunctionEntry("read_float", EntryType::ENTRY_FUNCTION, from_type, to_type));
 
-    from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    to_type = std::make_shared<TypeVariable>(TypeTag::Array, 
+    from_type = std::make_shared<TypeVariable>(TypeTag::Array, 
         std::make_shared<TypeVariable>(TypeTag::Char));
+    to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     st->insert_entry(new FunctionEntry("read_string", EntryType::ENTRY_FUNCTION, from_type, to_type));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Reference, 

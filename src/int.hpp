@@ -19,7 +19,7 @@ public:
 
     virtual void sem() override { /* No need for further checks */ }
 
-    virtual llvm::Value* codegen() const {
+    virtual llvm::Value* codegen() {
         return c32(this->value);
     }
 

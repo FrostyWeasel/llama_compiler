@@ -35,7 +35,7 @@ public:
     virtual void print(std::ostream& out) const = 0;
     virtual std::shared_ptr<TypeVariable> infer() = 0;
     virtual void sem() = 0;
-    virtual llvm::Value* codegen() const { }
+    virtual llvm::Value* codegen() { std::cout << "Unimplemented codeged!\n"; }
 
     //TODO: Set to true
     virtual void llvm_compile_and_dump(bool optimize=false);
@@ -86,6 +86,8 @@ protected:
     {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(64, n, true));
     }
+
+    static llvm::Type* map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, llvm::Value* array_index=nullptr);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){
