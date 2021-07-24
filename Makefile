@@ -6,8 +6,8 @@ CXX=g++
 CXXFLAGS=-O0 -Wall -Wextra -Wno-reorder -std=c++14 -g `$(LLVMCONFIG) --cxxflags`
 LDFLAGS=`$(LLVMCONFIG) --ldflags --system-libs --libs all`
 
-HPPFILES=$(shell find ./src -name "*.hpp")
-CPPFILES=$(shell find ./src -name "*.cpp")
+HPPFILES=$(shell find ./src -name "*.hpp" -not -name "parser.hpp" -not -name "lexer.hpp")
+CPPFILES=$(shell find ./src -name "*.cpp" -not -name "parser.cpp" -not -name "lexer.cpp")
 OBJFILES=$(patsubst %.cpp,%.o,$(CPPFILES))
 
 all: compiler
@@ -25,8 +25,8 @@ all: compiler
 
 ./src/parser.o: ./src/parser.cpp ./src/lexer.hpp
 
-compiler: ./src/lexer.o ./src/parser.o $(OBJFILES)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+compiler: ./src/lexer.o ./src/parser.o $(OBJFILES) $(HPPFILES) $(CPPFILES)
+	$(CXX) $(CXXFLAGS) -o $@ ./src/lexer.o ./src/parser.o $(OBJFILES) $(LDFLAGS)
 
 clean:
 	$(RM) ./src/lexer.cpp ./src/parser.hpp ./src/parser.cpp $(OBJFILES) 

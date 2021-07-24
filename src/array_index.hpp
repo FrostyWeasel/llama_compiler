@@ -9,6 +9,7 @@
 #include <string>
 #include <iostream>
 
+//TODO: Strings are not treated like chars
 class ArrayIndex : public Expr{
 public:
     ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
@@ -53,6 +54,47 @@ public:
 
         //All expressions in the expression comma list must be of type int and their count is the dimension of the array.
         this->expr_list->sem();
+    }
+
+    virtual llvm::Value* codegen() override {
+        //example: let mutable a[5, 3, 2] -> a[2, 1, 0] => access array at offset: 2*(3*2) + 1*(2) + 0
+        SymbolEntry* entry = st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES);
+        auto array_entry = dynamic_cast<VariableEntry*>(entry);
+
+        auto dim_sizes = array_entry->get_dim_sizes();
+
+        //example: let mutable a[5, 3, 2] -> partial_dim_size_mults = { 2, 3*2, 3*2*5 <-useless }
+        std::vector<llvm::Value*> partial_dim_size_mults;
+        partial_dim_size_mults.push_back(dim_sizes[dim_sizes.size() - 1]);
+        for(auto dim_size_it = ++dim_sizes.rbegin(); dim_size_it != dim_sizes.rend(); dim_size_it++) {
+            partial_dim_size_mults.push_back(Builder.CreateMul(partial_dim_size_mults[partial_dim_size_mults.size() - 1], *dim_size_it));
+        }
+        
+        auto expr_list_vector = this->expr_list->get_list();
+        auto index = expr_list_vector[0]->codegen();
+        auto partial_dim_size_mults_it = ++partial_dim_size_mults.rbegin(); //last entry is useless
+        llvm::Value* offset = nullptr;
+        if(partial_dim_size_mults_it != partial_dim_size_mults.rend()) {
+            offset = Builder.CreateMul(index, *partial_dim_size_mults_it);
+            partial_dim_size_mults_it++;
+        }
+        else
+            offset = index;
+        
+        
+        for(auto expr_it = ++expr_list_vector.begin(); expr_it != expr_list_vector.end(); expr_it++) {
+            if(partial_dim_size_mults_it != partial_dim_size_mults.rend()) {
+                index = Builder.CreateMul((*expr_it)->codegen(), *partial_dim_size_mults_it);
+                offset = Builder.CreateAdd(offset, index);
+                partial_dim_size_mults_it++;
+            }
+            else
+                offset = Builder.CreateAdd(offset, (*expr_it)->codegen());
+        }
+
+        auto elmnt_ref = llvm::GetElementPtrInst::CreateInBounds(array_entry->get_allocation()->getAllocatedType(), array_entry->get_allocation(), { offset }, "array_element_ptr", Builder.GetInsertBlock());
+        
+        return Builder.CreateLoad(map_to_llvm_type(array_entry->get_type()), elmnt_ref, "array_element"); 
     }
 
 private:

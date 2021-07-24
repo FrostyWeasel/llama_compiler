@@ -9,6 +9,7 @@
 #include "variable_entry.hpp"
 #include <iostream>
 #include <string>
+#include <vector>
 
 //TODO: TypeCheck: All expressions in expr_list should have type=int.
 //TODO: TypeInference: Type is arraytype [*...expr_list->size] of type
@@ -48,6 +49,28 @@ public:
         this->entry = entry;
     }
 
+    virtual void allocate() override {
+        std::vector<llvm::Value*> dim_sizes;
+        llvm::Value* dim_size;
+
+        auto expr_list_vector = this->expr_list->get_list();
+
+        auto array_size = expr_list_vector[0]->codegen();
+        dim_sizes.push_back(array_size);
+        
+        for(auto expr_it = ++expr_list_vector.begin(); expr_it != expr_list_vector.end(); expr_it++) {
+            dim_size = (*expr_it)->codegen();
+            dim_sizes.push_back(dim_size);
+            array_size = Builder.CreateMul(array_size, dim_size, "dim_size_calc");
+        }
+
+        llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(llvm::PointerType::get(map_to_llvm_type(this->type_variable), 0), array_size, id+"_array");
+        this->entry->set_allocation(alloc_ptr);
+
+        auto array_entry = dynamic_cast<VariableEntry*>(this->entry);
+        array_entry->set_dim_sizes(dim_sizes);
+    }
+
     virtual std::shared_ptr<TypeVariable> infer() override {
         //All expressions in the expression comma list must be of type int and their count is the dimension of the array.
         this->expr_list->infer();
@@ -58,18 +81,11 @@ public:
     virtual void sem() override {
         //All expressions in the expression comma list must be of type int and their count is the dimension of the array.
         this->expr_list->sem();
-
     }
 
 
     virtual llvm::Value* codegen() override {
-        auto expr_list_ptr = this->expr_list->codegen();
-
-        // llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable, expr_list_ptr), nullptr, "array_"+id);
-
-        // this->entry->set_allocation(alloc_ptr);
-
-        // return alloc_ptr;
+        return nullptr;
     }
 
 private:

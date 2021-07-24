@@ -38,7 +38,7 @@ void AST::close_all_program_scopes() {
     st->close_all_program_scopes();
 }
 
-llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, llvm::Value* array_index) {
+llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
     switch (type_variable->get_tag()) {
         case TypeTag::Int:
             return AST::i32;
@@ -66,18 +66,7 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, l
             return llvm::PointerType::get(referenced_llvm_type, 0);
         }
         case TypeTag::Array: {
-            // auto array_ptr = type_variable->get_array_type();
-            // auto array_llvm_type = map_to_llvm_type(array_ptr);
-
-            // auto array_type = llvm::ArrayType::get(array_llvm_type, type_variable->get_array_dim());   
-            
-            // auto element_ptr = dynamic_cast<llvm::GetElementPtrInst*>(array_index);
-            
-            // for(auto i = 1; i < type_variable->get_array_dim(); i++) {
-            //     array_type = llvm::ArrayType::get(array_type, element_ptr->);
-            // }
-
-            // return array_type;
+            return llvm::PointerType::get(map_to_llvm_type(type_variable->get_array_type()), 0);
         }
         break;
         default:
@@ -116,7 +105,7 @@ void AST::llvm_compile_and_dump(bool optimize) {
     // Verify the IR.
     bool bad = verifyModule(*TheModule, &llvm::errs());
     if (bad) {
-        std::cerr << "The IR is bad!" << std::endl;
+        std::cerr << "\nThe IR is bad!\n" << std::endl;
         TheModule->print(llvm::errs(), nullptr);
         std::exit(1);
     }

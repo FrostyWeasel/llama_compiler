@@ -53,6 +53,12 @@ public:
         this->entry = entry;
     }
 
+    virtual void allocate() override {
+        llvm::AllocaInst* alloc_ptr = nullptr;
+        alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id);
+        this->entry->set_allocation(alloc_ptr);
+    }
+
     virtual std::shared_ptr<TypeVariable> infer() override {
         FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
 

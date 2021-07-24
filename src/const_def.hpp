@@ -38,6 +38,12 @@ public:
         this->entry = entry;
     }
 
+    virtual void allocate() override {
+        llvm::AllocaInst* alloc_ptr = nullptr;
+        alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id);
+        this->entry->set_allocation(alloc_ptr);
+    }
+
     virtual std::shared_ptr<TypeVariable> infer() override {
         auto expr_type = this->expr->infer();
 
@@ -53,14 +59,10 @@ public:
     virtual llvm::Value* codegen() override {
         auto value = this->expr->codegen();
 
-        llvm::AllocaInst* const_alloc_ptr = nullptr;
-
-        if(value != nullptr) {
-            const_alloc_ptr = Builder.CreateAlloca(value->getType(), value, id);
-            this->entry->set_allocation(const_alloc_ptr);
-        }
-
-        return const_alloc_ptr;
+        if(value != nullptr)
+            return Builder.CreateStore(value, this->entry->get_allocation());
+        else
+            return nullptr;
     }
 
 private:

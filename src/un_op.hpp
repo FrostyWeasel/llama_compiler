@@ -124,7 +124,7 @@ public:
             case OpType::Dereference:{
                 rhs = this->expr->codegen();
 
-                //TODO: Implement this
+                return Builder.CreateLoad(rhs, "dereference");
                 break;
             }
             default:

@@ -475,85 +475,133 @@ public:
         llvm::Value* rhs = nullptr;
 
         switch (op) {
-        case OpType::And:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
+            case OpType::And:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            return Builder.CreateAnd(lhs, rhs, "andtmp");
-            break;
-        case OpType::Assign:
-            break;
-        case OpType::Concat:
-            break;
-        case OpType::Divide:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
-
-            return Builder.CreateSDiv(lhs, rhs, "divtmp");
-            break;
-        case OpType::Equals:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
-
-            switch(this->lval->get_type()->get_tag()) {
-                case TypeTag::Int:
-                    return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
+                return Builder.CreateAnd(lhs, rhs, "andtmp");
                 break;
-                default:
+            case OpType::Assign: {
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                Builder.CreateStore(rhs, lhs);
+                return nullptr;
                 break;
             }
-            break;
-        case OpType::GreaterOrEqualThan:
-            break;
-        case OpType::GreaterThan:
-            break;
-        case OpType::LessOrEqualThan:
-            break;
-        case OpType::LessThan:
-            break;
-        case OpType::Minus:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
+            case OpType::Concat:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+                
+                return rhs;
+                break;
+            case OpType::Divide:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            return Builder.CreateSub(lhs, rhs, "subtmp");
-            break;
-        case OpType::Modulo:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
+                return Builder.CreateSDiv(lhs, rhs, "divtmp");
+                break;
+            case OpType::Equals:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            return Builder.CreateSRem(lhs, rhs, "modtmp");
-            break;
-        case OpType::NatEquals:
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
 
-            break;
-        case OpType::NatNotEquals:
+                // switch(this->lval->get_type()->get_tag()) {
+                //     case TypeTag::Int:
+                //         return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
+                //         break;
+                //     case TypeTag::Bool:
+                //         return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
+                //         break;
+                //     case TypeTag::Char:
+                //         return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
+                //         break;
+                //     default:
+                //         std::cerr << "Unimplemented type comparison\n";
+                //         exit(1);
+                //         break;
+                // }
+                break;
+            case OpType::GreaterOrEqualThan:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            break;
-        case OpType::NotEquals:
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_SGE, lhs, rhs, "greater_or_equal");
+                break;
+            case OpType::GreaterThan:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            break;
-        case OpType::Or:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_SGT, lhs, rhs, "greater_than");
+                break;
+            case OpType::LessOrEqualThan:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            return Builder.CreateOr(lhs, rhs, "ortmp");
-            break;
-        case OpType::Plus:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_SLE, lhs, rhs, "less_or_equal");
+                break;
+            case OpType::LessThan:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            return Builder.CreateAdd(lhs, rhs, "addtmp");
-            break;
-        case OpType::Times:
-            lhs = this->lval->codegen();
-            rhs = this->rval->codegen();
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_SLT, lhs, rhs, "less_than");
+                break;
+            case OpType::Minus:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
 
-            return Builder.CreateMul(lhs, rhs, "multtmp");
-            break;
-        default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
-            break;
+                return Builder.CreateSub(lhs, rhs, "subtmp");
+                break;
+            case OpType::Modulo:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateSRem(lhs, rhs, "modtmp");
+                break;
+            case OpType::NatEquals:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "nat_equ");
+
+                break;
+            case OpType::NatNotEquals:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_NE, lhs, rhs, "nat_not_equ");
+
+                break;
+            case OpType::NotEquals:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateICmp(llvm::CmpInst::ICMP_NE, lhs, rhs, "not_equ");
+
+                break;
+            case OpType::Or:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateOr(lhs, rhs, "ortmp");
+                break;
+            case OpType::Plus:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateAdd(lhs, rhs, "addtmp");
+                break;
+            case OpType::Times:
+                lhs = this->lval->codegen();
+                rhs = this->rval->codegen();
+
+                return Builder.CreateMul(lhs, rhs, "multtmp");
+                break;
+            default:
+                std::cerr << "Unknown binary operator type\n";
+                exit(1); //TODO:Error handling
+                break;
         }
 
         return nullptr;

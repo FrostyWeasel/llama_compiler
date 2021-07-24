@@ -49,6 +49,8 @@ public:
 
     virtual void add_to_symbol_table() { }
 
+    virtual void allocate() { }
+
 
 protected:
     static SymbolTable* st;
@@ -87,7 +89,7 @@ protected:
         return llvm::ConstantInt::get(TheContext, llvm::APInt(64, n, true));
     }
 
-    static llvm::Type* map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, llvm::Value* array_index=nullptr);
+    static llvm::Type* map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){

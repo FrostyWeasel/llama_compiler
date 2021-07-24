@@ -20,9 +20,13 @@ public:
     virtual std::shared_ptr<TypeVariable> get_type() const override { return this->type; }
     unsigned int get_dim() { return dim; }
 
+    void set_dim_sizes(std::vector<llvm::Value*> dim_sizes) { this->dim_sizes = dim_sizes; }
+    std::vector<llvm::Value*>& get_dim_sizes() { return dim_sizes; }
+
 private:
     std::shared_ptr<TypeVariable> type;   
-    unsigned int dim;               
+    unsigned int dim;
+    std::vector<llvm::Value*> dim_sizes;               
 };
 
 #endif

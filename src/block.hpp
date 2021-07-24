@@ -93,6 +93,27 @@ public:
     }
   }
 
+  virtual void allocate() {
+    switch (this->block_type) {
+          case BlockType::Def:
+            for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+              if(*element_it != nullptr){
+                (*element_it)->allocate();
+              }
+              else {
+                std::cerr << "Nullptr in block list.\n";
+                exit(1); //TODO: Error handling
+              }
+            }
+            break;
+
+      default:
+          std::cerr << "Attempting to allocate non definitions.\n";
+          exit(1); //TODO: Error handling
+      break;
+    }
+  }
+
   virtual std::shared_ptr<TypeVariable> infer() override {
     std::shared_ptr<TypeVariable> block_type = nullptr;
 
@@ -211,20 +232,8 @@ virtual llvm::Value* codegen()  override {
       //   break;
 
       case BlockType::ExprComma: {
-          std::vector<llvm::Value*> dimension_values;
-
-          for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
-            if(*element_it != nullptr){
-              //Add result to vector of array index/dimension size
-              dimension_values.push_back((*element_it)->codegen());
-            }
-            else {
-              std::cerr << "Nullptr in block list.\n";
-              exit(1); //TODO: Error handling
-            }
-        }
-
-        block_value = dimension_values;
+        std::cerr << "Codegen for expr comma not generated\n";
+        exit(1); // TODO: error handling
       }
       break;
 
@@ -238,6 +247,8 @@ virtual llvm::Value* codegen()  override {
 
     return block_value;
   }
+
+  std::vector<T*>& get_list() { return list; }
 
 private:
     std::vector<T*> list;
