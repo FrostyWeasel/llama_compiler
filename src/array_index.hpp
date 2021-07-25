@@ -9,7 +9,6 @@
 #include <string>
 #include <iostream>
 
-//TODO: Strings are not treated like chars
 class ArrayIndex : public Expr{
 public:
     ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
@@ -73,13 +72,13 @@ public:
         //example: let mutable a[5, 3, 2] -> partial_dim_size_mults = { 2, 3*2, 3*2*5 <-useless }
         std::vector<llvm::Value*> partial_dim_size_mults;
         partial_dim_size_mults.push_back(dim_sizes[dim_sizes.size() - 1]);
-        for(auto dim_size_it = ++dim_sizes.rbegin(); dim_size_it != dim_sizes.rend(); dim_size_it++) {
+        for(auto dim_size_it = ++dim_sizes.rbegin(); dim_size_it != dim_sizes.rend() - 1; dim_size_it++) {
             partial_dim_size_mults.push_back(Builder.CreateMul(partial_dim_size_mults[partial_dim_size_mults.size() - 1], *dim_size_it));
         }
         
         auto expr_list_vector = this->expr_list->get_list();
         auto index = expr_list_vector[0]->codegen();
-        auto partial_dim_size_mults_it = ++partial_dim_size_mults.rbegin(); //last entry is useless
+        auto partial_dim_size_mults_it = partial_dim_size_mults.rbegin();
         llvm::Value* offset = nullptr;
         if(partial_dim_size_mults_it != partial_dim_size_mults.rend()) {
             offset = Builder.CreateMul(index, *partial_dim_size_mults_it);
