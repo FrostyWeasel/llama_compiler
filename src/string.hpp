@@ -24,20 +24,35 @@ public:
 
     //TODO: Change to match all other arrays
     virtual llvm::Value* codegen() {
-        std::vector<llvm::Constant*> chars;
+        llvm::StructType* array_type;
+        std::vector<llvm::Constant*> array_data;
+        llvm::ArrayType* data_type;
+        std::vector<llvm::Constant*> data;
+
+        //Array of char: [dim1, first_elmnt_ptr]
+        array_type = llvm::StructType::get(TheContext, { i32, llvm::PointerType::get(i8,0) }); 
+        //Array of char elements are of type i8, optimization for string because its values are already known
+        data_type = llvm::ArrayType::get(i8, value.size() + 1); 
 
         for(char c : value) {
-            chars.push_back(c8(c));
+            data.push_back(c8(c));
         }
-        chars.push_back(c8('\0'));
+        data.push_back(c8('\0'));
 
-        auto char_array = llvm::ArrayType::get(i8, chars.size());
+        auto array_data_ptr = Builder.CreateAlloca(data_type, nullptr, "string_data");
+        Builder.CreateStore(llvm::ConstantArray::get(data_type, data), array_data_ptr);
 
-        //Memory managed by the module
-        auto global_string = new llvm::GlobalVariable(*TheModule.get(), char_array, true, llvm::GlobalValue::LinkageTypes::PrivateLinkage, 
-            llvm::ConstantArray::get(char_array, chars), "string");
+        //To be compatible with array_type
+        auto first_element = Builder.CreateBitCast(array_data_ptr, llvm::PointerType::get(i8, 0));
+        auto first_element_ptr = Builder.CreateGEP(i8, first_element, { c32(0) }, "first_element_ptr");
+                
+        auto array_ptr = Builder.CreateAlloca(array_type, nullptr, "array_struct");
+        auto array_type_first_element_ptr = Builder.CreateStructGEP(array_ptr, 0, "dim_size");
+        auto array_type_second_element_ptr = Builder.CreateStructGEP(array_ptr, 1, "string_data_ptr");
+        Builder.CreateStore(c32(data.size()), array_type_first_element_ptr);
+        Builder.CreateStore(first_element_ptr, array_type_second_element_ptr);
 
-        return llvm::GetElementPtrInst::CreateInBounds(char_array, global_string, { c32(0), c32(0) }, "string_ptr", Builder.GetInsertBlock());
+        return Builder.CreateLoad(array_ptr, "array_struct");
     }
 
 private:

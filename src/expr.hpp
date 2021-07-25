@@ -19,8 +19,12 @@ public:
 
     virtual std::shared_ptr<TypeVariable> get_type() { return this->type_variable; }
 
+    virtual SymbolEntry* get_entry() { return this->entry; }
+
+
 protected:
     std::shared_ptr<TypeVariable> type_variable;
+    SymbolEntry* entry; 
 };
 
 #endif

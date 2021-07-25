@@ -50,25 +50,8 @@ public:
     }
 
     virtual void allocate() override {
-        std::vector<llvm::Value*> dim_sizes;
-        llvm::Value* dim_size;
-
-        auto expr_list_vector = this->expr_list->get_list();
-
-        auto array_size = expr_list_vector[0]->codegen();
-        dim_sizes.push_back(array_size);
-        
-        for(auto expr_it = ++expr_list_vector.begin(); expr_it != expr_list_vector.end(); expr_it++) {
-            dim_size = (*expr_it)->codegen();
-            dim_sizes.push_back(dim_size);
-            array_size = Builder.CreateMul(array_size, dim_size, "dim_size_calc");
-        }
-
-        llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), array_size, id+"_array");
+        llvm::AllocaInst* alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_array");
         this->entry->set_allocation(alloc_ptr);
-
-        auto array_entry = dynamic_cast<VariableEntry*>(this->entry);
-        array_entry->set_dim_sizes(dim_sizes);
     }
 
     virtual std::shared_ptr<TypeVariable> infer() override {
@@ -85,7 +68,18 @@ public:
 
 
     virtual llvm::Value* codegen() override {
-        return nullptr;
+        auto expr_list_vector = this->expr_list->get_list();
+        llvm::Value* dim_size_ptr;
+        llvm::Value* dim_size;
+        unsigned int i = 0;
+        for(auto expr_it = expr_list_vector.begin(); expr_it != expr_list_vector.end(); expr_it++) {
+            dim_size_ptr = Builder.CreateStructGEP(this->entry->get_allocation(), i, "dim_size_ptr");
+            dim_size = (*expr_it)->codegen();
+            Builder.CreateStore(dim_size, dim_size_ptr, "dim_size");
+            i++;
+        }
+
+        return this->entry->get_allocation();
     }
 
 private:

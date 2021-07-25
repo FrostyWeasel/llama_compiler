@@ -59,9 +59,16 @@ public:
     virtual llvm::Value* codegen() override {
         //example: let mutable a[5, 3, 2] -> a[2, 1, 0] => access array at offset: 2*(3*2) + 1*(2) + 0
         SymbolEntry* entry = st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES);
-        auto array_entry = dynamic_cast<VariableEntry*>(entry);
 
-        auto dim_sizes = array_entry->get_dim_sizes();
+        auto dim_count = entry->get_type()->get_array_dim();
+
+        std::vector<llvm::Value*> dim_sizes;
+        llvm::Value* dim_size_ptr;
+        for (auto i = 0; i < dim_count; i++) {
+            dim_size_ptr = Builder.CreateStructGEP(entry->get_allocation(), i, "dim_size_ptr");
+            dim_sizes.push_back(Builder.CreateLoad(dim_size_ptr, "dim_size"));
+        }
+        
 
         //example: let mutable a[5, 3, 2] -> partial_dim_size_mults = { 2, 3*2, 3*2*5 <-useless }
         std::vector<llvm::Value*> partial_dim_size_mults;
@@ -91,10 +98,10 @@ public:
             else
                 offset = Builder.CreateAdd(offset, (*expr_it)->codegen());
         }
-
-        auto elmnt_ref = llvm::GetElementPtrInst::CreateInBounds(array_entry->get_allocation()->getAllocatedType(), array_entry->get_allocation(), { offset }, "array_element_ptr", Builder.GetInsertBlock());
         
-        return Builder.CreateLoad(map_to_llvm_type(array_entry->get_type()), elmnt_ref, "array_element"); 
+        auto array_data_ptr = Builder.CreateLoad(Builder.CreateStructGEP(entry->get_allocation(), dim_count), "array_data_ptr");
+
+        return Builder.CreateGEP(array_data_ptr, { offset }, "array_element_ptr");
     }
 
 private:

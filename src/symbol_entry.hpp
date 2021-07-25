@@ -26,6 +26,7 @@ public:
    void set_next_hash(SymbolEntry* next_hash) { this->next_hash = next_hash; }
 
    std::string get_id() { return id; }
+   void set_id(std::string id) { this->id = id; }
 
    unsigned int get_nesting_level() { return nesting_level; }
    void set_nesting_level(unsigned int nesting_level) { this->nesting_level = nesting_level; }

@@ -66,7 +66,13 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
             return llvm::PointerType::get(referenced_llvm_type, 0);
         }
         case TypeTag::Array: {
-            return llvm::PointerType::get(map_to_llvm_type(type_variable->get_array_type()), 0);
+            std::vector<llvm::Type*> array_type;
+            for(auto i = 0; i < type_variable->get_array_dim(); i++) {
+                array_type.push_back(i32);
+            }
+            array_type.push_back(llvm::PointerType::get(map_to_llvm_type(type_variable->get_array_type()),0));
+
+            return llvm::StructType::get(TheContext, array_type);
         }
         break;
         default:

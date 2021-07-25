@@ -59,8 +59,10 @@ public:
     virtual llvm::Value* codegen() override {
         auto value = this->expr->codegen();
 
-        if(value != nullptr)
-            return Builder.CreateStore(value, this->entry->get_allocation());
+        if(value != nullptr) {
+            auto store = Builder.CreateStore(value, this->entry->get_allocation());
+            return store;
+        }
         else
             return nullptr;
     }
