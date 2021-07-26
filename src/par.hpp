@@ -50,7 +50,7 @@ public:
                 if((sa->is_same_tag(to_type, TypeTag::Array))) {
                     std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
                     exit(1); //TODO: Error handling.
-                }
+                }      
             }
             break;
             default:
@@ -58,6 +58,19 @@ public:
             break;
         }
     }
+
+    virtual llvm::Value* codegen() override {
+        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
+
+        st->insert_entry(entry);
+
+        auto alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_par");
+
+        entry->set_allocation(alloc_ptr);
+        return alloc_ptr;
+    }
+
+    virtual std::string get_id() { return this->id; }
 
 private:
     std::string id;

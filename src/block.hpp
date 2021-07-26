@@ -128,7 +128,7 @@ public:
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
                 std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
-                block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type);
+                block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type, FunctionTypeTag::Curry);
               }
               else {
                 std::cerr << "Nullptr in block list.\n";
@@ -148,7 +148,7 @@ public:
             for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
               if(*element_it != nullptr){
                 std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
-                block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type);
+                block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type, FunctionTypeTag::Curry);
               }
               else {
                 std::cerr << "Nullptr in block list.\n";

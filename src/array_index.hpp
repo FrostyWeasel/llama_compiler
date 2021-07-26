@@ -51,6 +51,16 @@ public:
 
     virtual void sem() override {
 
+        //* Not part of semantic analysis. Gathering non-local variables in function definition body for use during code generation
+        if(this->pass_stage == PassStage::FunctionDef) {
+            auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
+            
+            // If id not in the same scope as the parameters of the function
+            if(entry->get_nesting_level() != this->st->get_current_nesting_level()) {
+                this->current_func_def_non_locals->insert({ this->id, entry->get_type() });
+            }
+        }   
+
         //All expressions in the expression comma list must be of type int and their count is the dimension of the array.
         this->expr_list->sem();
     }
@@ -72,7 +82,7 @@ public:
         //example: let mutable a[5, 3, 2] -> partial_dim_size_mults = { 2, 3*2, 3*2*5 <-useless }
         std::vector<llvm::Value*> partial_dim_size_mults;
         partial_dim_size_mults.push_back(dim_sizes[dim_sizes.size() - 1]);
-        for(auto dim_size_it = ++dim_sizes.rbegin(); dim_size_it != dim_sizes.rend() - 1; dim_size_it++) {
+        for(auto dim_size_it = ++dim_sizes.rbegin(); (dim_size_it != dim_sizes.rend() - 1) && (dim_size_it != dim_sizes.rend()); dim_size_it++) {
             partial_dim_size_mults.push_back(Builder.CreateMul(partial_dim_size_mults[partial_dim_size_mults.size() - 1], *dim_size_it));
         }
         

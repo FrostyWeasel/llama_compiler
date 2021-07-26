@@ -122,6 +122,7 @@ program:
             
             $1->infer();
             $1->unify();
+            $1->clear_inference_structures();
             $1->close_all_program_scopes();
 
             $1->sem();
@@ -237,7 +238,7 @@ type:
 |   "char"                                                  { $$ = new TypeVariable(TypeTag::Char); }
 |   "bool"                                                  { $$ = new TypeVariable(TypeTag::Bool); }
 |   '(' type ')'                                            { $$ = $2; }
-|   type "->" type                                          { $$ = new TypeVariable(TypeTag::Function, std::shared_ptr<TypeVariable>($1), std::shared_ptr<TypeVariable>($3)); }
+|   type "->" type                                          { $$ = new TypeVariable(TypeTag::Function, std::shared_ptr<TypeVariable>($1), std::shared_ptr<TypeVariable>($3), FunctionTypeTag::Actual); }
 |   type "ref"                                              { $$ = new TypeVariable(TypeTag::Reference, std::shared_ptr<TypeVariable>($1)); }
 |   "array" "of" type                                       { $$ = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>($3), 1, DimType::Exact); }
 |   "array" '[' asterisk_list ']' "of" type                 { $$ = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>($6), $3, DimType::Exact); }

@@ -12,10 +12,12 @@ public:
     TypeVariable();
     TypeVariable(TypeTag type_tag);
     TypeVariable(TypeTag type_tag, TypeVariable* t1);
-    TypeVariable(TypeTag type_tag, TypeVariable* t1, TypeVariable* t2);
+    TypeVariable(TypeTag type_tag, TypeVariable* t1, TypeVariable* t2, unsigned int parameter_count);
+    TypeVariable(TypeTag type_tag, TypeVariable* t1, TypeVariable* t2, FunctionTypeTag function_tag=FunctionTypeTag::Actual);
     TypeVariable(TypeTag type_tag, TypeVariable* t1, unsigned int dim);
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1);
-    TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2);
+    TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2, unsigned int parameter_count);
+    TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2, FunctionTypeTag function_tag=FunctionTypeTag::Actual);
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, unsigned int dim);
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, DimType dim_type);
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, unsigned int dim, DimType dim_type);
@@ -38,6 +40,12 @@ public:
     void set_array_dim(unsigned int dim);
     DimType get_array_dim_type();
     void set_array_dim_type(DimType dim_type);
+
+    unsigned int get_function_parameter_count();
+    void set_function_parameter_count(unsigned int parameter_count);
+
+    FunctionTypeTag get_function_type_tag();
+    void set_function_type_tag(FunctionTypeTag function_type);
 
     TypeTag get_tag();
     TypeVariableTag get_variable_tag();

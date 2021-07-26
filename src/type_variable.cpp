@@ -6,6 +6,9 @@
 #include "enums.hpp"
 #include <memory>
 
+//TODO: In a static map put all typevariables created if any one is uknown after infer if shared_pointer reference count != 1 set out warning then set value base of optionals
+//TODO: Set up an optional map from type variable to preferred value if they are uknown (most are unit except for example comparisons which are int or char or float)
+
 unsigned int TypeVariable::counter = 0;
 
 TypeVariable::TypeVariable() : type(std::make_shared<Type>(TypeTag::Unknown)), tag(TypeVariableTag::Free), id(++TypeVariable::counter) {  }
@@ -47,10 +50,25 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1) {
     }
 }
 
-TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariable* to_type) {
+TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariable* to_type, FunctionTypeTag function_type) {
     switch (type_tag) {
         case TypeTag::Function:
-            this->type = std::make_shared<FunctionType>(from_type, to_type);
+            this->type = std::make_shared<FunctionType>(from_type, to_type, 0, function_type);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
+            exit(1);
+            break;
+    }
+}
+
+TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariable* to_type, unsigned int parameter_count) {
+    switch (type_tag) {
+        case TypeTag::Function:
+            this->type = std::make_shared<FunctionType>(from_type, to_type, parameter_count, FunctionTypeTag::Actual);
             this->tag = TypeVariableTag::Bound;
             this->id = 0;
             break;
@@ -99,10 +117,25 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1) {
     }
 }
 
-TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type) {
+TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type, FunctionTypeTag function_type) {
     switch (type_tag) {
         case TypeTag::Function:
-            this->type = std::make_shared<FunctionType>(from_type, to_type);
+            this->type = std::make_shared<FunctionType>(from_type, to_type, 0, function_type);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
+            exit(1);
+            break;
+    }
+}
+
+TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type, unsigned int parameter_count) {
+    switch (type_tag) {
+        case TypeTag::Function:
+            this->type = std::make_shared<FunctionType>(from_type, to_type, parameter_count, FunctionTypeTag::Actual);
             this->tag = TypeVariableTag::Bound;
             this->id = 0;
             break;
@@ -275,10 +308,53 @@ unsigned int TypeVariable::get_array_dim() {
 void TypeVariable::set_array_dim(unsigned int dim) {
     if(this->type->get_tag() == TypeTag::Array) {
         auto array_ptr = std::dynamic_pointer_cast<ArrayType>(this->type);
-        return array_ptr->set_dim(dim);
+        array_ptr->set_dim(dim);
     }
     else{
         std::cerr << "Requesting set_array_dim but type is not an array\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+unsigned int TypeVariable::get_function_parameter_count() {
+    if(this->type->get_tag() == TypeTag::Function) {
+        auto function_ptr = std::dynamic_pointer_cast<FunctionType>(this->type);
+        return function_ptr->get_parameter_count();
+    }
+    else{
+        std::cerr << "Requesting get_function_parameter_count but type is not a function\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+void TypeVariable::set_function_parameter_count(unsigned int parameter_count) {
+    if(this->type->get_tag() == TypeTag::Function) {
+        auto function_ptr = std::dynamic_pointer_cast<FunctionType>(this->type);
+        function_ptr->set_parameter_count(parameter_count);
+    }
+    else{
+        std::cerr << "Requesting set_function_parameter_count but type is not a function\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+FunctionTypeTag TypeVariable::get_function_type_tag() {
+    if(this->type->get_tag() == TypeTag::Function) {
+        auto function_ptr = std::dynamic_pointer_cast<FunctionType>(this->type);
+        return function_ptr->function_type_tag;
+    }
+    else{
+        std::cerr << "Requesting get_function_type_tag but type is not a function\n";
+        exit(1); //TODO: Error handling
+    }
+}
+void TypeVariable::set_function_type_tag(FunctionTypeTag function_type){
+    if(this->type->get_tag() == TypeTag::Function) {
+        auto function_ptr = std::dynamic_pointer_cast<FunctionType>(this->type);
+        function_ptr->function_type_tag = function_type;
+    }
+    else{
+        std::cerr << "Requesting set_function_type_tag but type is not a function\n";
         exit(1); //TODO: Error handling
     }
 }

@@ -38,6 +38,14 @@ void SymbolTable::close_all_program_scopes() {
     }
 }
 
+void SymbolTable::clear_inference_structures() {
+    this->contraints.clear();
+    this->contraints.shrink_to_fit();
+    this->bound_types.clear();
+    this->bound_types.shrink_to_fit();
+    this->substitutions.clear();
+}
+
 void SymbolTable::scope_hide(Scope* scope, bool flag) {
     if(scope == nullptr)
         exit(1); //TODO: Error Handling

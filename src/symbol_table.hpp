@@ -36,6 +36,9 @@ public:
     void        scope_hide    (Scope* scope, bool flag);
     void        scope_hide    (bool flag);
     void        close_all_program_scopes();
+    void        clear_inference_structures();
+
+    unsigned int get_current_nesting_level() { return this->current_scope->get_nesting_level(); }
 
 
     void            insert_entry   (SymbolEntry* entry);

@@ -11,97 +11,40 @@
 #include "function_entry.hpp"
 #include <string>
 #include <iostream>
+#include <map>
 
 class FunctionEntry;
 
 class FunctionDef : public Def {
 public:
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr) {}
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
 
     virtual ~FunctionDef() {
         delete expr;
         delete par_list;
     }
 
-    virtual void print(std::ostream& out) const override{
-        out << "FunctionDef(";
-        out << " Id: " << id;
-        out << " Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << ", Par_list: ";
-        if(par_list != nullptr)
-            par_list->print(out);
-        else
-            out << "null ";
-        out << ", Expr: ";
-        if(expr != nullptr)
-            expr->print(out);
-        else
-            out << "null ";
-        out << ") ";
-    }
+    virtual void print(std::ostream& out) const override;
 
-    virtual void add_to_symbol_table() override {
-        FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, std::make_shared<TypeVariable>(), this->type_variable);
-        
-        st->insert_entry(entry);
+    virtual void add_to_symbol_table() override ;
 
-        this->entry = entry;
-    }
+    virtual void allocate() override ;
 
-    virtual void allocate() override {
-        llvm::AllocaInst* alloc_ptr = nullptr;
-        alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id);
-        this->entry->set_allocation(alloc_ptr);
-    }
+    virtual std::shared_ptr<TypeVariable> infer() override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {
-        FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
+    virtual void sem() override;
 
-        //Function scope includes parameters and body
-        st->scope_open(); 
-
-        std::shared_ptr<TypeVariable> from_type = this->par_list->infer();
-
-        //Function from type must be the same as the type of its parameter list.
-        st->add_constraint(func_entry->get_from_type(), from_type);
-
-        std::shared_ptr<TypeVariable> to_type = this->expr->infer();
-
-        //Function return type must be the same as its body expr type.
-        st->add_constraint(this->type_variable, to_type);
-
-        st->scope_close();
-
-        return this->type_variable;
-    }
-
-    virtual void sem() override { 
-        FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
-        auto to_type = func_entry->get_to_type();
-
-        this->par_list->sem();
-        this->expr->sem();
-
-        if((sa->is_same_tag(to_type, TypeTag::Function))) {
-            std::cerr << "Function " << id << " return type can not be of type function\n" << "offending type is: " << *to_type;
-            exit(1); //TODO: Error handling.
-        }
-        if((sa->is_same_tag(to_type, TypeTag::Array))) {
-            std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
-            exit(1); //TODO: Error handling.
-        }
-    }
+    virtual llvm::Value* codegen();
 
 
 private:
     std::string id;
     Block<Par>* par_list;
     Expr* expr;
+    std::shared_ptr<TypeVariable> from_type;
+
+    std::map<std::string, std::shared_ptr<TypeVariable>> non_local_variables;
 };
 
 #endif

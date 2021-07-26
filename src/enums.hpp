@@ -41,4 +41,14 @@ enum class DimType      {
                             AtLeast //Array has at least this dimension
                         };
 
+enum class FunctionTypeTag  {
+                                Curry, //FunctionType simply binds two parameters together
+                                Actual //FunctionType is actually a function
+                            };
+
+enum class PassStage        {
+                                FunctionDef, //Currently doing a pass on function body
+                                Other
+                            };
+
 #endif

@@ -7,6 +7,7 @@
 #include "semantic_analyzer.hpp"
 #include <iostream>
 #include <string>
+#include <map>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Verifier.h>
@@ -44,6 +45,7 @@ public:
     void unify() { st->unify(); }
     void add_library_functions();
     void close_library_function_scope();
+    void clear_inference_structures() { st->clear_inference_structures(); };
 
     virtual NodeType get_node_type() { return node_type; }
 
@@ -56,6 +58,11 @@ protected:
     static SymbolTable* st;
     static SemanticAnalyzer* sa;
     NodeType node_type;
+    
+    static PassStage pass_stage;
+
+    //Points to similar structure of function definition to store non local variables that appear in the functions body.
+    static std::map<std::string, std::shared_ptr<TypeVariable>>* current_func_def_non_locals;
 
     static llvm::LLVMContext TheContext;
     static llvm::IRBuilder<> Builder;
@@ -90,6 +97,7 @@ protected:
     }
 
     static llvm::Type* map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable);
+    static void map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, std::vector<llvm::Type*>& par_types);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){
