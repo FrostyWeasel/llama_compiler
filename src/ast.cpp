@@ -53,10 +53,10 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
             return AST::i8;
         break;
         case TypeTag::Unit:
-            return llvm::Type::getVoidTy(TheContext);
+            return llvm::StructType::get(TheContext);
         break;
         case TypeTag::Unknown:
-            return llvm::Type::getVoidTy(TheContext);
+            return llvm::StructType::get(TheContext);
         break;
         case TypeTag::Function:{
             llvm::Type* return_type;
@@ -67,10 +67,10 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
             std::vector<llvm::Type*> par_types;
             map_par_list_to_llvm_type(type_variable->get_function_from_type(), par_types);
 
-            //Pointer to non local variable struct.
-            par_types.push_back(llvm::PointerType::get(i32, 0));
+            //Pointer to struct containing pointer to function and non local variables struct.
+            par_types.push_back(llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0));
 
-            return llvm::PointerType::get(llvm::FunctionType::get(return_type, par_types, false), 0);
+            return llvm::StructType::get(TheContext, { llvm::PointerType::get(llvm::FunctionType::get(return_type, par_types, false), 0), llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0) });
         }
         break;
         case TypeTag::Reference: {

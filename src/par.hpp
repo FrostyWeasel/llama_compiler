@@ -64,10 +64,20 @@ public:
 
         st->insert_entry(entry);
 
-        auto alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_par");
+        switch(this->type_variable->get_tag()) {
+            case TypeTag::Function : {
+                
+            }
+            break;
+            default:
+                auto alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_par");
 
-        entry->set_allocation(alloc_ptr);
-        return alloc_ptr;
+                entry->set_allocation(alloc_ptr);
+                return alloc_ptr;
+            break;
+        }
+
+       
     }
 
     virtual std::string get_id() { return this->id; }

@@ -32,12 +32,13 @@ void FunctionDef::add_to_symbol_table() {
     this->entry = entry;
 }
 
+//TODO: Function should propably save a pointer to themshelves so that if we call them recursively we can access the non local struct
 void FunctionDef::allocate() {
     //Create a function prototype
     auto func_entry = dynamic_cast<FunctionEntry*>(this->entry);
 
-    auto pointer_to_func_type = llvm::dyn_cast<llvm::PointerType>(map_to_llvm_type(this->entry->get_type()));
-    auto function_type = llvm::dyn_cast<llvm::FunctionType>(pointer_to_func_type->getElementType());
+    auto function_struct = llvm::dyn_cast<llvm::StructType>(map_to_llvm_type(this->entry->get_type()));
+    auto function_type = llvm::dyn_cast<llvm::FunctionType>(function_struct->getContainedType(0));
     auto function_declaration = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, id+"_"+std::to_string(func_entry->get_count()), TheModule.get());
 
     auto par_list = this->par_list->get_list();
@@ -50,23 +51,24 @@ void FunctionDef::allocate() {
             par.setName("non_locals");
     }
 
-    func_entry->set_allocation(Builder.CreateAlloca(pointer_to_func_type, nullptr, id+"_"+std::to_string(func_entry->get_count())+"_function"));
+    auto func_struct_alloca = Builder.CreateAlloca(function_struct, nullptr, id+"_"+std::to_string(func_entry->get_count())+"_function_struct");
+    func_entry->set_allocation(func_struct_alloca);
     func_entry->set_function_declaration(function_declaration);
+    auto func_ptr = Builder.CreateStructGEP(func_struct_alloca, 0, id+"_"+std::to_string(func_entry->get_count())+"_function_ptr");
+    Builder.CreateStore(function_declaration, func_ptr);
+    TheModule->print(llvm::outs(), nullptr);
 
+    //TODO: Propably not needed since it will be accessed through the function struct
     //Predifine the function non local struct pointer to allow mutually recursive functions that are declared together.
-    func_entry->set_non_local_struct(Builder.CreateAlloca(llvm::PointerType::get(i32, 0), nullptr, id+"_"+std::to_string(func_entry->get_count())+"_non_local_struct_ptr"));
-
+    func_entry->set_non_local_struct(Builder.CreateAlloca(llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0), nullptr, id+"_"+std::to_string(func_entry->get_count())+"_non_local_struct_ptr"));
 }
 
 
 void FunctionDef::make_non_local_variable_stack() {
-   FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
-    auto function = func_entry->get_function_declaration();
+    FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
 
     std::vector<llvm::Type*> non_local_struct_types;
     std::vector<llvm::Value*> non_local_struct_allocas;
-
-    non_local_struct_types.push_back(i32);
 
     for(auto nl_it = this->non_local_variables.begin(); nl_it != this->non_local_variables.end(); nl_it++) {
         auto nl_entry = st->lookup_entry(nl_it->first, LookupType::LOOKUP_ALL_SCOPES);
@@ -231,8 +233,9 @@ llvm::Value* FunctionDef::codegen() {
 
     auto return_value = this->expr->codegen();
 
-    if((return_value != nullptr) && (!(map_to_llvm_type(func_entry->get_to_type())->isVoidTy())))
+    if((return_value != nullptr) && (!(map_to_llvm_type(func_entry->get_to_type())->isVoidTy()))) {
         Builder.CreateRet(return_value);
+    }
     else
         Builder.CreateRetVoid();
 
