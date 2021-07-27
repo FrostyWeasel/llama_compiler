@@ -17,56 +17,17 @@ public:
         delete expr;
     }
 
-    virtual void print(std::ostream& out) const override{
-        out << " " << id;
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << " = ";
-        if(expr != nullptr)
-            expr->print(out);
-        else
-            out << " null";
-    }
+    virtual void print(std::ostream& out) const override;
 
-    virtual void add_to_symbol_table() override {
-        ConstantEntry* entry = new ConstantEntry(id, EntryType::ENTRY_CONSTANT, this->type_variable);
-        
-        st->insert_entry(entry);
+    virtual void add_to_symbol_table() override;
 
-        this->entry = entry;
-    }
+    virtual void allocate() override;
 
-    virtual void allocate() override {
-        llvm::AllocaInst* alloc_ptr = nullptr;
-        alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id);
-        this->entry->set_allocation(alloc_ptr);
-    }
+    virtual std::shared_ptr<TypeVariable> infer() override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {
-        auto expr_type = this->expr->infer();
+    virtual void sem() override;
 
-        st->add_constraint(this->type_variable, expr_type);
-
-        return this->type_variable;
-    }
-
-    virtual void sem() override { 
-        this->expr->sem();
-    }
-
-    virtual llvm::Value* codegen() override {
-        auto value = this->expr->codegen();
-
-        if(value != nullptr) {
-            auto store = Builder.CreateStore(value, this->entry->get_allocation());
-            return store;
-        }
-        else
-            return nullptr;
-    }
-
+    virtual llvm::Value* codegen() override;
 private:
     std::string id;
     Expr* expr;
