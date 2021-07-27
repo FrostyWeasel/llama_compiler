@@ -44,22 +44,22 @@ void FunctionCall::sem() {
 }
 
 llvm::Value* FunctionCall::codegen() {
-    //TODO: May be a parameter or a constant def add non local struct to them
-    auto func_entry = dynamic_cast<FunctionEntry*>(st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES));
-    auto non_local_struct = func_entry->get_non_local_struct();
-    auto function_ptr = func_entry->get_allocation();
+    auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
+    auto function_struct = entry->get_allocation();
 
-    auto function_type = llvm::dyn_cast<llvm::FunctionType>(map_to_llvm_type(func_entry->get_type()));
+    auto function_declaration_ptr = Builder.CreateStructGEP(function_struct, 0, this->id+"_function_declaration_ptr");
+    auto function_declaration_load = Builder.CreateLoad(function_declaration_ptr, this->id+"_function_declaration_load");
 
-    auto function = Builder.CreateLoad(function_ptr, this->id+"_"+std::to_string(func_entry->get_count())+"_function_load");
+    auto function_type = llvm::dyn_cast<llvm::FunctionType>(function_declaration_load->getType()->getPointerElementType());
 
     std::vector<llvm::Value*> par_values;
     for(auto exp: expr_list->get_list()) {
         par_values.push_back(exp->codegen());
     }
 
-    par_values.push_back(Builder.CreateLoad(non_local_struct, this->id+"_"+std::to_string(func_entry->get_count())+"_struct"));
+    par_values.push_back(Builder.CreateBitCast(function_struct, llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0)));
+
 
     // * Unnamed because it is not allowed for calls to have names if return type is void
-    return Builder.CreateCall(function_type, function);
+    return Builder.CreateCall(function_type, function_declaration_load, par_values);
 }

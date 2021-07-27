@@ -112,6 +112,32 @@ SymbolEntry* SymbolTable::lookup_entry(std::string id, LookupType lookup_type) {
     return nullptr;
 }
 
+bool SymbolTable::contains(std::string id, LookupType lookup_type) {
+    unsigned int hash_value = PJW_hash(id) % hashtable_size;
+    SymbolEntry* entry = hashtable[hash_value];
+
+    switch(lookup_type) {
+        case LookupType::LOOKUP_CURRENT_SCOPE:
+            while (entry != nullptr && entry->get_nesting_level() == this->current_scope->get_nesting_level()) {
+                if(entry->get_id() == id)
+                    return true;
+                else
+                    entry = entry->get_next_hash();
+            }
+            break;
+        case LookupType::LOOKUP_ALL_SCOPES:
+            while (entry != nullptr) {
+                if(entry->get_id() == id && !entry->get_scope()->get_hidden())
+                    return true;
+                else
+                    entry = entry->get_next_hash();
+            }           
+            break;
+    }
+
+    return false;
+}
+
 typedef unsigned long int HashType;
 unsigned int SymbolTable::PJW_hash(std::string id) {
     /*

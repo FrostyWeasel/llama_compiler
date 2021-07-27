@@ -38,7 +38,7 @@ void FunctionDef::allocate() {
     auto func_entry = dynamic_cast<FunctionEntry*>(this->entry);
 
     auto function_struct = llvm::dyn_cast<llvm::StructType>(map_to_llvm_type(this->entry->get_type()));
-    auto function_type = llvm::dyn_cast<llvm::FunctionType>(function_struct->getContainedType(0));
+    auto function_type = llvm::dyn_cast<llvm::FunctionType>(function_struct->getContainedType(0)->getPointerElementType());
     auto function_declaration = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, id+"_"+std::to_string(func_entry->get_count()), TheModule.get());
 
     auto par_list = this->par_list->get_list();
@@ -46,9 +46,9 @@ void FunctionDef::allocate() {
     unsigned int i = 0;
     for(auto &par: function_declaration->args()) {
         if(i <= par_list.size() - 1)
-            par.setName(par_list[i++]->get_id());
+            par.setName(par_list[i++]->get_id()+"_par");
         else
-            par.setName("non_locals");
+            par.setName("function_struct_par");
     }
 
     auto func_struct_alloca = Builder.CreateAlloca(function_struct, nullptr, id+"_"+std::to_string(func_entry->get_count())+"_function_struct");
@@ -56,11 +56,7 @@ void FunctionDef::allocate() {
     func_entry->set_function_declaration(function_declaration);
     auto func_ptr = Builder.CreateStructGEP(func_struct_alloca, 0, id+"_"+std::to_string(func_entry->get_count())+"_function_ptr");
     Builder.CreateStore(function_declaration, func_ptr);
-    TheModule->print(llvm::outs(), nullptr);
 
-    //TODO: Propably not needed since it will be accessed through the function struct
-    //Predifine the function non local struct pointer to allow mutually recursive functions that are declared together.
-    func_entry->set_non_local_struct(Builder.CreateAlloca(llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0), nullptr, id+"_"+std::to_string(func_entry->get_count())+"_non_local_struct_ptr"));
 }
 
 
@@ -75,33 +71,25 @@ void FunctionDef::make_non_local_variable_stack() {
         auto nl_type = map_to_llvm_type(nl_it->second);
         non_local_struct_types.push_back(llvm::PointerType::get(nl_type, 0));
         non_local_struct_allocas.push_back(nl_entry->get_allocation());
-        if(nl_entry->get_type()->get_tag() == TypeTag::Function) {
-            auto func_entry = dynamic_cast<FunctionEntry*>(nl_entry);
-            non_local_struct_types.push_back(llvm::PointerType::get(llvm::PointerType::get(i32, 0), 0));
-            non_local_struct_allocas.push_back(func_entry->get_non_local_struct());
-        }
     }
 
     // Struct structure: { non_local_variable_count, ptr_to_non_local_variable_1, ptr_to_non_local_variable_2, ... }
     auto non_local_struct_type = llvm::StructType::get(TheContext, non_local_struct_types);
     this->non_local_struct_type = non_local_struct_type;
-    auto non_local_struct = Builder.CreateAlloca(non_local_struct_type, nullptr, id+"_"+std::to_string(func_entry->get_count())+"_non_local_struct");
-
-    auto non_local_count_ptr = Builder.CreateStructGEP(non_local_struct, 0, id+"_"+std::to_string(func_entry->get_count())+"_non_locals_count");
-    Builder.CreateStore(c32(non_local_struct_allocas.size()), non_local_count_ptr);
+    auto non_local_struct = Builder.CreateAlloca(non_local_struct_type, nullptr, id+"_"+std::to_string(func_entry->get_count())+"_non_locals_struct");
 
     //Store pointers to non_local variables in struct.
     unsigned int i = 0;
     for(auto non_local_struct_alloca: non_local_struct_allocas) {
         //Returns a pointer to the struct element which is a pointer to the non local variable
-        auto non_local_ref_ptr = Builder.CreateStructGEP(non_local_struct, ++i, id+"_"+std::to_string(func_entry->get_count())+"_non_local_ref_ptr");
+        auto non_local_ref_ptr = Builder.CreateStructGEP(non_local_struct, i++, id+"_"+std::to_string(func_entry->get_count())+"_non_local_variable_struct_ptr");
         Builder.CreateStore(non_local_struct_alloca, non_local_ref_ptr);
     }
 
     //Pointer to non_local_struct for use during function calls
-    auto ptr_to_non_local_struct = Builder.CreateBitCast(non_local_struct, llvm::PointerType::get(i32, 0), id+"_"+std::to_string(func_entry->get_count())+"_non_local_struct_ptr");
-    Builder.CreateStore(ptr_to_non_local_struct, func_entry->get_non_local_struct());
-
+    auto ptr_to_non_local_struct = Builder.CreateBitCast(non_local_struct, llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0), id+"_"+std::to_string(func_entry->get_count())+"_non_locals_struct_ptr");
+    auto func_struct_non_locals_ptr = Builder.CreateStructGEP(func_entry->get_allocation(), 1, id+"_"+std::to_string(func_entry->get_count())+"_func_struct_non_locals_ptr");
+    Builder.CreateStore(ptr_to_non_local_struct, func_struct_non_locals_ptr);
 }
 
 std::shared_ptr<TypeVariable> FunctionDef::infer() {
@@ -135,10 +123,37 @@ void FunctionDef::sem() {
 
     this->par_list->sem();
 
-    this->pass_stage = PassStage::FunctionDef;
-    this->current_func_def_non_locals = &this->non_local_variables;
+    //get list of non local variables in function body
+    auto is_outer_scope_function_def = false;
+    if(this->pass_stage != PassStage::FunctionDef)
+        this->pass_stage = PassStage::FunctionDef;
+    else
+        is_outer_scope_function_def = true;
+
+    AST::current_func_def_non_locals = &this->non_local_variables;
     this->expr->sem();
-    this->pass_stage = PassStage::Other;
+
+    //Make sure that no non local variable is a parameter of the function. If it is remove it
+    auto par_vector =  this->par_list->get_list();
+    for(auto par: par_vector) {
+        if(this->non_local_variables.count(par->get_id()) != 0)
+            this->non_local_variables.erase(par->get_id());
+    }
+
+    //Make sure that non local variable has an earlier definition than this function definition
+    std::vector<std::string> out_of_scope_variables;
+    for(auto nl: this->non_local_variables) {
+        auto is_in_table = st->contains(nl.first, LookupType::LOOKUP_ALL_SCOPES);
+        if(!is_in_table){
+            out_of_scope_variables.push_back(nl.first);
+        }
+    }
+    for(auto out_of_scope_variable_id: out_of_scope_variables) {
+        this->non_local_variables.erase(out_of_scope_variable_id);
+    }
+
+    if(!is_outer_scope_function_def)
+        this->pass_stage = PassStage::Other;
 
     st->scope_close();
 
@@ -155,6 +170,7 @@ void FunctionDef::sem() {
 llvm::Value* FunctionDef::codegen() {
     FunctionEntry* func_entry = dynamic_cast<FunctionEntry*>(this->entry);
     auto function = func_entry->get_function_declaration();
+    auto func_struct = func_entry->get_allocation();
 
     //Function scope includes parameters and body
     st->scope_open(); 
@@ -170,72 +186,52 @@ llvm::Value* FunctionDef::codegen() {
     for(auto par: par_list_vector) {
         par_allocas.push_back(par->codegen());
     }
-    auto non_cast_pointer_to_struct_alloca = Builder.CreateAlloca(llvm::PointerType::get(i32, 0), nullptr, "non_locals_par");
+    auto func_struct_alloca = Builder.CreateAlloca(func_struct->getType(), nullptr, "function_struct");
 
     //store function parameters in local allocas
     unsigned int i = 0;
     for(auto &par: func_entry->get_function_declaration()->args()) {
         if(i <= par_allocas.size() - 1)
             Builder.CreateStore(&par, par_allocas[i++]);
-        else
-            Builder.CreateStore(&par, non_cast_pointer_to_struct_alloca);
+        else {
+            Builder.CreateStore(Builder.CreateBitCast(&par, func_struct->getType()), func_struct_alloca);
+        }
     }
 
     //Load pointer to non_local struct and bitcast it to its original type
-    auto parent_function_struct_first_element_ptr = Builder.CreateLoad(non_cast_pointer_to_struct_alloca, "parent_function_struct_first_element_ptr");
-    auto parent_function_struct_ptr = Builder.CreateBitCast(parent_function_struct_first_element_ptr, llvm::PointerType::get(non_local_struct_type, 0), "parent_function_struct_ptr");
+    auto non_locals_struct_first_element_ptr = Builder.CreateStructGEP(Builder.CreateLoad(func_struct_alloca, "function_struct_load"), 1, "non_locals_struct_first_element_ptr");
+    auto non_locals_struct_first_element_ptr_load = Builder.CreateLoad(non_locals_struct_first_element_ptr, "non_locals_struct_first_element_ptr_load");
+    auto non_locals_struct_ptr = Builder.CreateBitCast(non_locals_struct_first_element_ptr_load, llvm::PointerType::get(non_local_struct_type, 0), "non_locals_struct_ptr");
     
     //allocate space in function stack for pointer to non local struct
-    auto non_local_struct_function_body = Builder.CreateAlloca(non_local_struct_type, nullptr, "non_local_struct");
-    auto struct_ptr = Builder.CreateGEP(parent_function_struct_ptr, { c32(0) }, "struct_ptr");
-    Builder.CreateStore(Builder.CreateLoad(struct_ptr, "non_local_struct_load"), non_local_struct_function_body);
+    auto non_locals_struct = Builder.CreateAlloca(non_local_struct_type, nullptr, "non_locals_struct");
+    Builder.CreateStore(Builder.CreateLoad(non_locals_struct_ptr, "non_local_struct_load"), non_locals_struct);
 
 
     //Load all non local variables and replace their alloca in the symbol table with the ones in the function body
     std::map<std::string, llvm::AllocaInst*> non_local_allocas;
-    std::map<FunctionEntry*, llvm::AllocaInst*> non_local_function_structs;
 
     i = 0;
     for(auto nl_it = this->non_local_variables.begin(); nl_it != this->non_local_variables.end(); nl_it++) {
         //Returns a pointer to the struct element which is a pointer to the non local variable
-        auto non_local_ref_ptr = Builder.CreateStructGEP(non_local_struct_function_body, ++i, "non_local_ref_ptr");
+        auto non_local_ref_ptr = Builder.CreateStructGEP(non_locals_struct, i++, "non_local_ref_ptr");
         //Dereference both the GEP pointer and the variable pointer to get the type of the non local variable
         auto non_local_alloca = Builder.CreateAlloca(non_local_ref_ptr->getType()->getPointerElementType()->getPointerElementType(),  nullptr, nl_it->first);
         Builder.CreateStore(Builder.CreateLoad(Builder.CreateLoad(non_local_ref_ptr)), non_local_alloca);
 
         auto nl_entry = st->lookup_entry(nl_it->first, LookupType::LOOKUP_ALL_SCOPES);
-        llvm::AllocaInst* function_non_local_struct = nullptr;
-        if(nl_entry->get_type()->get_tag() == TypeTag::Function) {
-            auto func_entry = dynamic_cast<FunctionEntry*>(nl_entry);
-            //Returns a pointer to the struct element which is a pointer to the non local variable
-            auto non_local_ref_ptr = Builder.CreateStructGEP(non_local_struct_function_body, ++i, "non_local_ref_ptr");
-            //Dereference both the GEP pointer and the variable pointer to get the type of the non local variable
-            function_non_local_struct = Builder.CreateAlloca(non_local_ref_ptr->getType()->getPointerElementType()->getPointerElementType(),  nullptr, nl_it->first);
-            Builder.CreateStore(Builder.CreateLoad(Builder.CreateLoad(non_local_ref_ptr)), function_non_local_struct);
-        }
 
         //Remember non local variables old alloca
         non_local_allocas.insert({ nl_it->first, nl_entry->get_allocation() });
 
-        //Remember functions old non local struct alloca
-        if(nl_entry->get_type()->get_tag() == TypeTag::Function) {
-            auto func_entry = dynamic_cast<FunctionEntry*>(nl_entry);
-            non_local_function_structs.insert({ func_entry, func_entry->get_non_local_struct() });
-        }
-
         //Store non local alloca in variables symbol table
         nl_entry->set_allocation(non_local_alloca);
-        if(nl_entry->get_type()->get_tag() == TypeTag::Function) {
-            auto func_entry = dynamic_cast<FunctionEntry*>(nl_entry);
-            func_entry->set_non_local_struct(function_non_local_struct);
-        }
     }
 
     auto return_value = this->expr->codegen();
 
-    if((return_value != nullptr) && (!(map_to_llvm_type(func_entry->get_to_type())->isVoidTy()))) {
+    if((return_value != nullptr) && (!(function->getReturnType()->isVoidTy())))
         Builder.CreateRet(return_value);
-    }
     else
         Builder.CreateRetVoid();
 
@@ -243,9 +239,6 @@ llvm::Value* FunctionDef::codegen() {
     for(auto nl_it = non_local_allocas.begin(); nl_it != non_local_allocas.end(); nl_it++) {
         auto nl_entry = st->lookup_entry(nl_it->first, LookupType::LOOKUP_ALL_SCOPES);
         nl_entry->set_allocation(nl_it->second);
-    }
-    for(auto nl_it = non_local_function_structs.begin(); nl_it != non_local_function_structs.end(); nl_it++) {
-        nl_it->first->set_non_local_struct(nl_it->second);
     }
 
     Builder.SetInsertPoint(previous_insert_point);

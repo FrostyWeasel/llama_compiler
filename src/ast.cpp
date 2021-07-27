@@ -18,6 +18,7 @@ SymbolTable* AST::st = new SymbolTable(20000);
 SemanticAnalyzer* AST::sa = new SemanticAnalyzer();
 PassStage AST::pass_stage = PassStage::Other;
 std::map<std::string, std::shared_ptr<TypeVariable>>* AST::current_func_def_non_locals = nullptr;
+unsigned int outer_function_nesting_level = 0;
 
 
 llvm::LLVMContext AST::TheContext;

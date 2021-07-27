@@ -15,72 +15,17 @@ public:
 
     virtual ~Par() {}
 
-    virtual void print(std::ostream &out) const override { 
-        out << "(" << id << " :";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << " null";
-        out << ")";
-    }
+    virtual void print(std::ostream &out) const override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {
-        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
+    virtual std::shared_ptr<TypeVariable> infer() override;
+    virtual void set_type(std::shared_ptr<TypeVariable> type_variable);
+    virtual std::shared_ptr<TypeVariable> get_type();
 
-        st->insert_entry(entry);
+    virtual void sem() override;
+    
+    virtual llvm::Value* codegen() override;
 
-        return this->type_variable;
-    }
-
-    virtual void set_type(std::shared_ptr<TypeVariable> type_variable) { this->type_variable = type_variable; }
-    virtual std::shared_ptr<TypeVariable> get_type() { return this->type_variable; }
-
-    virtual void sem() override {
-        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
-
-        st->insert_entry(entry);
-
-        switch(this->type_variable->get_tag()) {
-            case TypeTag::Function : {
-                auto to_type = this->type_variable->get_function_to_type();
-                if((sa->is_same_tag(to_type, TypeTag::Function))) {
-                    std::cerr << "Function " << id << " return type can not be of type function\n" << "offending type is: " << *to_type;
-                    exit(1); //TODO: Error handling.
-                }
-                if((sa->is_same_tag(to_type, TypeTag::Array))) {
-                    std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
-                    exit(1); //TODO: Error handling.
-                }      
-            }
-            break;
-            default:
-
-            break;
-        }
-    }
-
-    virtual llvm::Value* codegen() override {
-        ParameterEntry* entry = new ParameterEntry(id, EntryType::ENTRY_PARAMETER, this->type_variable);
-
-        st->insert_entry(entry);
-
-        switch(this->type_variable->get_tag()) {
-            case TypeTag::Function : {
-                
-            }
-            break;
-            default:
-                auto alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_par");
-
-                entry->set_allocation(alloc_ptr);
-                return alloc_ptr;
-            break;
-        }
-
-       
-    }
-
-    virtual std::string get_id() { return this->id; }
+    virtual std::string get_id();
 
 private:
     std::string id;

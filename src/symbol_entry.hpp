@@ -45,7 +45,6 @@ protected:
    std::string         id;                   /* Ονομα αναγνωριστικού          */
    EntryType           entry_type;           /* Τύπος της εγγραφής            */
    llvm::AllocaInst*   allocation;           /* Ptr to variable in stack      */ 
-   llvm::AllocaInst*   non_local_struct;     /* Allocate space for nl struct  */
 
 private:
    unsigned int        nesting_level;        /* Βάθος φωλιάσματος             */

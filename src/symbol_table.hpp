@@ -43,6 +43,7 @@ public:
 
     void            insert_entry   (SymbolEntry* entry);
     SymbolEntry*    lookup_entry   (std::string id, LookupType lookup_type);
+    bool            contains       (std::string id, LookupType lookup_type);
 
     inline void add_constraint (std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2) {
         contraints.push_back(Constraint(t1, t2));

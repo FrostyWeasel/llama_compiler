@@ -29,8 +29,22 @@ std::shared_ptr<TypeVariable> LetIn::infer() {
 }
 
 void LetIn::sem() {
+
+    //* Not part of semantic analysis. Gathering non-local variables in function definition body for use during code generation
+    if(this->pass_stage == PassStage::FunctionDef) {
+        this->parent_function_non_locals = AST::current_func_def_non_locals;
+    }   
+
     //Opens but does not close scope.
     this->let_def->sem(); 
+
+    // * Location of code must be here to allow the existence of more let in expressions in this ones expression
+    if(this->pass_stage == PassStage::FunctionDef) {
+        for(auto non_local_variable: *AST::current_func_def_non_locals) {
+            this->parent_function_non_locals->insert(non_local_variable);
+        }
+        AST::current_func_def_non_locals = this->parent_function_non_locals;
+    }
 
     this->expr->sem();
 

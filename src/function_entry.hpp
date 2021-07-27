@@ -29,14 +29,9 @@ public:
 
     unsigned int get_parameter_count() { return this->parameter_count; }
 
-    llvm::AllocaInst* get_non_local_struct() { return this->non_local_struct; }
-    void set_non_local_struct(llvm::AllocaInst* non_local_struct) {  this->non_local_struct = non_local_struct; }
-
-
 private:
     std::shared_ptr<TypeVariable>       from_type;
     std::shared_ptr<TypeVariable>       to_type;
-    llvm::AllocaInst*   non_local_struct;
     llvm::Function*     function_declaration;
     unsigned int        parameter_count;
     unsigned int        count;
