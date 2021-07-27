@@ -73,6 +73,7 @@ public:
         //This is to allow mutually recursive definitions ex.let rec even n = if n=0 then true else odd (n-1) and odd n = if n=0 then false else even (n-1)
         this->def->add_to_symbol_table();
         this->def->allocate();
+        this->def->make_non_local_variable_stack();
 
         auto def_value = def->codegen();
 

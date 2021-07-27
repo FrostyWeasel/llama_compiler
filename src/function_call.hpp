@@ -19,49 +19,14 @@ public:
         delete expr_list;
     }
 
-    virtual void print(std::ostream &out) const override{
-        out << "FunctionCall(";
-        out << " Id: " << id << ", ";
-        out << "Type: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << "Expr_list: ";
-        if(expr_list != nullptr)
-            expr_list->print(out);
-        else
-            out << "null ";
-        out << ") ";
-    }
+    virtual void print(std::ostream &out) const override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {
-        auto entry = this->st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES);
-        
-        std::shared_ptr<TypeVariable> func_type = entry->get_type();
-        std::shared_ptr<TypeVariable> par_list_type = this->expr_list->infer();
-        std::shared_ptr<TypeVariable> correct_type = std::make_shared<TypeVariable>(TypeTag::Function, par_list_type, this->type_variable, this->expr_list->block_size()); 
+    virtual std::shared_ptr<TypeVariable> infer() override;
 
-        this->st->add_constraint(func_type, correct_type);
+    virtual void sem() override;
 
-        return this->type_variable;
-    }
+    virtual llvm::Value* codegen() override;
 
-    virtual void sem() override {  
-
-        //* Not part of semantic analysis. Gathering non-local variables in function definition body for use during code generation
-        if(this->pass_stage == PassStage::FunctionDef) {
-            auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
-            
-            // If id not in the same scope as the parameters of the function
-            if(entry->get_nesting_level() != this->st->get_current_nesting_level()) {
-                this->current_func_def_non_locals->insert({ this->id, entry->get_type() });
-            }
-        }   
-           
-        this->expr_list->sem();
-
-    }
 
 private:
     std::string id;

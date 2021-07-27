@@ -53,10 +53,10 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
             return AST::i8;
         break;
         case TypeTag::Unit:
-            return llvm::StructType::get(TheContext);
+            return llvm::Type::getVoidTy(TheContext);
         break;
         case TypeTag::Unknown:
-            return llvm::StructType::get(TheContext);
+            return llvm::Type::getVoidTy(TheContext);
         break;
         case TypeTag::Function:{
             llvm::Type* return_type;

@@ -25,7 +25,7 @@ all: compiler
 
 ./src/parser.o: ./src/parser.cpp ./src/lexer.hpp
 
-compiler: ./src/lexer.o ./src/parser.o $(OBJFILES) $(HPPFILES) $(CPPFILES)
+compiler: ./src/lexer.o ./src/parser.o $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o $@ ./src/lexer.o ./src/parser.o $(OBJFILES) $(LDFLAGS)
 
 clean:

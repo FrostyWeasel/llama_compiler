@@ -37,6 +37,8 @@ public:
 
     virtual llvm::Value* codegen();
 
+    virtual void make_non_local_variable_stack() override;
+
 
 private:
     std::string id;
@@ -45,6 +47,8 @@ private:
     std::shared_ptr<TypeVariable> from_type;
 
     std::map<std::string, std::shared_ptr<TypeVariable>> non_local_variables;
+
+    llvm::StructType* non_local_struct_type;
 };
 
 #endif

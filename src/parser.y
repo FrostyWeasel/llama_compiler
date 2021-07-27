@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+#include "block.hpp"
 #include "includes.hpp"
 #include "lexer.hpp"
 #include <memory>

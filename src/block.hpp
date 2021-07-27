@@ -188,64 +188,25 @@ public:
     }
   }
 
-virtual llvm::Value* codegen()  override {
-  llvm::Value* block_value = nullptr;
+  virtual llvm::Value* codegen()  override {
+      llvm::Value* block_value = nullptr;
 
-  switch (this->block_type) {
-      // case BlockType::Par:
-      //   if(this->list.size() == 0) {
-      //     std::cerr << "Parameter list is empty.\n";
-      //     exit(1); //TODO: Error handling
-      //   }
-      //   else {
-      //     block_type = list[0]->infer();
-      //       for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
-      //         if(*element_it != nullptr){
-      //           //TODO: Implement
-
-      //         }
-      //         else {
-      //           std::cerr << "Nullptr in block list.\n";
-      //           exit(1); //TODO: Error handling
-      //         }
-      //     }
-      //   }
-      //   break;
-
-      // case BlockType::Expr:
-      //   if(this->list.size() == 0) {
-      //     std::cerr << "Expression list is empty.\n";
-      //     exit(1); //TODO: Error handling
-      //   }
-      //   else {
-      //     block_type = list[0]->infer();
-      //       for(auto element_it = ++this->list.begin(); element_it != this->list.end(); element_it++) {
-      //         if(*element_it != nullptr){
-      //           //TODO: Implement
-      //         }
-      //         else {
-      //           std::cerr << "Nullptr in block list.\n";
-      //           exit(1); //TODO: Error handling
-      //         }
-      //     }
-      //   }
-      //   break;
-
-      case BlockType::ExprComma: {
-        std::cerr << "Codegen for expr comma not generated\n";
-        exit(1); // TODO: error handling
+    
+      for(T* element: list) {
+        if(element != nullptr)
+          element->codegen();
       }
-      break;
 
-      default:
-          for(T* element: list) {
-            if(element != nullptr)
-              element->codegen();
-          }
-        break;
+      return block_value;
     }
 
-    return block_value;
+  virtual void make_non_local_variable_stack()  override {
+
+    for(T* element: list) {
+      if(element != nullptr)
+        element->make_non_local_variable_stack();
+    }
+
   }
 
   std::vector<T*>& get_list() { return list; }

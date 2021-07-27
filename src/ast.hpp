@@ -53,6 +53,8 @@ public:
 
     virtual void allocate() { }
 
+    virtual void make_non_local_variable_stack() { }
+
 
 protected:
     static SymbolTable* st;
