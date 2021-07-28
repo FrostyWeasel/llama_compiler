@@ -17,7 +17,6 @@
 #include <llvm/Transforms/Scalar/GVN.h>
 #include <llvm/Transforms/Utils.h>
 
-//TODO: Check types in llama panflet for more type restrictions
 
 //TODO: In case i implement float
 /*
@@ -71,6 +70,27 @@ protected:
     static std::unique_ptr<llvm::Module> TheModule;
     static std::unique_ptr<llvm::legacy::FunctionPassManager> FPM;
 
+    static llvm::Function* print_string;
+    static llvm::Function* print_int;
+    static llvm::Function* print_char;
+    static llvm::Function* print_bool;
+
+    static llvm::Function* read_string;
+    static llvm::Function* read_int;
+    static llvm::Function* read_char;
+    static llvm::Function* read_bool;
+
+    static llvm::Function* incr;
+    static llvm::Function* decr;
+
+    static llvm::Function* int_of_char;
+    static llvm::Function* char_of_int;
+
+    static llvm::Function* strcpy;
+    static llvm::Function* strcmp;
+    static llvm::Function* strcat;
+    static llvm::Function* strlen;
+
     static llvm::Type *i1;
     static llvm::Type *i8;
     static llvm::Type *i16;
@@ -99,7 +119,10 @@ protected:
     }
 
     static llvm::Type* map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable);
+
+private:
     static void map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, std::vector<llvm::Type*>& par_types);
+    static void declare_library_functions();
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){

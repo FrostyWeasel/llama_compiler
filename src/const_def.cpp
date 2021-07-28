@@ -43,9 +43,11 @@ llvm::Value* ConstDef::codegen() {
     auto value = this->expr->codegen();
 
     if(value != nullptr) {
-        auto store = Builder.CreateStore(value, this->entry->get_allocation());
-        return store;
+        if((!value->getType()->isVoidTy())) {
+            auto store = Builder.CreateStore(value, this->entry->get_allocation());
+            return store;
+        }
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }

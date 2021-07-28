@@ -31,6 +31,8 @@ public:
 private:
     std::string id;
     Block<Expr>* expr_list;
+
+    llvm::Value* library_function_codegen();
 };
 
 #endif

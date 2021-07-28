@@ -37,6 +37,6 @@
 #include "const_def.hpp"
 #include "id.hpp"
 
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 #endif

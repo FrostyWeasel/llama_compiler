@@ -26,6 +26,23 @@ llvm::IRBuilder<> AST::Builder(TheContext);
 std::unique_ptr<llvm::Module> AST::TheModule;
 std::unique_ptr<llvm::legacy::FunctionPassManager> AST::FPM;
 
+llvm::Function* AST::print_string;
+llvm::Function* AST::print_int;
+llvm::Function* AST::print_char;
+llvm::Function* AST::print_bool;
+llvm::Function* AST::read_string;
+llvm::Function* AST::read_int;
+llvm::Function* AST::read_char;
+llvm::Function* AST::read_bool;
+llvm::Function* AST::incr;
+llvm::Function* AST::decr;
+llvm::Function* AST::int_of_char;
+llvm::Function* AST::char_of_int;
+llvm::Function* AST::strcpy;
+llvm::Function* AST::strcmp;
+llvm::Function* AST::strcat;
+llvm::Function* AST::strlen;
+
 llvm::Type *AST::i1 = llvm::IntegerType::get(TheContext, 1);
 llvm::Type *AST::i8 = llvm::IntegerType::get(TheContext, 8);
 llvm::Type *AST::i16 = llvm::IntegerType::get(TheContext, 16);
@@ -69,9 +86,9 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
             map_par_list_to_llvm_type(type_variable->get_function_from_type(), par_types);
 
             //Pointer to struct containing pointer to function and non local variables struct.
-            par_types.push_back(llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0));
+            par_types.push_back(llvm::PointerType::get(i8, 0));
 
-            return llvm::StructType::get(TheContext, { llvm::PointerType::get(llvm::FunctionType::get(return_type, par_types, false), 0), llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0) });
+            return llvm::StructType::get(TheContext, { llvm::PointerType::get(llvm::FunctionType::get(return_type, par_types, false), 0), llvm::PointerType::get(i8, 0) });
         }
         break;
         case TypeTag::Reference: {
@@ -126,6 +143,9 @@ void AST::llvm_compile_and_dump(bool optimize) {
     }
     FPM->doInitialization();
 
+    //Define llama library functions
+    AST::declare_library_functions();
+
     // Define and start the main function.
     llvm::FunctionType* main_type = llvm::FunctionType::get(i32, {}, false);
     llvm::Function *main =
@@ -152,6 +172,63 @@ void AST::llvm_compile_and_dump(bool optimize) {
 
     // Print out the IR.
     TheModule->print(llvm::outs(), nullptr);
+}
+
+void AST::declare_library_functions() {
+    //Print Functions
+    auto print_string_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), {llvm::PointerType::get(AST::i8, 0)}, false);
+    AST::print_string = llvm::Function::Create(print_string_type, llvm::Function::ExternalLinkage, "writeString", TheModule.get());
+
+    auto print_int_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { AST::i32 }, false);
+    AST::print_int = llvm::Function::Create(print_int_type, llvm::Function::ExternalLinkage, "writeInteger", TheModule.get());
+
+    auto print_char_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { AST::i8 }, false);
+    AST::print_char = llvm::Function::Create(print_char_type, llvm::Function::ExternalLinkage, "writeChar", TheModule.get());
+
+    auto print_bool_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { AST::i1 }, false);
+    AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "writeBoolean", TheModule.get());
+
+    //Read Functions
+    auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), { }, false);
+    AST::read_string = llvm::Function::Create(read_string_type, llvm::Function::ExternalLinkage, "readString", TheModule.get());
+
+    auto read_int_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Int)), { }, false);
+    AST::read_int = llvm::Function::Create(read_int_type, llvm::Function::ExternalLinkage, "readInteger", TheModule.get());
+
+    auto read_char_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Char)), {  }, false);
+    AST::read_char = llvm::Function::Create(read_char_type, llvm::Function::ExternalLinkage, "readChar", TheModule.get());
+
+    auto read_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Bool)), {  }, false);
+    AST::read_bool = llvm::Function::Create(read_bool_type, llvm::Function::ExternalLinkage, "readBoolean", TheModule.get());
+
+    //Reference update Functions
+    //TODO: Implement these
+    auto incr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Int))) }, false);
+    AST::incr = llvm::Function::Create(incr_type, llvm::Function::ExternalLinkage, "incr", TheModule.get());
+
+    auto decr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Int))) }, false);
+    AST::decr = llvm::Function::Create(decr_type, llvm::Function::ExternalLinkage, "decr", TheModule.get());
+
+    //Conversion Functions
+    auto int_of_char_type = llvm::FunctionType::get(i32, { i8 }, false);
+    AST::int_of_char = llvm::Function::Create(int_of_char_type, llvm::Function::LinkageTypes::ExternalLinkage, "int_of_char", TheModule.get());
+
+    auto char_of_int_type = llvm::FunctionType::get(i8, { i32 }, false);
+    AST::char_of_int = llvm::Function::Create(char_of_int_type, llvm::Function::LinkageTypes::ExternalLinkage, "char_of_int", TheModule.get());
+
+    //String functions
+    auto strcpy_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    AST::strcpy = llvm::Function::Create(strcpy_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcpy", TheModule.get());
+
+    auto strcmp_type = llvm::FunctionType::get(i32, { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    AST::strcmp = llvm::Function::Create(strcmp_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcmp", TheModule.get());
+
+    auto strcat_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    AST::strcat = llvm::Function::Create(strcat_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcat", TheModule.get());
+
+    auto strlen_type = llvm::FunctionType::get(i32, { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
+
 }
 
 void AST::add_library_functions() {
@@ -199,8 +276,7 @@ void AST::add_library_functions() {
     // to_type = std::make_shared<TypeVariable>(TypeTag::Float);
     // st->insert_entry(new FunctionEntry("read_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
-    from_type = std::make_shared<TypeVariable>(TypeTag::Array, 
-        std::make_shared<TypeVariable>(TypeTag::Char));
+    from_type = std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     st->insert_entry(new FunctionEntry("read_string", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 

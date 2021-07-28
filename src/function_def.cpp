@@ -87,7 +87,7 @@ void FunctionDef::make_non_local_variable_stack() {
     }
 
     //Pointer to non_local_struct for use during function calls
-    auto ptr_to_non_local_struct = Builder.CreateBitCast(non_local_struct, llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0), id+"_"+std::to_string(func_entry->get_count())+"_non_locals_struct_ptr");
+    auto ptr_to_non_local_struct = Builder.CreateBitCast(non_local_struct, llvm::PointerType::get(i8, 0), id+"_"+std::to_string(func_entry->get_count())+"_non_locals_struct_ptr");
     auto func_struct_non_locals_ptr = Builder.CreateStructGEP(func_entry->get_allocation(), 1, id+"_"+std::to_string(func_entry->get_count())+"_func_struct_non_locals_ptr");
     Builder.CreateStore(ptr_to_non_local_struct, func_struct_non_locals_ptr);
 }
@@ -161,10 +161,10 @@ void FunctionDef::sem() {
         std::cerr << "Function " << id << " return type can not be of type function\n" << "offending type is: " << *to_type;
         exit(1); //TODO: Error handling.
     }
-    if((sa->is_same_tag(to_type, TypeTag::Array))) {
-        std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
-        exit(1); //TODO: Error handling.
-    }
+    // if((sa->is_same_tag(to_type, TypeTag::Array))) {
+    //     std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
+    //     exit(1); //TODO: Error handling.
+    // }
 }
 
 llvm::Value* FunctionDef::codegen() {

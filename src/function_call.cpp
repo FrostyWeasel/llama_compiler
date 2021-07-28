@@ -1,5 +1,7 @@
 #include "function_call.hpp"
 #include <vector>
+#include <string>
+#include <iostream>
 
 void FunctionCall::print(std::ostream &out) const {
     out << "FunctionCall(";
@@ -45,21 +47,70 @@ void FunctionCall::sem() {
 
 llvm::Value* FunctionCall::codegen() {
     auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
-    auto function_struct = entry->get_allocation();
 
-    auto function_declaration_ptr = Builder.CreateStructGEP(function_struct, 0, this->id+"_function_declaration_ptr");
-    auto function_declaration_load = Builder.CreateLoad(function_declaration_ptr, this->id+"_function_declaration_load");
+    //If nesting level is 1 then it is a library function
+    if(entry->get_nesting_level() == 1) {
+        return FunctionCall::library_function_codegen();
+    }
+    else {
+        auto function_struct = entry->get_allocation();
 
-    auto function_type = llvm::dyn_cast<llvm::FunctionType>(function_declaration_load->getType()->getPointerElementType());
+        auto function_declaration_ptr = Builder.CreateStructGEP(function_struct, 0, this->id+"_function_declaration_ptr");
+        auto function_declaration_load = Builder.CreateLoad(function_declaration_ptr, this->id+"_function_declaration_load");
 
+        auto function_type = llvm::dyn_cast<llvm::FunctionType>(function_declaration_load->getType()->getPointerElementType());
+
+        std::vector<llvm::Value*> par_values;
+        for(auto exp: expr_list->get_list()) {
+            par_values.push_back(exp->codegen());
+        }
+
+        par_values.push_back(Builder.CreateBitCast(function_struct, llvm::PointerType::get(i8, 0)));
+
+        // * Unnamed because it is not allowed for calls to have names if return type is void
+        return Builder.CreateCall(function_type, function_declaration_load, par_values);
+    }
+}
+
+llvm::Value* FunctionCall::library_function_codegen() {
     std::vector<llvm::Value*> par_values;
     for(auto exp: expr_list->get_list()) {
         par_values.push_back(exp->codegen());
     }
 
-    par_values.push_back(Builder.CreateBitCast(function_struct, llvm::PointerType::get(llvm::Type::getVoidTy(TheContext), 0)));
-
-
-    // * Unnamed because it is not allowed for calls to have names if return type is void
-    return Builder.CreateCall(function_type, function_declaration_load, par_values);
+    if(this->id == "print_string") {
+        auto string_struct = par_values[0];
+        auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
+        Builder.CreateStore(string_struct, string_struct_alloca);
+        auto string_pointer = Builder.CreateStructGEP(string_struct_alloca, 1, "string_ptr");
+        return Builder.CreateCall(AST::print_string, { Builder.CreateLoad(string_pointer) });
+    }
+    if(this->id == "print_int") {
+        auto number = par_values[0];
+        return Builder.CreateCall(AST::print_int, { number });
+    }
+    if(this->id == "print_char") {
+        auto character = par_values[0];
+        return Builder.CreateCall(AST::print_char, { character });
+    }
+    if(this->id == "print_bool") {
+        auto boolean = par_values[0];
+        return Builder.CreateCall(AST::print_bool, { boolean });
+    }
+    if(this->id == "read_string") {
+        return Builder.CreateCall(AST::print_string, {  });
+    }
+    if(this->id == "read_int") {
+        return Builder.CreateCall(AST::print_int, {  });
+    }
+    if(this->id == "read_char") {
+        return Builder.CreateCall(AST::print_char, {  });
+    }
+    if(this->id == "read_bool") {
+        return Builder.CreateCall(AST::print_bool, {  });
+    }
+    else {
+        std::cerr << "Library function: " << this->id << " is not implemented";
+        exit(1); //TODO: Error handling
+    }
 }

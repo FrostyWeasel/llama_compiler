@@ -26,6 +26,49 @@ char get_ascii(const char* hex){
     return res;
 }
 
+std::string* fixEscape(char* original){
+	std::string* fixed = new std::string();
+	for (int i=1; original[i] != '\0'; ++i) {
+		char c = original[i];
+		if (c != '\\') fixed->push_back(c);
+		else {
+			c = original[++i];
+			switch(c) {
+				case 'n':
+					fixed->push_back('\n');
+					break;
+				case 't':
+					fixed->push_back('\t');
+					break;
+				case 'r':
+					fixed->push_back('\r');
+					break;
+				case '0':
+					fixed->push_back('\0');
+					break;
+				case '\\':
+					fixed->push_back('\\');
+					break;
+				case '\'':
+					fixed->push_back('\'');
+					break;
+				case '\"':
+					fixed->push_back('\"');
+					break;
+				case 'x':
+					++i;
+					fixed->push_back(get_ascii(original+i));
+					++i;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	fixed->pop_back();
+	return fixed;
+}
+
 char get_char(const char* char_read){
     if(char_read[1] != '\\') return char_read[1];
 
@@ -142,7 +185,7 @@ W [ \t\n\r]
 {D}+    { yylval.number = atoi(yytext); return T_CONST_INT; }
 \'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x({D}|[A-Fa-f])({D}|[A-Fa-f]))\' { yylval.const_char = get_char(yytext); return T_CONST_CHAR; }
 
-\"([^\n\r\"]|\\\")*\" { std::string* str = new std::string(yytext) ; yylval.string_literal = str; return T_STRING_LITERAL; }
+\"([^\n\r\"]|\\\")*\" { std::string* str = fixEscape(yytext) ; yylval.string_literal = str; return T_STRING_LITERAL; }
 
 {W}+        { /* nothing */ }   /*White space*/
 
