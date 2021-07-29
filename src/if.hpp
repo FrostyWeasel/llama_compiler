@@ -5,15 +5,7 @@
 #include "enums.hpp"
 #include "type_variable.hpp"
 
-//TODO:
-/*
-Η αποτίμησή της γίνεται ξεκινώντας από την αποτίμηση της e. Αν η τιμή
-αυτής είναι true, τότε αποτιμάται η e1 και η τιμή αυτής είναι το αποτέλεσμα. Διαφορετικά, αποτιμάται
-η e2 και η τιμή αυτής είναι το αποτέλεσμα. Σε κάθε περίπτωση, αποτιμάται μόνο ένα από τα τελούμενα
-e1 και e2.
-Το σκέλος else e2 μπορεί να παραλειφθεί, στην περίπτωση που η έκφραση e1 είναι τύπου unit.
-Στην περίπτωση αυτή αν η συνθήκη είναι ψευδής δε γίνεται τίποτα.
-*/
+
 class If : public Expr{
 public:
     If(Expr* condition, Expr* if_expr): condition(condition), if_expr(if_expr), else_expr(nullptr), Expr(new TypeVariable(TypeTag::Unit)) {}

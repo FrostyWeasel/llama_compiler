@@ -140,12 +140,17 @@ void FunctionDef::sem() {
             this->non_local_variables.erase(par->get_id());
     }
 
-    //Make sure that non local variable has an earlier definition than this function definition
+    //Make sure that non local variable has an earlier definition than this function definition but is also not a library function
     std::vector<std::string> out_of_scope_variables;
     for(auto nl: this->non_local_variables) {
         auto is_in_table = st->contains(nl.first, LookupType::LOOKUP_ALL_SCOPES);
         if(!is_in_table){
             out_of_scope_variables.push_back(nl.first);
+        }
+        else{
+            auto non_local_variable_entry = st->lookup_entry(nl.first, LookupType::LOOKUP_ALL_SCOPES);
+            if(non_local_variable_entry->get_nesting_level() == 1)
+                out_of_scope_variables.push_back(nl.first);
         }
     }
     for(auto out_of_scope_variable_id: out_of_scope_variables) {

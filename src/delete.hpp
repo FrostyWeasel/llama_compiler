@@ -11,27 +11,13 @@ public:
     Delete(Expr* expr): expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
     virtual ~Delete()  {}
 
-    virtual void print(std::ostream &out) const override {
-        out << " delete";
-        if(expr != nullptr)
-            expr->print(out);
-        else
-            out << " null";
-    }
+    virtual void print(std::ostream &out) const override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {
-        auto expr_type = this->expr->infer();
+    virtual std::shared_ptr<TypeVariable> infer() override;
 
-        //Expr must be t ref
-        st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Reference, std::make_shared<TypeVariable>()));
+    virtual void sem() override;
 
-        //Result is always type ()
-        return this->type_variable;
-    }
-
-    virtual void sem() override {
-        this->expr->sem();
-    }
+    virtual llvm::Value* codegen() override;
 
 private:
     Expr* expr;

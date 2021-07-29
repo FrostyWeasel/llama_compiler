@@ -16,6 +16,11 @@ std::shared_ptr<TypeVariable> Dim::infer() {
 }
 
 void Dim::sem() {
+    if(this->dimension < 1) {
+        std::cerr << "Array dimensions are indexed starting from 1";
+        exit(1);
+    }   
+
     //* Not part of semantic analysis. Gathering non-local variables in function definition body for use during code generation
     if(this->pass_stage == PassStage::FunctionDef) {
         auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
@@ -24,6 +29,14 @@ void Dim::sem() {
         if(entry->get_nesting_level() != this->st->get_current_nesting_level()) {
             this->current_func_def_non_locals->insert({ this->id, entry->get_type() });
         }
-    }   
+    }
+}
 
+llvm::Value* Dim::codegen() {
+    auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
+    auto array_alloc = entry->get_allocation();
+
+    auto dim_size = Builder.CreateStructGEP(array_alloc, this->dimension - 1, "dim_size_ptr");
+
+    return Builder.CreateLoad(dim_size, this->id+"_dim_size_"+std::to_string(this->dimension));
 }

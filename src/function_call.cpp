@@ -98,16 +98,16 @@ llvm::Value* FunctionCall::library_function_codegen() {
         return Builder.CreateCall(AST::print_bool, { boolean });
     }
     if(this->id == "read_string") {
-        return Builder.CreateCall(AST::print_string, {  });
+        return Builder.CreateCall(AST::read_string, {  });
     }
     if(this->id == "read_int") {
-        return Builder.CreateCall(AST::print_int, {  });
+        return Builder.CreateCall(AST::read_int, {  });
     }
     if(this->id == "read_char") {
-        return Builder.CreateCall(AST::print_char, {  });
+        return Builder.CreateCall(AST::read_char, {  });
     }
     if(this->id == "read_bool") {
-        return Builder.CreateCall(AST::print_bool, {  });
+        return Builder.CreateCall(AST::read_bool, {  });
     }
     else {
         std::cerr << "Library function: " << this->id << " is not implemented";

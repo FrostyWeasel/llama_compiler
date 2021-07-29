@@ -35,7 +35,7 @@ public:
     virtual void print(std::ostream& out) const = 0;
     virtual std::shared_ptr<TypeVariable> infer() = 0;
     virtual void sem() = 0;
-    virtual llvm::Value* codegen() { std::cout << "Unimplemented codeged!\n"; }
+    virtual llvm::Value* codegen() = 0;
 
     //TODO: Set to true
     virtual void llvm_compile_and_dump(bool optimize=false);

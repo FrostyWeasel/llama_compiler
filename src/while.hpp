@@ -16,35 +16,13 @@ public:
         delete expr;
     }
 
-    virtual void print(std::ostream &out) const override {
-        out << "While(";
-        out << "Condition: ";
-        if(condition != nullptr)
-            condition->print(out);
-        else
-            out << "null ";
-        out << "Expr: ";
-        if(expr != nullptr)
-            expr->print(out);
-        else
-            out << "null ";
-        out << ") ";
-    }
+    virtual void print(std::ostream &out) const override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {
-        auto condition_type = this->condition->infer();
-        auto expr_type = this->expr->infer();        
-        
-        st->add_constraint(condition_type, std::make_shared<TypeVariable>(TypeTag::Bool));
-        st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Unit));
+    virtual std::shared_ptr<TypeVariable> infer() override;
 
-        return this->type_variable;
-    }
+    virtual void sem() override;
 
-    virtual void sem() override {
-        this->condition->sem();
-        this->expr->sem();        
-    }
+    virtual llvm::Value* codegen() override;
 
 private:
     Expr* condition;
