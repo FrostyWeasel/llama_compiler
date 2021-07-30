@@ -72,6 +72,7 @@ llvm::Value* FunctionCall::codegen() {
     }
 }
 
+//TODO: Check that the par values are not null and handle errors
 llvm::Value* FunctionCall::library_function_codegen() {
     std::vector<llvm::Value*> par_values;
     for(auto exp: expr_list->get_list()) {
@@ -82,7 +83,7 @@ llvm::Value* FunctionCall::library_function_codegen() {
         auto string_struct = par_values[0];
         auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
         Builder.CreateStore(string_struct, string_struct_alloca);
-        auto string_pointer = Builder.CreateStructGEP(string_struct_alloca, 1, "string_ptr");
+        auto string_pointer = Builder.CreateStructGEP(string_struct_alloca, 2, "string_ptr");
         return Builder.CreateCall(AST::print_string, { Builder.CreateLoad(string_pointer) });
     }
     if(this->id == "print_int") {
@@ -98,7 +99,13 @@ llvm::Value* FunctionCall::library_function_codegen() {
         return Builder.CreateCall(AST::print_bool, { boolean });
     }
     if(this->id == "read_string") {
-        return Builder.CreateCall(AST::read_string, {  });
+        auto string_struct = par_values[0];
+        auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
+        Builder.CreateStore(string_struct, string_struct_alloca);
+        auto string_ptr = Builder.CreateStructGEP(string_struct_alloca, 2, "string_ptr");
+        auto array_size_ptr = Builder.CreateStructGEP(string_struct_alloca, 0, "array_size_ptr");
+
+        return Builder.CreateCall(AST::read_string, { Builder.CreateLoad(array_size_ptr), Builder.CreateLoad(string_ptr) });
     }
     if(this->id == "read_int") {
         return Builder.CreateCall(AST::read_int, {  });
@@ -108,6 +115,68 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "read_bool") {
         return Builder.CreateCall(AST::read_bool, {  });
+    }
+    if(this->id == "strlen") {
+        //Get pointer to string
+        auto string_struct = par_values[0];
+        auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
+        Builder.CreateStore(string_struct, string_struct_alloca);
+        auto string_ptr = Builder.CreateStructGEP(string_struct_alloca, 2, "string_ptr");
+
+        return Builder.CreateCall(AST::strlen, { Builder.CreateLoad(string_ptr) });
+    }
+    if(this->id == "strcmp") {
+        /*
+            -1 : if string_1 < string_2
+            0 : if string_1 = string_2
+            1 : if string_1 > string_2
+        */
+
+        //Get pointer to target array
+        auto string_1_struct = par_values[0];
+        auto string_1_struct_alloca = Builder.CreateAlloca(string_1_struct->getType(), nullptr, "string_1_struct_alloca");
+        Builder.CreateStore(string_1_struct, string_1_struct_alloca);
+        auto string_1_ptr = Builder.CreateStructGEP(string_1_struct_alloca, 2, "string_1_ptr");
+
+        //Get pointer to source array
+        auto string_2_struct = par_values[1];
+        auto string_2_struct_alloca = Builder.CreateAlloca(string_2_struct->getType(), nullptr, "string_2_struct_alloca");
+        Builder.CreateStore(string_2_struct, string_2_struct_alloca);
+        auto string_2_ptr = Builder.CreateStructGEP(string_2_struct_alloca, 2, "string_2_ptr");
+
+        return Builder.CreateCall(AST::strcmp, { Builder.CreateLoad(string_1_ptr), Builder.CreateLoad(string_2_ptr) });
+    }
+    if(this->id == "strcpy") {
+        //Get pointer to target array
+        auto target_struct = par_values[0];
+        auto target_struct_alloca = Builder.CreateAlloca(target_struct->getType(), nullptr, "target_struct_alloca");
+        Builder.CreateStore(target_struct, target_struct_alloca);
+        auto target_ptr = Builder.CreateStructGEP(target_struct_alloca, 2, "target_ptr");
+
+        //Get pointer to source array
+        auto source_struct = par_values[1];
+        auto source_struct_alloca = Builder.CreateAlloca(source_struct->getType(), nullptr, "source_struct_alloca");
+        Builder.CreateStore(source_struct, source_struct_alloca);
+        auto source_ptr = Builder.CreateStructGEP(source_struct_alloca, 2, "source_ptr");
+
+        return Builder.CreateCall(AST::strcpy, { Builder.CreateLoad(target_ptr), Builder.CreateLoad(source_ptr) });
+    }
+    if(this->id == "strcat") {
+        //Source string is concatenated to target string
+
+        //Get pointer to target array
+        auto target_struct = par_values[0];
+        auto target_struct_alloca = Builder.CreateAlloca(target_struct->getType(), nullptr, "target_struct_alloca");
+        Builder.CreateStore(target_struct, target_struct_alloca);
+        auto target_ptr = Builder.CreateStructGEP(target_struct_alloca, 2, "target_ptr");
+
+        //Get pointer to source array
+        auto source_struct = par_values[1];
+        auto source_struct_alloca = Builder.CreateAlloca(source_struct->getType(), nullptr, "source_struct_alloca");
+        Builder.CreateStore(source_struct, source_struct_alloca);
+        auto source_ptr = Builder.CreateStructGEP(source_struct_alloca, 2, "source_ptr");
+
+        return Builder.CreateCall(AST::strcat, { Builder.CreateLoad(target_ptr), Builder.CreateLoad(source_ptr) });
     }
     else {
         std::cerr << "Library function: " << this->id << " is not implemented";

@@ -36,7 +36,8 @@ llvm::Value* Dim::codegen() {
     auto entry = st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES);
     auto array_alloc = entry->get_allocation();
 
-    auto dim_size = Builder.CreateStructGEP(array_alloc, this->dimension - 1, "dim_size_ptr");
+    //First position of array struct holds the total size of the array
+    auto dim_size = Builder.CreateStructGEP(array_alloc, this->dimension, "dim_size_ptr");
 
     return Builder.CreateLoad(dim_size, this->id+"_dim_size_"+std::to_string(this->dimension));
 }

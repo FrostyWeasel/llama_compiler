@@ -30,7 +30,8 @@ public:
         std::vector<llvm::Constant*> data;
 
         //Array of char: [dim1, first_elmnt_ptr]
-        array_type = llvm::StructType::get(TheContext, { i32, llvm::PointerType::get(i8,0) }); 
+        array_type = llvm::StructType::get(TheContext, { i32, i32, llvm::PointerType::get(i8,0) }); 
+        
         //Array of char elements are of type i8, optimization for string because its values are already known
         data_type = llvm::ArrayType::get(i8, value.size() + 1); 
 
@@ -47,10 +48,13 @@ public:
         auto first_element_ptr = Builder.CreateGEP(i8, first_element, { c32(0) }, "first_element_ptr");
                 
         auto array_ptr = Builder.CreateAlloca(array_type, nullptr, "array_struct");
-        auto array_type_first_element_ptr = Builder.CreateStructGEP(array_ptr, 0, "dim_size");
-        auto array_type_second_element_ptr = Builder.CreateStructGEP(array_ptr, 1, "string_data_ptr");
-        Builder.CreateStore(c32(data.size()), array_type_first_element_ptr);
-        Builder.CreateStore(first_element_ptr, array_type_second_element_ptr);
+        auto array_type_size_ptr = Builder.CreateStructGEP(array_ptr, 0, "string_size");
+        auto array_type_dim_ptr = Builder.CreateStructGEP(array_ptr, 1, "dim_size");
+        auto array_type_array_ptr = Builder.CreateStructGEP(array_ptr, 2, "string_data_ptr");
+
+        Builder.CreateStore(c32(data.size()), array_type_size_ptr);
+        Builder.CreateStore(c32(data.size()), array_type_dim_ptr);
+        Builder.CreateStore(first_element_ptr, array_type_array_ptr);
 
         return Builder.CreateLoad(array_ptr, "array_struct");
     }

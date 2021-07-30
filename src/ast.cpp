@@ -99,9 +99,13 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
         }
         case TypeTag::Array: {
             std::vector<llvm::Type*> array_type;
+            //space to store the total array size
+            array_type.push_back(i32);
+            //space to store the dimension size
             for(auto i = 0; i < type_variable->get_array_dim(); i++) {
                 array_type.push_back(i32);
             }
+            //space to store the pointer to the first array element
             array_type.push_back(llvm::PointerType::get(map_to_llvm_type(type_variable->get_array_type()),0));
 
             return llvm::StructType::get(TheContext, array_type);
@@ -189,20 +193,19 @@ void AST::declare_library_functions() {
     AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "writeBoolean", TheModule.get());
 
     //Read Functions
-    auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), { }, false);
+    auto read_string_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { i32, llvm::PointerType::get(i8, 0) }, false);
     AST::read_string = llvm::Function::Create(read_string_type, llvm::Function::ExternalLinkage, "readString", TheModule.get());
 
-    auto read_int_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Int)), { }, false);
+    auto read_int_type = llvm::FunctionType::get(i32, {  }, false);
     AST::read_int = llvm::Function::Create(read_int_type, llvm::Function::ExternalLinkage, "readInteger", TheModule.get());
 
-    auto read_char_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Char)), {  }, false);
+    auto read_char_type = llvm::FunctionType::get(i8, {  }, false);
     AST::read_char = llvm::Function::Create(read_char_type, llvm::Function::ExternalLinkage, "readChar", TheModule.get());
 
-    auto read_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Bool)), {  }, false);
+    auto read_bool_type = llvm::FunctionType::get(i1, {  }, false);
     AST::read_bool = llvm::Function::Create(read_bool_type, llvm::Function::ExternalLinkage, "readBoolean", TheModule.get());
 
     //Reference update Functions
-    //TODO: Implement these
     auto incr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Int))) }, false);
     AST::incr = llvm::Function::Create(incr_type, llvm::Function::ExternalLinkage, "incr", TheModule.get());
 
@@ -217,16 +220,16 @@ void AST::declare_library_functions() {
     AST::char_of_int = llvm::Function::Create(char_of_int_type, llvm::Function::LinkageTypes::ExternalLinkage, "char_of_int", TheModule.get());
 
     //String functions
-    auto strcpy_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    auto strcpy_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
     AST::strcpy = llvm::Function::Create(strcpy_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcpy", TheModule.get());
 
-    auto strcmp_type = llvm::FunctionType::get(i32, { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    auto strcmp_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
     AST::strcmp = llvm::Function::Create(strcmp_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcmp", TheModule.get());
 
-    auto strcat_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    auto strcat_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
     AST::strcat = llvm::Function::Create(strcat_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcat", TheModule.get());
 
-    auto strlen_type = llvm::FunctionType::get(i32, { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)), map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact)) }, false);
+    auto strlen_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, false);
     AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
 
 }

@@ -41,28 +41,30 @@ void ArrayDef::sem() {
     this->expr_list->sem();
 }
 
-
+// ? store array size in stack to use for index in bounds checks
 llvm::Value* ArrayDef::codegen() {
     auto expr_list_vector = this->expr_list->get_list();
     llvm::Value* dim_size_ptr;
     llvm::Value* dim_size;
 
-    auto array_size = Builder.CreateAlloca(i32, nullptr, "array_size");
-    Builder.CreateStore(c32(1), array_size);
+    llvm::Value* array_size = c32(1);
 
-    unsigned int i = 0;
+    unsigned int i = 1;
     for(auto expr_it = expr_list_vector.begin(); expr_it != expr_list_vector.end(); expr_it++) {
         dim_size_ptr = Builder.CreateStructGEP(this->entry->get_allocation(), i++, "dim_size_ptr");
         dim_size = (*expr_it)->codegen();
         Builder.CreateStore(dim_size, dim_size_ptr, "dim_size");
-        Builder.CreateMul(Builder.CreateLoad(array_size), dim_size);
+        array_size = Builder.CreateMul(array_size, dim_size);
     }
 
+    //Allocate space for the array elements in the heap and store the pointer to the first element in the array struct
     auto array_ptr = Builder.CreateStructGEP(this->entry->get_allocation(), i, "array_ptr");
-
-    auto array_alloca = Builder.CreateAlloca(map_to_llvm_type(this->type_variable->get_array_type()), Builder.CreateLoad(array_size), "array");
-
+    auto array_alloca = Builder.CreateAlloca(map_to_llvm_type(this->type_variable->get_array_type()), array_size, "array");
     Builder.CreateStore(array_alloca, array_ptr);
+
+    //Store the array size in the first position of the array struct
+    auto array_size_pt = Builder.CreateStructGEP(this->entry->get_allocation(), 0, "array_size_ptr");
+    Builder.CreateStore(array_size, array_size_pt, "array_size");
 
     return this->entry->get_allocation();
 }

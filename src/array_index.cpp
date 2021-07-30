@@ -48,20 +48,22 @@ void ArrayIndex::sem() {
     this->expr_list->sem();
 }
 
+// ? the first element of the array type holds the total size and could be used to implement out-of-bounds checking
 llvm::Value* ArrayIndex::codegen() {
     //example: let mutable a[5, 3, 2] -> a[2, 1, 0] => access array at offset: 2*(3*2) + 1*(2) + 0
     SymbolEntry* entry = st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES);
 
     auto dim_count = entry->get_type()->get_array_dim();
 
+    //Get all the array dimension size values
     std::vector<llvm::Value*> dim_sizes;
     llvm::Value* dim_size_ptr;
-    for (auto i = 0; i < dim_count; i++) {
+    for (auto i = 1; i <= dim_count; i++) {
         dim_size_ptr = Builder.CreateStructGEP(entry->get_allocation(), i, "dim_size_ptr");
         dim_sizes.push_back(Builder.CreateLoad(dim_size_ptr, "dim_size"));
     }
     
-
+    //Calculate the total size of lower array dimensions
     //example: let mutable a[5, 3, 2] -> partial_dim_size_mults = { 2, 3*2, 3*2*5 <-useless }
     std::vector<llvm::Value*> partial_dim_size_mults;
     partial_dim_size_mults.push_back(dim_sizes[dim_sizes.size() - 1]);

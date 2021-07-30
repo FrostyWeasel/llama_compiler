@@ -32,7 +32,6 @@ void FunctionDef::add_to_symbol_table() {
     this->entry = entry;
 }
 
-//TODO: Function should propably save a pointer to themshelves so that if we call them recursively we can access the non local struct
 void FunctionDef::allocate() {
     //Create a function prototype
     auto func_entry = dynamic_cast<FunctionEntry*>(this->entry);
