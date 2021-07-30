@@ -1,50 +1,37 @@
-let mmult a b c =
-  if dim 2 a = dim 1 b && dim 1 c = dim 1 a && dim 2 c = dim 2 b then
-    for i = 0 to
-      dim 1 c - 1 do
-      for j = 0 to
-        dim 2 c - 1 do
-        c[i, j] := 0;
-        for k = 0 to dim 2 a - 1 do
-          c[i, j] := !c[i, j] + !a[i, k] * !b[k, j]
-        done
-      done
-    done
-
-let mutable seed
-
-let init = seed := 65
-
-let minit m =
-  for i = 0 to
-    dim 1 m - 1 do
-    for j = 0 to
-      dim 2 m - 1 do
-      seed := (!seed * 137 + 2 * i + j) mod 101;
-      m[i, j] := !seed
-    done
-  done
-
-let mprint m =
-  for i = 0 to
-    dim 1 m - 1 do
-    for j = 0 to dim 2 m - 1 do
-      print_int !m[i, j];
-      print_string " "
-    done;
-    print_string "\n"
-  done
+let rec prime n = if n < 0 then prime (-n)
+  else if n < 2 then false
+  else if n = 2 then true
+  else if n mod 2 = 0 then false
+  else
+    let rec loop i =
+      if i <= n / 2 then if n mod i = 0 then false else loop (i + 2)
+      else true in
+    loop 3
 
 let main =
-  let mutable x [3, 4]
-  and mutable y [4, 5]
-  and mutable z [3, 5] in
-  minit x;
-  minit y;
-  mprint x;
-  print_string "\ntimes\n\n";
-  mprint y;
-  print_string "\nmakes\n\n";
-  mmult x y z;
-  mprint z
-
+  print_string "Please, give the upper limit: ";
+  let limit = read_int () in
+  print_string "Prime numbers between 0 and ";
+  print_int limit;
+  print_string "\n\n";
+  let mutable counter in
+  counter := 0;
+  if limit >= 2 then (incr counter;
+                      print_string "2\n");
+  if limit >= 3 then (incr counter;
+                      print_string "3\n");
+  let rec loop number =
+    if number <= limit then
+      (if prime (number - 1) then
+         (incr counter;
+          print_int (number - 1);
+          print_string "\n");
+       if number <> limit && prime (number + 1) then
+         (incr counter;
+          print_int (number + 1);
+          print_string "\n");
+       loop (number + 6)) in
+  loop 6;
+  print_string "\n";
+  print_int !counter;
+  print_string " prime number(s) were found.\n"

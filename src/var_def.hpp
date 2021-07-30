@@ -12,42 +12,17 @@ public:
     VarDef(std::string* id): id(*id), Def(new TypeVariable(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Unknown))) {}
     VarDef(std::string* id, std::shared_ptr<TypeVariable> type_variable): id(*id), Def(new TypeVariable(TypeTag::Reference, type_variable)) {}
 
-    virtual void print(std::ostream& out) const override{
-        out << "VarDef(";
-        out << " Id: " << id;
-        out << " TypeVariable: ";
-        if(type_variable != nullptr)
-            type_variable->print(out);
-        else
-            out << "null ";
-        out << ") ";
-    }
+    virtual void print(std::ostream& out) const override;
 
-    virtual void add_to_symbol_table() override {
-        VariableEntry* entry = new VariableEntry(id, EntryType::ENTRY_VARIABLE, this->type_variable);
-        
-        st->insert_entry(entry);
+    virtual void add_to_symbol_table() override;
 
-        this->entry = entry;
-    }
+    virtual void allocate() override;
 
-    virtual void allocate() override {
-        llvm::AllocaInst* alloc_ptr = nullptr;
-        alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_mutable");
-        this->entry->set_allocation(alloc_ptr);
-    }
+    virtual std::shared_ptr<TypeVariable> infer() override;
 
-    virtual std::shared_ptr<TypeVariable> infer() override {        
-        return this->type_variable;
-    }
+    virtual void sem() override;
 
-    virtual void sem() override { 
-            
-    }
-
-    virtual llvm::Value* codegen() override {
-        return this->entry->get_allocation();
-    }
+    virtual llvm::Value* codegen() override;
 
 private:
     std::string id;

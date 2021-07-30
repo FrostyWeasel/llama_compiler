@@ -33,6 +33,7 @@ llvm::Value* ForDownTo::codegen() {
 
     auto current_function = Builder.GetInsertBlock()->getParent();
 
+
     //Current previous BB
     auto header_BB = Builder.GetInsertBlock();
 
@@ -41,12 +42,16 @@ llvm::Value* ForDownTo::codegen() {
     auto loop_body_BB = llvm::BasicBlock::Create(TheContext, "loop_body");
     auto loop_end_BB = llvm::BasicBlock::Create(TheContext, "loop_end");
 
+    auto iterator_alloca = Builder.CreateAlloca(i32, nullptr, "iterator_alloca");
+
     //Enter the loop
     Builder.CreateBr(loop_start_BB);
     Builder.SetInsertPoint(loop_start_BB);
 
     auto phi_node = Builder.CreatePHI(i32, 2, this->id);
     phi_node->addIncoming(start_value, header_BB);
+
+    Builder.CreateStore(phi_node, iterator_alloca);
 
     auto end_condition = this->second_condition->codegen();
     auto condition_result = Builder.CreateICmp(llvm::CmpInst::ICMP_SGT, end_condition, phi_node, "end_condition");
@@ -61,6 +66,8 @@ llvm::Value* ForDownTo::codegen() {
 
     ConstantEntry* entry = new ConstantEntry(id, EntryType::ENTRY_CONSTANT, std::make_shared<TypeVariable>(TypeTag::Int));
     st->insert_entry(entry);
+    entry->set_allocation(iterator_alloca);
+
 
     this->expr->codegen();        
 
