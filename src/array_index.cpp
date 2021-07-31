@@ -24,6 +24,8 @@ std::shared_ptr<TypeVariable> ArrayIndex::infer() {
 
     auto array_element_type = std::make_shared<TypeVariable>();
 
+    AST::created_type_variables->push_back(array_element_type);
+
     this->type_variable = std::make_shared<TypeVariable>(TypeTag::Reference, array_element_type);
 
     st->add_constraint(entry->get_type(), std::make_shared<TypeVariable>(TypeTag::Array,

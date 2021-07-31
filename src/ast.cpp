@@ -14,11 +14,11 @@
 #include <llvm/Transforms/Utils.h>
 #include <iostream>
 
-SymbolTable* AST::st = new SymbolTable(20000);
-SemanticAnalyzer* AST::sa = new SemanticAnalyzer();
+std::unique_ptr<SymbolTable> AST::st = std::make_unique<SymbolTable>(20000);
+std::unique_ptr<SemanticAnalyzer> AST::sa = std::make_unique<SemanticAnalyzer>();
 PassStage AST::pass_stage = PassStage::Other;
 std::map<std::string, std::shared_ptr<TypeVariable>>* AST::current_func_def_non_locals = nullptr;
-unsigned int outer_function_nesting_level = 0;
+std::unique_ptr<std::vector<std::shared_ptr<TypeVariable>>> AST::created_type_variables = std::make_unique<std::vector<std::shared_ptr<TypeVariable>>>();
 
 
 llvm::LLVMContext AST::TheContext;
@@ -51,8 +51,6 @@ llvm::Type *AST::i64 = llvm::IntegerType::get(TheContext, 64);
 
 void AST::close_library_function_scope() {
     st->scope_close();
-    delete AST::sa;
-    delete AST::st;
 }
 
 void AST::close_all_program_scopes() {
@@ -386,4 +384,13 @@ void AST::add_library_functions() {
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     st->insert_entry(new FunctionEntry("strcat", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
     
+}
+
+void AST::bind_to_default_types() {
+    for(auto type_it = AST::created_type_variables->begin(); type_it != AST::created_type_variables->end(); type_it++) {
+        if((*type_it)->get_tag() == TypeTag::Unknown) {
+            (*type_it)->set_tag_to_default();
+            std::cout << "Type variable @" << (*type_it)->get_id()  << " was not bound\n"; //TODO: error handling : Warning
+        }
+    }
 }

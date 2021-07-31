@@ -266,14 +266,17 @@ void BinOp::sem() {
             this->lval->sem();
             this->rval->sem();
 
+            this->lval->get_type()->set_default_type(TypeTag::Int);
+            this->rval->get_type()->set_default_type(TypeTag::Int);
+
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
                 exit(1); //TODO: Error handling.
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
                 exit(1); //TODO: Error handling.
@@ -283,14 +286,17 @@ void BinOp::sem() {
             this->lval->sem();
             this->rval->sem();
 
+            this->lval->get_type()->set_default_type(TypeTag::Int);
+            this->rval->get_type()->set_default_type(TypeTag::Int);
+
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
                 exit(1); //TODO: Error handling.
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
                 exit(1); //TODO: Error handling.
@@ -300,14 +306,17 @@ void BinOp::sem() {
             this->lval->sem();
             this->rval->sem();
 
+            this->lval->get_type()->set_default_type(TypeTag::Int);
+            this->rval->get_type()->set_default_type(TypeTag::Int);
+
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
                 exit(1); //TODO: Error handling.
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
                 exit(1); //TODO: Error handling.
@@ -317,14 +326,17 @@ void BinOp::sem() {
             this->lval->sem();
             this->rval->sem();
 
+            this->lval->get_type()->set_default_type(TypeTag::Int);
+            this->rval->get_type()->set_default_type(TypeTag::Int);
+
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
                 exit(1); //TODO: Error handling.
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
                 std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
                 exit(1); //TODO: Error handling.

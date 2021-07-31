@@ -11,7 +11,7 @@
 
 unsigned int TypeVariable::counter = 0;
 
-TypeVariable::TypeVariable() : type(std::make_shared<Type>(TypeTag::Unknown)), tag(TypeVariableTag::Free), id(++TypeVariable::counter) {  }
+TypeVariable::TypeVariable() : type(std::make_shared<Type>(TypeTag::Unknown)), tag(TypeVariableTag::Free), id(++TypeVariable::counter) { }
 
 TypeVariable::TypeVariable(TypeTag type_tag) { 
     switch (type_tag) {
@@ -355,6 +355,16 @@ void TypeVariable::set_function_type_tag(FunctionTypeTag function_type){
     }
     else{
         std::cerr << "Requesting set_function_type_tag but type is not a function\n";
+        exit(1); //TODO: Error handling
+    }
+}
+
+void TypeVariable::set_tag_to_default() {
+    if(this->type->get_tag() == TypeTag::Unknown) {
+        this->type->set_tag(this->default_type);
+    }
+    else{
+        std::cerr << "Requesting set_default_tag but type is not uknown\n";
         exit(1); //TODO: Error handling
     }
 }

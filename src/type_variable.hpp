@@ -2,6 +2,7 @@
 #define __TYPEVARIABLE_HPP__
 
 #include <memory>
+#include <vector>
 #include "iostream"
 #include "enums.hpp"
 
@@ -53,9 +54,17 @@ public:
     unsigned int get_complex_type_depth();
     TypeTag get_bottom_tag();
 
+    inline void set_default_type(TypeTag default_type) { this->default_type = default_type; }
+    //inline TypeTag get_default_type() { return this->default_type; }
+
+    inline unsigned int get_id() { return this->id; }
+
+    void set_tag_to_default();
+
 private:
     std::shared_ptr<Type> type;
     TypeVariableTag tag;
+    TypeTag default_type = TypeTag::Unit;
     unsigned int id;
 
     static unsigned int counter;

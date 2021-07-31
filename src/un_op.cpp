@@ -49,6 +49,8 @@ std::shared_ptr<TypeVariable> UnOp::infer() {
             expr_type = this->expr->infer(); //Type must be t ref
             this->type_variable = std::make_shared<TypeVariable>(); //Type must be t
 
+            this->created_type_variables->push_back(this->type_variable);
+
             this->st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Reference, this->type_variable));
             break;
         }

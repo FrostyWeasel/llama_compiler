@@ -1,7 +1,2 @@
-let main = 
-	let mutable a [10] in
-        let mutable b in
-        b := ();
-	a[0] := print_string "SESPAO"; b;
-	!a[0]
-
+let f x = x
+let f x y = x < y

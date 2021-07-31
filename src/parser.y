@@ -127,6 +127,7 @@ program:
             $1->close_all_program_scopes();
 
             $1->sem();
+            $1->bind_to_default_types();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             $1->close_all_program_scopes();
 

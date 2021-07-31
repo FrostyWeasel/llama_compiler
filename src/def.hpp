@@ -12,8 +12,12 @@
 class Def : public AST {
 public:    
     Def() : AST(NodeType::Def) {}
-    Def(TypeVariable* type_variable) : type_variable(std::shared_ptr<TypeVariable>(type_variable)), AST(NodeType::Def) { }
-    Def(std::shared_ptr<TypeVariable> type_variable) : type_variable(type_variable), AST(NodeType::Def) { }
+    Def(TypeVariable* type_variable) : type_variable(std::shared_ptr<TypeVariable>(type_variable)), AST(NodeType::Def) { 
+        AST::created_type_variables->push_back(this->type_variable);    
+    }
+    Def(std::shared_ptr<TypeVariable> type_variable) : type_variable(type_variable), AST(NodeType::Def) { 
+        AST::created_type_variables->push_back(this->type_variable);    
+    }
 
     virtual ~Def()  {}
 

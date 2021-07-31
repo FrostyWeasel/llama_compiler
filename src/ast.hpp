@@ -45,6 +45,7 @@ public:
     void add_library_functions();
     void close_library_function_scope();
     void clear_inference_structures() { st->clear_inference_structures(); };
+    static void bind_to_default_types();
 
     virtual NodeType get_node_type() { return node_type; }
 
@@ -56,10 +57,14 @@ public:
 
 
 protected:
-    static SymbolTable* st;
-    static SemanticAnalyzer* sa;
+    static std::unique_ptr<SymbolTable> st;
+    static std::unique_ptr<SemanticAnalyzer> sa;
     NodeType node_type;
-    
+
+    //Vector of type variables to find unknown types left after inference
+    static std::unique_ptr<std::vector<std::shared_ptr<TypeVariable>>> created_type_variables;
+
+    //Used to differentiate between stages of AST pass (for example function definition)
     static PassStage pass_stage;
 
     //Points to similar structure of function definition to store non local variables that appear in the functions body.

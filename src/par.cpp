@@ -14,6 +14,8 @@ std::shared_ptr<TypeVariable> Par::infer() {
 
     st->insert_entry(entry);
 
+    AST::created_type_variables->push_back(this->type_variable);
+
     return this->type_variable;
 }
 
