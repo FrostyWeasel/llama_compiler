@@ -1,7 +1,7 @@
-let a = "hello"
-let mutable b[6]
-let x = strcpy b a
-let x = for i = 0 to dim b - 1 do print_char !b[i] done
-let x = print_string "\n" ; print_int (strlen b)
-let x = print_string "\n" ; print_int (strcmp b a)
+let main = 
+	let mutable a [10] in
+        let mutable b in
+        b := ();
+	a[0] := print_string "SESPAO"; b;
+	!a[0]
 

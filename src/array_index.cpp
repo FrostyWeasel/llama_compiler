@@ -94,7 +94,7 @@ llvm::Value* ArrayIndex::codegen() {
             offset = Builder.CreateAdd(offset, (*expr_it)->codegen());
     }
     
-    auto array_data_ptr = Builder.CreateLoad(Builder.CreateStructGEP(entry->get_allocation(), dim_count), "array_data_ptr");
+    auto array_data_ptr = Builder.CreateLoad(Builder.CreateStructGEP(entry->get_allocation(), dim_count + 1), "array_data_ptr");
 
     return Builder.CreateGEP(array_data_ptr, { offset }, "array_element_ptr");
 }

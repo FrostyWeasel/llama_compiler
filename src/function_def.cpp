@@ -237,7 +237,7 @@ llvm::Value* FunctionDef::codegen() {
     if((return_value != nullptr) && (!(function->getReturnType()->isVoidTy())))
         Builder.CreateRet(return_value);
     else
-        Builder.CreateRetVoid();
+        Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
 
     //return non local variables alloca in the symbol table to their original value
     for(auto nl_it = non_local_allocas.begin(); nl_it != non_local_allocas.end(); nl_it++) {

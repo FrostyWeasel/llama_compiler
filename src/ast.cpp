@@ -78,10 +78,7 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
         break;
         case TypeTag::Function:{
             llvm::Type* return_type;
-            if((type_variable->get_function_to_type()->get_tag() != TypeTag::Unit) && (type_variable->get_function_to_type()->get_tag() != TypeTag::Unknown))
                 return_type = map_to_llvm_type(type_variable->get_function_to_type());
-            else
-                return_type = llvm::Type::getVoidTy(TheContext);
             std::vector<llvm::Type*> par_types;
             map_par_list_to_llvm_type(type_variable->get_function_from_type(), par_types);
 
@@ -180,24 +177,25 @@ void AST::llvm_compile_and_dump(bool optimize) {
 
 void AST::declare_library_functions() {
     //Print Functions
-    auto print_string_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), {llvm::PointerType::get(AST::i8, 0)}, false);
+    auto print_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), {llvm::PointerType::get(AST::i8, 0)}, false);
     AST::print_string = llvm::Function::Create(print_string_type, llvm::Function::ExternalLinkage, "writeString", TheModule.get());
 
-    auto print_int_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { AST::i32 }, false);
+    auto print_int_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i32 }, false);
     AST::print_int = llvm::Function::Create(print_int_type, llvm::Function::ExternalLinkage, "writeInteger", TheModule.get());
 
-    auto print_char_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { AST::i8 }, false);
+    auto print_char_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i8 }, false);
     AST::print_char = llvm::Function::Create(print_char_type, llvm::Function::ExternalLinkage, "writeChar", TheModule.get());
 
-    auto print_bool_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { AST::i1 }, false);
+    auto print_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i1 }, false);
     AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "writeBoolean", TheModule.get());
 
     //Read Functions
-    auto read_string_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { i32, llvm::PointerType::get(i8, 0) }, false);
+    auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { i32, llvm::PointerType::get(i8, 0) }, false);
     AST::read_string = llvm::Function::Create(read_string_type, llvm::Function::ExternalLinkage, "readString", TheModule.get());
 
     auto read_int_type = llvm::FunctionType::get(i32, {  }, false);
     AST::read_int = llvm::Function::Create(read_int_type, llvm::Function::ExternalLinkage, "readInteger", TheModule.get());
+    AST::read_int->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
 
     auto read_char_type = llvm::FunctionType::get(i8, {  }, false);
     AST::read_char = llvm::Function::Create(read_char_type, llvm::Function::ExternalLinkage, "readChar", TheModule.get());
@@ -212,17 +210,19 @@ void AST::declare_library_functions() {
     define_conversion_functions();
 
     //String functions
-    auto strcpy_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
+    auto strcpy_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
     AST::strcpy = llvm::Function::Create(strcpy_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcpy", TheModule.get());
 
     auto strcmp_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
     AST::strcmp = llvm::Function::Create(strcmp_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcmp", TheModule.get());
+    AST::strcmp->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
 
-    auto strcat_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
+    auto strcat_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
     AST::strcat = llvm::Function::Create(strcat_type, llvm::Function::LinkageTypes::ExternalLinkage, "strcat", TheModule.get());
 
     auto strlen_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, false);
     AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
+    AST::strlen->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
 
 }
 
@@ -261,7 +261,7 @@ void AST::define_conversion_functions() {
 
 void AST::define_reference_update_functions() {
     //Definition of incr function
-    auto incr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i32, 0) }, false);
+    auto incr_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { llvm::PointerType::get(i32, 0) }, false);
     AST::incr = llvm::Function::Create(incr_type, llvm::Function::ExternalLinkage, "incr", TheModule.get());
     
     auto previous_insert_point = Builder.GetInsertBlock();
@@ -274,11 +274,11 @@ void AST::define_reference_update_functions() {
         Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(&par, "value"), c32(1)), &par);
     }
 
-    Builder.CreateRetVoid();
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
 
     //Definition of decr function
-    auto decr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i32, 0) }, false);
+    auto decr_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { llvm::PointerType::get(i32, 0) }, false);
     AST::decr = llvm::Function::Create(decr_type, llvm::Function::ExternalLinkage, "decr", TheModule.get());
 
     previous_insert_point = Builder.GetInsertBlock();
@@ -291,7 +291,7 @@ void AST::define_reference_update_functions() {
         Builder.CreateStore(Builder.CreateSub(Builder.CreateLoad(&par, "value"), c32(1)), &par);
     }
 
-    Builder.CreateRetVoid();
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
 
 }

@@ -469,7 +469,7 @@ llvm::Value* BinOp::codegen() {
             rhs = this->rval->codegen();
 
             Builder.CreateStore(rhs, lhs);
-            return nullptr;
+            return llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { });
             break;
         }
         case OpType::Concat:
