@@ -206,18 +206,10 @@ void AST::declare_library_functions() {
     AST::read_bool = llvm::Function::Create(read_bool_type, llvm::Function::ExternalLinkage, "readBoolean", TheModule.get());
 
     //Reference update Functions
-    auto incr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Int))) }, false);
-    AST::incr = llvm::Function::Create(incr_type, llvm::Function::ExternalLinkage, "incr", TheModule.get());
-
-    auto decr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Int))) }, false);
-    AST::decr = llvm::Function::Create(decr_type, llvm::Function::ExternalLinkage, "decr", TheModule.get());
+    define_reference_update_functions();
 
     //Conversion Functions
-    auto int_of_char_type = llvm::FunctionType::get(i32, { i8 }, false);
-    AST::int_of_char = llvm::Function::Create(int_of_char_type, llvm::Function::LinkageTypes::ExternalLinkage, "int_of_char", TheModule.get());
-
-    auto char_of_int_type = llvm::FunctionType::get(i8, { i32 }, false);
-    AST::char_of_int = llvm::Function::Create(char_of_int_type, llvm::Function::LinkageTypes::ExternalLinkage, "char_of_int", TheModule.get());
+    define_conversion_functions();
 
     //String functions
     auto strcpy_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
@@ -231,6 +223,76 @@ void AST::declare_library_functions() {
 
     auto strlen_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, false);
     AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
+
+}
+
+void AST::define_conversion_functions() {
+    //Definition of int_of_char function
+    auto int_of_char_type = llvm::FunctionType::get(i32, { i8 }, false);
+    AST::int_of_char = llvm::Function::Create(int_of_char_type, llvm::Function::LinkageTypes::ExternalLinkage, "int_of_char", TheModule.get());
+
+    auto previous_insert_point = Builder.GetInsertBlock();
+    auto function_body_BB = llvm::BasicBlock::Create(TheContext, "int_of_char_entry", AST::int_of_char );
+    Builder.SetInsertPoint(function_body_BB);
+
+    //Get function parameter transform it from char to int and then return it
+    unsigned int i = 0;
+    for(auto &par: AST::int_of_char->args()) {
+        Builder.CreateRet(Builder.CreateZExt(&par, i32));
+    }
+
+    Builder.SetInsertPoint(previous_insert_point);
+
+    auto char_of_int_type = llvm::FunctionType::get(i8, { i32 }, false);
+    AST::char_of_int = llvm::Function::Create(char_of_int_type, llvm::Function::LinkageTypes::ExternalLinkage, "char_of_int", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "char_of_int_entry", AST::char_of_int );
+    Builder.SetInsertPoint(function_body_BB);
+
+    //Get function parameter transform it from char to int and then return it
+    i = 0;
+    for(auto &par: AST::char_of_int->args()) {
+        Builder.CreateRet(Builder.CreateTrunc(&par, i8));
+    }
+
+    Builder.SetInsertPoint(previous_insert_point);
+}
+
+void AST::define_reference_update_functions() {
+    //Definition of incr function
+    auto incr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i32, 0) }, false);
+    AST::incr = llvm::Function::Create(incr_type, llvm::Function::ExternalLinkage, "incr", TheModule.get());
+    
+    auto previous_insert_point = Builder.GetInsertBlock();
+    auto function_body_BB = llvm::BasicBlock::Create(TheContext, "incr_entry", AST::incr );
+    Builder.SetInsertPoint(function_body_BB);
+
+    //Load pointed to int, increment it and store it back
+    unsigned int i = 0;
+    for(auto &par: AST::incr->args()) {
+        Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(&par, "value"), c32(1)), &par);
+    }
+
+    Builder.CreateRetVoid();
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //Definition of decr function
+    auto decr_type = llvm::FunctionType::get(llvm::Type::getVoidTy(AST::TheContext), { llvm::PointerType::get(i32, 0) }, false);
+    AST::decr = llvm::Function::Create(decr_type, llvm::Function::ExternalLinkage, "decr", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "decr_entry", AST::decr );
+    Builder.SetInsertPoint(function_body_BB);
+
+    //Load pointed to int, increment it and store it back
+    i = 0;
+    for(auto &par: AST::decr->args()) {
+        Builder.CreateStore(Builder.CreateSub(Builder.CreateLoad(&par, "value"), c32(1)), &par);
+    }
+
+    Builder.CreateRetVoid();
+    Builder.SetInsertPoint(previous_insert_point);
 
 }
 

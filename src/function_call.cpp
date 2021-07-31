@@ -178,6 +178,22 @@ llvm::Value* FunctionCall::library_function_codegen() {
 
         return Builder.CreateCall(AST::strcat, { Builder.CreateLoad(target_ptr), Builder.CreateLoad(source_ptr) });
     }
+    if(this->id == "int_of_char") {
+        auto character = par_values[0];
+        return Builder.CreateCall(AST::int_of_char, { character });
+    }
+    if(this->id == "char_of_int") {
+        auto ascii_value = par_values[0];
+        return Builder.CreateCall(AST::char_of_int, { ascii_value });
+    }
+    if(this->id == "incr") {
+        auto int_ref = par_values[0];
+        return Builder.CreateCall(AST::incr, { int_ref });
+    }
+    if(this->id == "decr") {
+        auto int_ref = par_values[0];
+        return Builder.CreateCall(AST::decr, { int_ref });
+    }
     else {
         std::cerr << "Library function: " << this->id << " is not implemented";
         exit(1); //TODO: Error handling

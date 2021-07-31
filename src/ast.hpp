@@ -123,6 +123,8 @@ protected:
 private:
     static void map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, std::vector<llvm::Type*>& par_types);
     static void declare_library_functions();
+    static void define_conversion_functions();
+    static void define_reference_update_functions();
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){
