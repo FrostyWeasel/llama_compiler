@@ -11,6 +11,8 @@
 
 std::vector<std::string*> str_to_delete;
 
+constexpr bool debug = false;
+
 %}
 
 %token T_AND                    "and"                 
@@ -105,7 +107,7 @@ std::vector<std::string*> str_to_delete;
     std::string* string_literal;
     char const_char;
     int number;
-    float float_value;
+    double float_value;
     unsigned int dimension_count;
 }
 

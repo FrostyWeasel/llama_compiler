@@ -34,10 +34,12 @@ llvm::Function* AST::print_string;
 llvm::Function* AST::print_int;
 llvm::Function* AST::print_char;
 llvm::Function* AST::print_bool;
+llvm::Function* AST::print_float;
 llvm::Function* AST::read_string;
 llvm::Function* AST::read_int;
 llvm::Function* AST::read_char;
 llvm::Function* AST::read_bool;
+llvm::Function* AST::read_float;
 llvm::Function* AST::incr;
 llvm::Function* AST::decr;
 llvm::Function* AST::int_of_char;
@@ -65,7 +67,7 @@ llvm::Type *AST::i8 = llvm::IntegerType::get(TheContext, 8);
 llvm::Type *AST::i16 = llvm::IntegerType::get(TheContext, 16);
 llvm::Type *AST::i32 = llvm::IntegerType::get(TheContext, 32);
 llvm::Type *AST::i64 = llvm::IntegerType::get(TheContext, 64);
-llvm::Type *AST::f32 = llvm::Type::getFloatTy(TheContext);
+llvm::Type *AST::f32 = llvm::Type::getDoubleTy(TheContext);
 
 void AST::close_library_function_scope() {
     st->scope_close();
@@ -215,6 +217,9 @@ void AST::declare_library_functions() {
     auto print_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i1 }, false);
     AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "writeBoolean", TheModule.get());
 
+    auto print_float_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::f32 }, false);
+    AST::print_float = llvm::Function::Create(print_float_type, llvm::Function::ExternalLinkage, "writeReal", TheModule.get());
+
     //Read Functions
     auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { i32, llvm::PointerType::get(i8, 0) }, false);
     AST::read_string = llvm::Function::Create(read_string_type, llvm::Function::ExternalLinkage, "readString", TheModule.get());
@@ -229,11 +234,27 @@ void AST::declare_library_functions() {
     auto read_bool_type = llvm::FunctionType::get(i1, {  }, false);
     AST::read_bool = llvm::Function::Create(read_bool_type, llvm::Function::ExternalLinkage, "readBoolean", TheModule.get());
 
+    auto read_float_type = llvm::FunctionType::get(f32, {  }, false);
+    AST::read_float = llvm::Function::Create(read_float_type, llvm::Function::ExternalLinkage, "readReal", TheModule.get());
+
     //Reference update Functions
     define_reference_update_functions();
 
     //Conversion Functions
     define_conversion_functions();
+
+    //Math Functions
+    auto tan_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::tan = llvm::Function::Create(tan_type, llvm::Function::LinkageTypes::ExternalLinkage, "tan", TheModule.get());
+    
+    auto atan_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::atan = llvm::Function::Create(atan_type, llvm::Function::LinkageTypes::ExternalLinkage, "atan", TheModule.get());
+
+    
+    auto pi_type = llvm::FunctionType::get(f32, { }, false);
+    AST::pi = llvm::Function::Create(pi_type, llvm::Function::LinkageTypes::ExternalLinkage, "pi", TheModule.get());
+
+    define_math_functions();
 
     //String functions
     auto strcpy_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { llvm::PointerType::get(i8, 0), llvm::PointerType::get(i8, 0) }, false);
@@ -250,6 +271,92 @@ void AST::declare_library_functions() {
     AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
     AST::strlen->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
 
+}
+
+void AST::define_math_functions() {
+    auto abs_type = llvm::FunctionType::get(i32, { i32 }, false);
+    AST::abs = llvm::Function::Create(abs_type, llvm::Function::LinkageTypes::ExternalLinkage, "abs", TheModule.get());
+
+    auto previous_insert_point = Builder.GetInsertBlock();
+    auto function_body_BB = llvm::BasicBlock::Create(TheContext, "abs_entry", AST::abs);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::abs->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::abs, { i32 }, { &par, c1(0) }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+
+    auto fabs_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::fabs = llvm::Function::Create(fabs_type, llvm::Function::LinkageTypes::ExternalLinkage, "fabs", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "fabs_entry", AST::fabs);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::fabs->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::fabs, { f32 }, { &par }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+
+    auto sqrt_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::sqrt = llvm::Function::Create(sqrt_type, llvm::Function::LinkageTypes::ExternalLinkage, "sqrt", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "sqrt_entry", AST::sqrt);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::sqrt->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::sqrt, { f32 }, { &par }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+   
+    auto sin_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::sin = llvm::Function::Create(sin_type, llvm::Function::LinkageTypes::ExternalLinkage, "sin", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "sin_entry", AST::sin);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::sin->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::sin, { f32 }, { &par }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+    
+    auto cos_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::cos = llvm::Function::Create(cos_type, llvm::Function::LinkageTypes::ExternalLinkage, "cos", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "cos_entry", AST::cos);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::cos->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::cos, { f32 }, { &par }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+    
+    auto exp_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::exp = llvm::Function::Create(exp_type, llvm::Function::LinkageTypes::ExternalLinkage, "exp", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "exp_entry", AST::exp);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::exp->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::exp, { f32 }, { &par }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+    
+    auto ln_type = llvm::FunctionType::get(f32, { f32 }, false);
+    AST::ln = llvm::Function::Create(ln_type, llvm::Function::LinkageTypes::ExternalLinkage, "ln", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "ln_entry", AST::ln);
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::ln->args()) {
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::log, { f32 }, { &par }, nullptr));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
 }
 
 void AST::define_conversion_functions() {

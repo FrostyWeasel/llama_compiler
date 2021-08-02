@@ -100,11 +100,13 @@ protected:
     static llvm::Function* print_int;
     static llvm::Function* print_char;
     static llvm::Function* print_bool;
+    static llvm::Function* print_float;
 
     static llvm::Function* read_string;
     static llvm::Function* read_int;
     static llvm::Function* read_char;
     static llvm::Function* read_bool;
+    static llvm::Function* read_float;
 
     static llvm::Function* incr;
     static llvm::Function* decr;
@@ -159,7 +161,7 @@ protected:
         return llvm::ConstantInt::get(TheContext, llvm::APInt(64, n, true));
     }
 
-    static llvm::ConstantFP *cf32(float n)
+    static llvm::ConstantFP *cf32(double n)
     {
         return llvm::ConstantFP::get(TheContext, llvm::APFloat(n));
     }
@@ -170,6 +172,7 @@ private:
     static void map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, std::vector<llvm::Type*>& par_types);
     static void declare_library_functions();
     static void define_conversion_functions();
+    static void define_math_functions();
     static void define_reference_update_functions();
 };
 

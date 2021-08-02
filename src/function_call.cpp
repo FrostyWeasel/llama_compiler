@@ -97,6 +97,10 @@ llvm::Value* FunctionCall::library_function_codegen() {
         auto boolean = par_values[0];
         return Builder.CreateCall(AST::print_bool, { boolean }, "print_bool_function_return");
     }
+    if(this->id == "print_float") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::print_float, { float_value }, "print_float_function_return");
+    }
     if(this->id == "read_string") {
         auto string_struct = par_values[0];
         auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
@@ -115,6 +119,10 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "read_bool") {
         return Builder.CreateCall(AST::read_bool, {  });
+    }
+    if(this->id == "read_float") {
+        // * Return of read float is double
+        return Builder.CreateCall(AST::read_float, {  });
     }
     if(this->id == "strlen") {
         //Get pointer to string
@@ -193,6 +201,57 @@ llvm::Value* FunctionCall::library_function_codegen() {
     if(this->id == "decr") {
         auto int_ref = par_values[0];
         return Builder.CreateCall(AST::decr, { int_ref }, "decr_function_return");
+    }
+    if(this->id == "int_of_float") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::int_of_float, { float_value }, "int_of_float_function_return");
+    }
+    if(this->id == "float_of_int") {
+        auto int_value = par_values[0];
+        return Builder.CreateCall(AST::float_of_int, { int_value }, "float_of_int_function_return");
+    }
+    if(this->id == "round") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::round, { float_value }, "round_function_return");
+    }
+    if(this->id == "abs") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::abs, { float_value }, "abs_function_return");
+    }
+    if(this->id == "fabs") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::fabs, { float_value }, "fabs_function_return");
+    }
+    if(this->id == "sqrt") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::sqrt, { float_value }, "sqrt_function_return");
+    }
+    if(this->id == "sin") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::sin, { float_value }, "sin_function_return");
+    }
+    if(this->id == "cos") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::cos, { float_value }, "cos_function_return");
+    }
+    if(this->id == "tan") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::tan, { float_value }, "tan_function_return");
+    }
+    if(this->id == "atan") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::atan, { float_value }, "atan_function_return");
+    }
+    if(this->id == "exp") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::exp, { float_value }, "exp_function_return");
+    }
+    if(this->id == "ln") {
+        auto float_value = par_values[0];
+        return Builder.CreateCall(AST::ln, { float_value }, "ln_function_return");
+    }
+    if(this->id == "pi") {
+        return Builder.CreateCall(AST::pi, {  }, "pi_function_return");
     }
     else {
         error_handler->print_error("Library function: " + this->id + " is not implemented", ErrorType::Internal);

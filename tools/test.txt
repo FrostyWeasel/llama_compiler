@@ -1,2 +1,3 @@
-let x = 'c'
-let y = x + 1
+let pi x = 3.14
+let f x = x +. 3.14
+let x = f (pi () /. 4.0)

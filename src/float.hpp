@@ -16,7 +16,7 @@ public:
     virtual llvm::Value* codegen();
 
 private:
-    float value;    
+    double value;    
 };
 
 #endif
