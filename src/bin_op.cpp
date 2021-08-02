@@ -675,8 +675,7 @@ llvm::Value* BinOp::codegen() {
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
 
-            //declare float     @llvm.pow.f32(float  %Val, float %Power)
-            return Builder.CreateIntrinsic(llvm::Intrinsic::pow, { f32 }, { lhs, rhs }, nullptr, "float_exptmp");
+            return Builder.CreateIntrinsic(llvm::Intrinsic::pow, { f64 }, { lhs, rhs }, nullptr, "float_exptmp");
 
             break;
         default:

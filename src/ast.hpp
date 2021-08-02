@@ -138,7 +138,9 @@ protected:
     static llvm::Type *i16;
     static llvm::Type *i32;
     static llvm::Type *i64;
+    static llvm::Type *f16;
     static llvm::Type *f32;
+    static llvm::Type *f64;
 
     static llvm::ConstantInt *c1(bool b)
     {
@@ -156,12 +158,17 @@ protected:
     {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(32, n, true));
     }
-    static llvm::ConstantInt *c64(int n)
+    static llvm::ConstantInt *c64(long n)
     {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(64, n, true));
     }
 
-    static llvm::ConstantFP *cf32(double n)
+    static llvm::ConstantFP *cf32(float n)
+    {
+        return llvm::ConstantFP::get(TheContext, llvm::APFloat(n));
+    }
+
+    static llvm::ConstantFP *cf64(double n)
     {
         return llvm::ConstantFP::get(TheContext, llvm::APFloat(n));
     }
@@ -172,7 +179,6 @@ private:
     static void map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable, std::vector<llvm::Type*>& par_types);
     static void declare_library_functions();
     static void define_conversion_functions();
-    static void define_math_functions();
     static void define_reference_update_functions();
 };
 

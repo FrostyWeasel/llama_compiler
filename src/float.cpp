@@ -16,5 +16,5 @@ std::shared_ptr<TypeVariable> Float::infer() {
 void Float::sem() { /* No need for further checks */ }
 
 llvm::Value* Float::codegen() {
-    return cf32(this->value);
+    return cf64(this->value);
 }

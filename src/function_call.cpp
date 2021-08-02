@@ -99,6 +99,7 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "print_float") {
         auto float_value = par_values[0];
+        // auto truncated_value = Builder.CreateFPTrBuilder.CreateFPTrunc(float_value, f32));
         return Builder.CreateCall(AST::print_float, { float_value }, "print_float_function_return");
     }
     if(this->id == "read_string") {
@@ -212,27 +213,27 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "round") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::round, { float_value }, "round_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::llround, { i32, f64 }, { float_value }, nullptr);
     }
     if(this->id == "abs") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::abs, { float_value }, "abs_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::abs, { i32 }, { float_value, c1(0) }, nullptr);
     }
     if(this->id == "fabs") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::fabs, { float_value }, "fabs_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::fabs, { f64 }, { float_value }, nullptr);
     }
     if(this->id == "sqrt") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::sqrt, { float_value }, "sqrt_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::sqrt, { f64 }, { float_value }, nullptr);
     }
     if(this->id == "sin") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::sin, { float_value }, "sin_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::sin, { f64 }, { float_value }, nullptr);
     }
     if(this->id == "cos") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::cos, { float_value }, "cos_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::cos, { f64 }, { float_value }, nullptr);
     }
     if(this->id == "tan") {
         auto float_value = par_values[0];
@@ -244,11 +245,11 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "exp") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::exp, { float_value }, "exp_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::exp, { f64 }, { float_value }, nullptr);
     }
     if(this->id == "ln") {
         auto float_value = par_values[0];
-        return Builder.CreateCall(AST::ln, { float_value }, "ln_function_return");
+        return Builder.CreateIntrinsic(llvm::Intrinsic::log, { f64 }, { float_value }, nullptr);
     }
     if(this->id == "pi") {
         return Builder.CreateCall(AST::pi, {  }, "pi_function_return");
