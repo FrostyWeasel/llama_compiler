@@ -1,13 +1,12 @@
-#ifndef __INT_HPP__
-#define __INT_HPP__
+#ifndef __FLOAT_HPP__
+#define __FLOAT_HPP__
 
 #include "expr.hpp"
 #include "enums.hpp"
 
-
-class Int : public Expr{
+class Float : public Expr{
 public:
-    Int(int value);
+    Float(float value);
     virtual void print(std::ostream& out) const override;
 
     virtual std::shared_ptr<TypeVariable> infer() override;
@@ -17,7 +16,7 @@ public:
     virtual llvm::Value* codegen();
 
 private:
-    int value;    
+    float value;    
 };
 
 #endif

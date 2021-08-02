@@ -46,12 +46,26 @@ llvm::Function* AST::strcpy;
 llvm::Function* AST::strcmp;
 llvm::Function* AST::strcat;
 llvm::Function* AST::strlen;
+llvm::Function* AST::float_of_int;
+llvm::Function* AST::int_of_float;
+llvm::Function* AST::round;
+llvm::Function* AST::abs;
+llvm::Function* AST::fabs;
+llvm::Function* AST::sqrt;
+llvm::Function* AST::sin;
+llvm::Function* AST::cos;
+llvm::Function* AST::tan;
+llvm::Function* AST::atan;
+llvm::Function* AST::exp;
+llvm::Function* AST::ln;
+llvm::Function* AST::pi;
 
 llvm::Type *AST::i1 = llvm::IntegerType::get(TheContext, 1);
 llvm::Type *AST::i8 = llvm::IntegerType::get(TheContext, 8);
 llvm::Type *AST::i16 = llvm::IntegerType::get(TheContext, 16);
 llvm::Type *AST::i32 = llvm::IntegerType::get(TheContext, 32);
 llvm::Type *AST::i64 = llvm::IntegerType::get(TheContext, 64);
+llvm::Type *AST::f32 = llvm::Type::getFloatTy(TheContext);
 
 void AST::close_library_function_scope() {
     st->scope_close();
@@ -73,6 +87,9 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
     switch (type_variable->get_tag()) {
         case TypeTag::Int:
             return AST::i32;
+        break;
+        case TypeTag::Float:
+            return AST::f32;
         break;
         case TypeTag::Bool:
             return AST::i1;
@@ -251,6 +268,7 @@ void AST::define_conversion_functions() {
 
     Builder.SetInsertPoint(previous_insert_point);
 
+    //Definition of char_of_int function
     auto char_of_int_type = llvm::FunctionType::get(i8, { i32 }, false);
     AST::char_of_int = llvm::Function::Create(char_of_int_type, llvm::Function::LinkageTypes::ExternalLinkage, "char_of_int", TheModule.get());
 
@@ -262,7 +280,47 @@ void AST::define_conversion_functions() {
     for(auto &par: AST::char_of_int->args()) {
         Builder.CreateRet(Builder.CreateTrunc(&par, i8));
     }
+    Builder.SetInsertPoint(previous_insert_point);
 
+    //Definition of float_of_int function
+    auto float_of_int_type = llvm::FunctionType::get(f32, { i32 }, false);
+    AST::float_of_int = llvm::Function::Create(float_of_int_type, llvm::Function::LinkageTypes::ExternalLinkage, "float_of_int", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "float_of_int_entry", AST::float_of_int );
+    Builder.SetInsertPoint(function_body_BB);
+
+    //Get function parameter transform it from char to int and then return it
+    for(auto &par: AST::float_of_int->args()) {
+        Builder.CreateRet(Builder.CreateSIToFP(&par, f32));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //Definition of int_of_float function
+    auto int_of_float_type = llvm::FunctionType::get(i32, { f32 }, false);
+    AST::int_of_float = llvm::Function::Create(int_of_float_type, llvm::Function::LinkageTypes::ExternalLinkage, "int_of_float", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "int_of_float_entry", AST::int_of_float );
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::int_of_float->args()) {
+        Builder.CreateRet(Builder.CreateFPToSI(&par, i32));
+    }
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //Definition of round function
+    auto round_type = llvm::FunctionType::get(i32, { f32 }, false);
+    AST::round = llvm::Function::Create(round_type, llvm::Function::LinkageTypes::ExternalLinkage, "round", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "round_entry", AST::round );
+    Builder.SetInsertPoint(function_body_BB);
+
+    for(auto &par: AST::round->args()) {
+        //declare i32 @llvm.lround.i32.f32(float %Val)
+        Builder.CreateRet(Builder.CreateIntrinsic(llvm::Intrinsic::llround, { i32, f32 }, { &par }, nullptr));
+    }
     Builder.SetInsertPoint(previous_insert_point);
 }
 
@@ -320,9 +378,9 @@ void AST::add_library_functions() {
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     st->insert_entry(new FunctionEntry("print_char", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
-    // from_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    // to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    // st->insert_entry(new FunctionEntry("print_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
+    st->insert_entry(new FunctionEntry("print_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Array, 
         std::make_shared<TypeVariable>(TypeTag::Char));
@@ -342,9 +400,9 @@ void AST::add_library_functions() {
     to_type = std::make_shared<TypeVariable>(TypeTag::Char);
     st->insert_entry(new FunctionEntry("read_char", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
-    // from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    // to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    // st->insert_entry(new FunctionEntry("read_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("read_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
@@ -360,6 +418,7 @@ void AST::add_library_functions() {
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     st->insert_entry(new FunctionEntry("decr", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
+    //Conversion functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Char);
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
     st->insert_entry(new FunctionEntry("int_of_char", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
@@ -368,6 +427,19 @@ void AST::add_library_functions() {
     to_type = std::make_shared<TypeVariable>(TypeTag::Char);
     st->insert_entry(new FunctionEntry("char_of_int", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
 
+    from_type = std::make_shared<TypeVariable>(TypeTag::Int);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("float_of_int", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Int);
+    st->insert_entry(new FunctionEntry("int_of_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Int);
+    st->insert_entry(new FunctionEntry("round", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    //String functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Array, 
         std::make_shared<TypeVariable>(TypeTag::Char));
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
@@ -390,6 +462,48 @@ void AST::add_library_functions() {
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)));
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     st->insert_entry(new FunctionEntry("strcat", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    //Math functions
+    from_type = std::make_shared<TypeVariable>(TypeTag::Int);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Int);
+    st->insert_entry(new FunctionEntry("abs", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("fabs", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("sqrt", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("sin", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("cos", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("tan", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("atan", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("exp", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("ln", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
+    from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
+    to_type = std::make_shared<TypeVariable>(TypeTag::Float);
+    st->insert_entry(new FunctionEntry("pi", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+
     
 }
 

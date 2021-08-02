@@ -26,6 +26,9 @@ void Type::print(std::ostream& out) const {
         case TypeTag::Int:
             out << " int";
             break;
+        case TypeTag::Float:
+            out << " float";
+        break;
         case TypeTag::Unit:
             out << " unit";
             break;

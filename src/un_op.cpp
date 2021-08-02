@@ -26,6 +26,12 @@ void UnOp::print(std::ostream &out) const {
         case OpType::Plus:
             out << " +";
             break;
+        case OpType::PlusFloat:
+            out << " +.";
+            break;
+        case OpType::MinusFloat:
+            out << " -.";
+            break;
         default:
             error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
 
@@ -66,6 +72,18 @@ std::shared_ptr<TypeVariable> UnOp::infer() {
             this->st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Reference, this->type_variable), this->lineno);
             break;
         }
+        case OpType::PlusFloat:
+            expr_type = this->expr->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(expr_type, this->type_variable, this->lineno); 
+            break;
+        case OpType::MinusFloat:
+            expr_type = this->expr->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(expr_type, this->type_variable, this->lineno); 
+            break;
         default:
             error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
 
@@ -94,6 +112,14 @@ void UnOp::sem() {
 
             break;
         }
+        case OpType::PlusFloat:
+            this->expr->sem();
+            
+            break;
+        case OpType::MinusFloat:
+            this->expr->sem();
+
+            break;
         default:
             error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
 
@@ -126,6 +152,16 @@ llvm::Value* UnOp::codegen() {
             return Builder.CreateLoad(rhs, "dereference");
             break;
         }
+        case OpType::PlusFloat:
+            rhs = this->expr->codegen();
+
+            return rhs;
+            break;
+        case OpType::MinusFloat:
+            rhs = this->expr->codegen();
+
+            return Builder.CreateFNeg(rhs, "float_negtmp");
+            break;
         default:
             error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
 

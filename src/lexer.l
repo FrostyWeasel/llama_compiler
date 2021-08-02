@@ -159,15 +159,21 @@ W [ \t\n\r]
 
 [\|\(\)\[\]\,\:]		{ return yytext[0]; }
 
-"+" { yylval.op = OpType::Plus; return yytext[0]; }
-"-" { yylval.op = OpType::Minus; return yytext[0]; }
-"*" { yylval.op = OpType::Times; return yytext[0]; }
-"/" { yylval.op = OpType::Divide; return yytext[0]; }
-"=" { yylval.op = OpType::Equals; return yytext[0]; }
-"<" { yylval.op = OpType::LessThan; return yytext[0]; }
-">" { yylval.op = OpType::GreaterThan; return yytext[0]; }
-"!" { yylval.op = OpType::Dereference; return yytext[0]; }
-";" { yylval.op = OpType::Concat; return yytext[0]; }
+"+"     { yylval.op = OpType::Plus; return yytext[0]; }
+"-"     { yylval.op = OpType::Minus; return yytext[0]; }
+"*"     { yylval.op = OpType::Times; return yytext[0]; }
+"/"     { yylval.op = OpType::Divide; return yytext[0]; }
+"="     { yylval.op = OpType::Equals; return yytext[0]; }
+"<"     { yylval.op = OpType::LessThan; return yytext[0]; }
+">"     { yylval.op = OpType::GreaterThan; return yytext[0]; }
+"!"     { yylval.op = OpType::Dereference; return yytext[0]; }
+";"     { yylval.op = OpType::Concat; return yytext[0]; }
+
+"+."    { yylval.op = OpType::PlusFloat; return T_PLUS_FLOAT; }
+"-."    { yylval.op = OpType::MinusFloat; return T_MINUS_FLOAT; }
+"*."    { yylval.op = OpType::TimesFloat; return T_TIMES_FLOAT; }
+"/."    { yylval.op = OpType::DivideFloat; return T_DIVIDE_FLOAT; }
+"**"    { yylval.op = OpType::ExponentiateFloat; return T_EXPONENTIATE_FLOAT; }
 
 "->"		{ return T_TYPE_ARROW_OP; }
 "&&"		{ yylval.op = OpType::And; return T_AND_OP; }
@@ -182,7 +188,12 @@ W [ \t\n\r]
 {L_lower}({L}|{D}|_)*       { std::string* id = new std::string(yytext); yylval.id = id; return T_ID; }
 {L_upper}({L}|{D}|_)*       { std::string* id = new std::string(yytext); yylval.id = id; return T_CONSTRUCTOR_ID; }
 
-{D}+    { yylval.number = atoi(yytext); return T_CONST_INT; }
+{D}+{L}+    { fprintf(stderr, "Invalid suffix of integer number\n"); exit(1); }
+{D}+        { yylval.number = atoi(yytext); return T_CONST_INT; }
+
+{D}+\.{D}+([eE][\+\-]?{D}+)?{L}+    { fprintf(stderr, "Invalid suffix of floating point number\n"); exit(1);  }
+{D}+\.{D}+([eE][\+\-]?{D}+)?        { yylval.float_value = atof(yytext); return T_CONST_FLOAT; }
+
 \'([^\'\"\\]|\\n|\\t|\\r|\\0|\\\\|\\\'|\\\"|\\x({D}|[A-Fa-f])({D}|[A-Fa-f]))\' { yylval.const_char = get_char(yytext); return T_CONST_CHAR; }
 
 \"([^\n\r\"]|\\\")*\" { std::string* str = fixEscape(yytext) ; yylval.string_literal = str; return T_STRING_LITERAL; }

@@ -12,6 +12,7 @@
 #include "ast.hpp"
 #include "bin_op.hpp"
 #include "bool.hpp"
+#include "float.hpp"
 #include "char.hpp"
 #include "delete.hpp"
 #include "dim.hpp"
@@ -37,6 +38,6 @@
 #include "const_def.hpp"
 #include "id.hpp"
 
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 #endif

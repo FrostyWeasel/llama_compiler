@@ -73,16 +73,16 @@ void ErrorHandler::redefining_variable(std::string id) {
 void ErrorHandler::print_error(std::string msg, ErrorType error_type) {
     switch(error_type) {
         case ErrorType::Warning:
-            std::cerr << "Warning:\n";
+            std::cerr << "Warning:\n\t";
             std::cerr << msg;
             break;
         case ErrorType::User:
-            std::cerr << "Error:\n";
+            std::cerr << "Error:\n\t";
             std::cerr << msg;
             exit(1);
             break;
         case ErrorType::Internal:
-            std::cerr << "Internal Error:\n";
+            std::cerr << "Internal Error:\n\t";
             std::cerr << msg;
             exit(1);
         default:
@@ -94,16 +94,16 @@ void ErrorHandler::print_error(std::string msg, ErrorType error_type) {
 void ErrorHandler::print_error(std::string msg, ErrorType error_type, unsigned int lineno) {
     switch(error_type) {
         case ErrorType::Warning:
-            std::cerr << "Warning: In line " << lineno << ":\n";
+            std::cerr << "Warning: In line " << lineno << ":\n\t";
             std::cerr << msg;
             break;
         case ErrorType::User:
-            std::cerr << "Error: In line " << lineno << ":\n";
+            std::cerr << "Error: In line " << lineno << ":\n\t";
             std::cerr << msg;
             exit(1);
             break;
         case ErrorType::Internal:
-            std::cerr << "Internal Error: In line " << lineno << ":\n";
+            std::cerr << "Internal Error: In line " << lineno << ":\n\t";
             std::cerr << msg;
             exit(1);
         default:

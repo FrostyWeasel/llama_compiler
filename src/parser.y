@@ -30,6 +30,7 @@ std::vector<std::string*> str_to_delete;
 %token T_IF                     "if"
 %token T_IN                     "in"
 %token T_INT                    "int"
+%token T_FLOAT                  "float"
 %token T_LET                    "let"
 %token T_MATCH                  "match"
 %token T_MOD                    "mod"
@@ -55,11 +56,17 @@ std::vector<std::string*> str_to_delete;
 %token T_NAT_EQ_OP              "=="
 %token T_NAT_NOT_EQ_OP          "!="
 %token T_ASSIGNMENT_OP          ":="
+%token T_PLUS_FLOAT             "+."
+%token T_MINUS_FLOAT            "-."  
+%token T_TIMES_FLOAT            "*."  
+%token T_DIVIDE_FLOAT           "/."  
+%token T_EXPONENTIATE_FLOAT     "**"      
 
 %token<id> T_ID    
 %token T_CONSTRUCTOR_ID
 %token<const_char> T_CONST_CHAR 
-%token<number> T_CONST_INT 
+%token<number> T_CONST_INT
+%token<float_value> T_CONST_FLOAT 
 %token<string_literal> T_STRING_LITERAL
 
 %expect 1
@@ -71,8 +78,8 @@ std::vector<std::string*> str_to_delete;
 %left<op> "||"
 %left<op> "&&"
 %nonassoc<op> '=' "<>" '>' '<' "<=" ">=" "==" "!="
-%left<op> '+' '-'
-%left<op> '*' '/' "mod" 
+%left<op> '+' '-' "+." "-."
+%left<op> '*' '/' "mod" "*." "/." 
 %right<op> "**"
 %left<op> UNOP "not" "delete"
 %right "->"
@@ -98,6 +105,7 @@ std::vector<std::string*> str_to_delete;
     std::string* string_literal;
     char const_char;
     int number;
+    float float_value;
     unsigned int dimension_count;
 }
 
@@ -197,11 +205,18 @@ expr:
 |   "for" T_ID '=' expr "downto" expr "do" expr "done"      { $$ = new ForDownTo($2, $4, $6, $8); str_to_delete.push_back($2); }
 |   '+' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
 |   '-' expr    %prec UNOP                                  { $$ = new UnOp($2, $1); }
+|   "+." expr   %prec UNOP                                  { $$ = new UnOp($2, $1); }
+|   "-." expr   %prec UNOP                                  { $$ = new UnOp($2, $1); }
 |   "not" expr                                              { $$ = new UnOp($2, $1); }
 |   expr '+' expr                                           { $$ = new BinOp($1, $3, $2); }
 |   expr '-' expr                                           { $$ = new BinOp($1, $3, $2); }
 |   expr '*' expr                                           { $$ = new BinOp($1, $3, $2); }              
 |   expr '/' expr                                           { $$ = new BinOp($1, $3, $2); }
+|   expr "+." expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "-." expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "*." expr                                          { $$ = new BinOp($1, $3, $2); }              
+|   expr "/." expr                                          { $$ = new BinOp($1, $3, $2); }
+|   expr "**" expr                                          { $$ = new BinOp($1, $3, $2); }
 |   expr '=' expr                                           { $$ = new BinOp($1, $3, $2); }
 |   expr "<>" expr                                          { $$ = new BinOp($1, $3, $2); }
 |   expr '<' expr                                           { $$ = new BinOp($1, $3, $2); }
@@ -222,7 +237,8 @@ func_expr:
 |   '(' expr ')'                                            { $$ = $2; }
 |   '(' ')'                                                 { $$ = new Unit(); }
 |   T_ID                                                    { $$ = new Id($1); str_to_delete.push_back($1); }
-|   T_CONST_INT                                             { $$ = new Int($1); }                                         
+|   T_CONST_INT                                             { $$ = new Int($1); }
+|   T_CONST_FLOAT                                           { $$ = new Float($1); }                                        
 |   T_CONST_CHAR                                            { $$ = new Char($1); }
 |   T_STRING_LITERAL                                        { $$ = new String($1); str_to_delete.push_back($1); }
 |   "true"                                                  { $$ = new Bool(true); }
@@ -239,6 +255,7 @@ type:
 |   "int"                                                   { $$ = new TypeVariable(TypeTag::Int); }
 |   "char"                                                  { $$ = new TypeVariable(TypeTag::Char); }
 |   "bool"                                                  { $$ = new TypeVariable(TypeTag::Bool); }
+|   "float"                                                 { $$ = new TypeVariable(TypeTag::Float); }
 |   '(' type ')'                                            { $$ = $2; }
 |   type "->" type                                          { $$ = new TypeVariable(TypeTag::Function, std::shared_ptr<TypeVariable>($1), std::shared_ptr<TypeVariable>($3), FunctionTypeTag::Actual); }
 |   type "ref"                                              { $$ = new TypeVariable(TypeTag::Reference, std::shared_ptr<TypeVariable>($1)); }

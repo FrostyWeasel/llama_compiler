@@ -71,6 +71,21 @@ void BinOp::print(std::ostream &out) const {
         case OpType::Times:
             out << " *";
             break;
+        case OpType::PlusFloat:
+            out << " +.";
+            break;
+        case OpType::MinusFloat:
+            out << " -.";
+            break;
+        case OpType::TimesFloat:
+            out << " *.";
+            break;
+        case OpType::DivideFloat:
+            out << " /.";
+            break;
+        case OpType::ExponentiateFloat:
+            out << " **";
+            break;
         default:
             out << "ERROR: No known type "; //TODO: Error: Replace by error handling
             exit(1);
@@ -214,6 +229,46 @@ std::shared_ptr<TypeVariable> BinOp::infer() {
             this->st->add_constraint(lval_type, this->type_variable, this->lineno);
             this->st->add_constraint(rval_type, this->type_variable, this->lineno); 
             break;
+        case OpType::PlusFloat:
+            lval_type = this->lval->infer();
+            rval_type = this->rval->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);  
+            break;
+        case OpType::MinusFloat:
+            lval_type = this->lval->infer();
+            rval_type = this->rval->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);  
+            break;
+        case OpType::TimesFloat:
+            lval_type = this->lval->infer();
+            rval_type = this->rval->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);  
+            break;
+        case OpType::DivideFloat:
+            lval_type = this->lval->infer();
+            rval_type = this->rval->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);  
+            break;
+        case OpType::ExponentiateFloat:
+            lval_type = this->lval->infer();
+            rval_type = this->rval->infer();
+            this->type_variable = std::make_shared<TypeVariable>(TypeTag::Float);
+
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);
+            break;
         default:
             error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);
             break;
@@ -270,7 +325,6 @@ void BinOp::sem() {
             }
         break;
         case OpType::GreaterOrEqualThan:
-            //TODO: Sem float same for other comp
             this->lval->sem();
             this->rval->sem();
 
@@ -278,12 +332,12 @@ void BinOp::sem() {
             this->rval->get_type()->set_default_type(TypeTag::Int);
 
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
@@ -296,12 +350,12 @@ void BinOp::sem() {
             this->rval->get_type()->set_default_type(TypeTag::Int);
 
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
@@ -314,12 +368,12 @@ void BinOp::sem() {
             this->rval->get_type()->set_default_type(TypeTag::Int);
 
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
@@ -332,12 +386,12 @@ void BinOp::sem() {
             this->rval->get_type()->set_default_type(TypeTag::Int);
 
             if((sa->is_not_same_tag(this->lval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
-                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
+                std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Float, TypeTag::Unknown}))) {
                 
                 error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }             
@@ -445,6 +499,31 @@ void BinOp::sem() {
             this->lval->sem();
             this->rval->sem(); 
             
+            break;
+        case OpType::PlusFloat:
+            this->lval->sem();
+            this->rval->sem(); 
+
+            break;
+        case OpType::MinusFloat:
+            this->lval->sem();
+            this->rval->sem(); 
+
+            break;
+        case OpType::TimesFloat:
+            this->lval->sem();
+            this->rval->sem(); 
+
+            break;
+        case OpType::DivideFloat:
+            this->lval->sem();
+            this->rval->sem(); 
+
+            break;
+        case OpType::ExponentiateFloat:
+            this->lval->sem();
+            this->rval->sem(); 
+
             break;
         default:
             error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);
@@ -563,6 +642,42 @@ llvm::Value* BinOp::codegen() {
             rhs = this->rval->codegen();
 
             return Builder.CreateMul(lhs, rhs, "multtmp");
+            break;
+        case OpType::PlusFloat:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateFAdd(lhs, rhs, "float_addtmp");
+            
+            break;
+        case OpType::MinusFloat:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateFSub(lhs, rhs, "float_subtmp");
+
+            break;
+        case OpType::TimesFloat:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateFMul(lhs, rhs, "float_multtmp");
+
+            break;
+        case OpType::DivideFloat:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            return Builder.CreateFDiv(lhs, rhs, "float_divtmp");
+
+            break;
+        case OpType::ExponentiateFloat:
+            lhs = this->lval->codegen();
+            rhs = this->rval->codegen();
+
+            //declare float     @llvm.pow.f32(float  %Val, float %Power)
+            return Builder.CreateIntrinsic(llvm::Intrinsic::pow, { f32 }, { lhs, rhs }, nullptr, "float_exptmp");
+
             break;
         default:
             error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);

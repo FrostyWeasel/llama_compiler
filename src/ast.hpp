@@ -117,11 +117,26 @@ protected:
     static llvm::Function* strcat;
     static llvm::Function* strlen;
 
+    static llvm::Function* float_of_int;
+    static llvm::Function* int_of_float;
+    static llvm::Function* round;
+    static llvm::Function* abs;
+    static llvm::Function* fabs;
+    static llvm::Function* sqrt;
+    static llvm::Function* sin;
+    static llvm::Function* cos;
+    static llvm::Function* tan;
+    static llvm::Function* atan;
+    static llvm::Function* exp;
+    static llvm::Function* ln;
+    static llvm::Function* pi;
+
     static llvm::Type *i1;
     static llvm::Type *i8;
     static llvm::Type *i16;
     static llvm::Type *i32;
     static llvm::Type *i64;
+    static llvm::Type *f32;
 
     static llvm::ConstantInt *c1(bool b)
     {
@@ -142,6 +157,11 @@ protected:
     static llvm::ConstantInt *c64(int n)
     {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(64, n, true));
+    }
+
+    static llvm::ConstantFP *cf32(float n)
+    {
+        return llvm::ConstantFP::get(TheContext, llvm::APFloat(n));
     }
 
     static llvm::Type* map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable);

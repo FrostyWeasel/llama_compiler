@@ -71,39 +71,46 @@ extern int yydebug;
     T_IF = 272,                    /* "if"  */
     T_IN = 273,                    /* "in"  */
     T_INT = 274,                   /* "int"  */
-    T_LET = 275,                   /* "let"  */
-    T_MATCH = 276,                 /* "match"  */
-    T_MOD = 277,                   /* "mod"  */
-    T_MUTABLE = 278,               /* "mutable"  */
-    T_NEW = 279,                   /* "new"  */
-    T_NOT = 280,                   /* "not"  */
-    T_OF = 281,                    /* "of"  */
-    T_REC = 282,                   /* "rec"  */
-    T_REF = 283,                   /* "ref"  */
-    T_THEN = 284,                  /* "then"  */
-    T_TO = 285,                    /* "to"  */
-    T_TRUE = 286,                  /* "true"  */
-    T_TYPE = 287,                  /* "type"  */
-    T_UNIT = 288,                  /* "unit"  */
-    T_WHILE = 289,                 /* "while"  */
-    T_WITH = 290,                  /* "with"  */
-    T_TYPE_ARROW_OP = 291,         /* "->"  */
-    T_AND_OP = 292,                /* "&&"  */
-    T_OR_OP = 293,                 /* "||"  */
-    T_NOT_EQ_OP = 294,             /* "<>"  */
-    T_LESS_THAN_OR_EQ_OP = 295,    /* "<="  */
-    T_GREATER_THAN_OR_EQ_OP = 296, /* ">="  */
-    T_NAT_EQ_OP = 297,             /* "=="  */
-    T_NAT_NOT_EQ_OP = 298,         /* "!="  */
-    T_ASSIGNMENT_OP = 299,         /* ":="  */
-    T_ID = 300,                    /* T_ID  */
-    T_CONSTRUCTOR_ID = 301,        /* T_CONSTRUCTOR_ID  */
-    T_CONST_CHAR = 302,            /* T_CONST_CHAR  */
-    T_CONST_INT = 303,             /* T_CONST_INT  */
-    T_STRING_LITERAL = 304,        /* T_STRING_LITERAL  */
-    IF_THEN = 305,                 /* IF_THEN  */
-    IF_THEN_ELSE = 306,            /* IF_THEN_ELSE  */
-    UNOP = 308                     /* UNOP  */
+    T_FLOAT = 275,                 /* "float"  */
+    T_LET = 276,                   /* "let"  */
+    T_MATCH = 277,                 /* "match"  */
+    T_MOD = 278,                   /* "mod"  */
+    T_MUTABLE = 279,               /* "mutable"  */
+    T_NEW = 280,                   /* "new"  */
+    T_NOT = 281,                   /* "not"  */
+    T_OF = 282,                    /* "of"  */
+    T_REC = 283,                   /* "rec"  */
+    T_REF = 284,                   /* "ref"  */
+    T_THEN = 285,                  /* "then"  */
+    T_TO = 286,                    /* "to"  */
+    T_TRUE = 287,                  /* "true"  */
+    T_TYPE = 288,                  /* "type"  */
+    T_UNIT = 289,                  /* "unit"  */
+    T_WHILE = 290,                 /* "while"  */
+    T_WITH = 291,                  /* "with"  */
+    T_TYPE_ARROW_OP = 292,         /* "->"  */
+    T_AND_OP = 293,                /* "&&"  */
+    T_OR_OP = 294,                 /* "||"  */
+    T_NOT_EQ_OP = 295,             /* "<>"  */
+    T_LESS_THAN_OR_EQ_OP = 296,    /* "<="  */
+    T_GREATER_THAN_OR_EQ_OP = 297, /* ">="  */
+    T_NAT_EQ_OP = 298,             /* "=="  */
+    T_NAT_NOT_EQ_OP = 299,         /* "!="  */
+    T_ASSIGNMENT_OP = 300,         /* ":="  */
+    T_PLUS_FLOAT = 301,            /* "+."  */
+    T_MINUS_FLOAT = 302,           /* "-."  */
+    T_TIMES_FLOAT = 303,           /* "*."  */
+    T_DIVIDE_FLOAT = 304,          /* "/."  */
+    T_EXPONENTIATE_FLOAT = 305,    /* "**"  */
+    T_ID = 306,                    /* T_ID  */
+    T_CONSTRUCTOR_ID = 307,        /* T_CONSTRUCTOR_ID  */
+    T_CONST_CHAR = 308,            /* T_CONST_CHAR  */
+    T_CONST_INT = 309,             /* T_CONST_INT  */
+    T_CONST_FLOAT = 310,           /* T_CONST_FLOAT  */
+    T_STRING_LITERAL = 311,        /* T_STRING_LITERAL  */
+    IF_THEN = 312,                 /* IF_THEN  */
+    IF_THEN_ELSE = 313,            /* IF_THEN_ELSE  */
+    UNOP = 314                     /* UNOP  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -112,7 +119,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 84 "./src/parser.y"
+#line 91 "./src/parser.y"
 
     LetDef* let_def;
     Def* def;
@@ -130,9 +137,10 @@ union YYSTYPE
     std::string* string_literal;
     char const_char;
     int number;
+    float float_value;
     unsigned int dimension_count;
 
-#line 136 "./src/parser.hpp"
+#line 144 "./src/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
