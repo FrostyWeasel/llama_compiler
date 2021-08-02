@@ -2,18 +2,16 @@
 #define __UNOP_HPP__
 
 #include "expr.hpp"
-#include "type_variable.hpp"
 #include "enums.hpp"
 #include <iostream>
 #include <memory>
 
+class TypeVariable;
 class UnOp : public Expr{
 public:
-    UnOp(Expr* expr, OpType op): expr(expr), op(op) {}
+    UnOp(Expr* expr, OpType op);
 
-    virtual ~UnOp() {
-        delete expr;
-    }
+    virtual ~UnOp();
 
     virtual void print(std::ostream &out) const override;
 

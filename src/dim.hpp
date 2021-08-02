@@ -2,8 +2,6 @@
 #define __DIM_HPP__
 
 #include "expr.hpp"
-#include "variable_entry.hpp"
-#include "type_variable.hpp"
 #include <iostream>
 #include <memory>
 #include <string>

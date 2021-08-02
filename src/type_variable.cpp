@@ -4,12 +4,11 @@
 #include "array_type.hpp"
 #include "ref_type.hpp"
 #include "enums.hpp"
+#include "error_handler.hpp"
 #include <memory>
 
-//TODO: In a static map put all typevariables created if any one is uknown after infer if shared_pointer reference count != 1 set out warning then set value base of optionals
-//TODO: Set up an optional map from type variable to preferred value if they are uknown (most are unit except for example comparisons which are int or char or float)
-
 unsigned int TypeVariable::counter = 0;
+std::unique_ptr<ErrorHandler> TypeVariable::error_handler = std::make_unique<ErrorHandler>();
 
 TypeVariable::TypeVariable() : type(std::make_shared<Type>(TypeTag::Unknown)), tag(TypeVariableTag::Free), id(++TypeVariable::counter) { }
 
@@ -44,8 +43,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1) {
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag for constractor taking one type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking one type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -59,8 +57,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariab
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag non Function for constractor two type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -74,8 +71,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* from_type, TypeVariab
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag non Function for constractor two type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -89,8 +85,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, TypeVariable* t1, unsigned int dim)
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag for constractor taking one type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking one type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -111,8 +106,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1) {
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag for constractor taking one type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking one type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -126,8 +120,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> from_
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag non Function for constractor two type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -141,8 +134,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> from_
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag non Function for constractor two type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag non Function for constractor two type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -157,8 +149,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, u
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag for constractor taking one type variable\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking one type variable\n", ErrorType::Internal);
             break;
     }
 }
@@ -172,8 +163,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, D
             break;
 
         default:
-            std::cerr << "Invalid TypeVariableTag for constractor taking DimType\n";
-            exit(1);
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking DimType\n", ErrorType::Internal);
             break;
     }
 }
@@ -233,9 +223,10 @@ std::shared_ptr<TypeVariable> TypeVariable::get_function_from_type() {
         return function_ptr->get_from_type_variable();
     }
     else{
-        std::cerr << "Requesting get_function_from_type but type is not a function\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_function_from_type but type is not a function\n", ErrorType::Internal);
     }
+
+    return nullptr;
 }
 
 std::shared_ptr<TypeVariable> TypeVariable::get_function_to_type() {
@@ -244,9 +235,10 @@ std::shared_ptr<TypeVariable> TypeVariable::get_function_to_type() {
         return function_ptr->get_to_type_variable();
     }
     else{
-        std::cerr << "Requesting get_function_to_type but type is not a function\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_function_to_type but type is not a function\n", ErrorType::Internal);
     }
+
+   return nullptr;
 }
 
 std::shared_ptr<TypeVariable> TypeVariable::get_referenced_type() {
@@ -255,9 +247,10 @@ std::shared_ptr<TypeVariable> TypeVariable::get_referenced_type() {
         return reference_ptr->get_referenced_variable();
     }
     else{
-        std::cerr << "Requesting get_referenced_variable but type is not a reference\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_referenced_variable but type is not a reference\n", ErrorType::Internal);
     }
+
+   return nullptr;
 }
 
 std::shared_ptr<TypeVariable> TypeVariable::get_array_type() {
@@ -266,9 +259,10 @@ std::shared_ptr<TypeVariable> TypeVariable::get_array_type() {
         return array_ptr->get_array_type();
     }
     else{
-        std::cerr << "Requesting get_array_type but type is not an array\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_array_type but type is not an array\n", ErrorType::Internal);
     }
+
+   return nullptr;
 }
 
 TypeTag TypeVariable::get_tag() { return type->get_tag(); }
@@ -283,8 +277,7 @@ void TypeVariable::print(std::ostream& out) const {
             out << *this->type;
             break;
         default:
-            std::cerr << "Unknown TypeVariableTag\n";
-            exit(1);
+             error_handler->print_error("Unknown TypeVariableTag\n", ErrorType::Internal);
             break;
     }
 }
@@ -300,9 +293,10 @@ unsigned int TypeVariable::get_array_dim() {
         return array_ptr->get_dim();
     }
     else{
-        std::cerr << "Requesting get_array_dim but type is not an array\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_array_dim but type is not an array\n", ErrorType::Internal);
     }
+
+   return 0;
 }
 
 void TypeVariable::set_array_dim(unsigned int dim) {
@@ -311,8 +305,7 @@ void TypeVariable::set_array_dim(unsigned int dim) {
         array_ptr->set_dim(dim);
     }
     else{
-        std::cerr << "Requesting set_array_dim but type is not an array\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting set_array_dim but type is not an array\n", ErrorType::Internal);
     }
 }
 
@@ -322,9 +315,10 @@ unsigned int TypeVariable::get_function_parameter_count() {
         return function_ptr->get_parameter_count();
     }
     else{
-        std::cerr << "Requesting get_function_parameter_count but type is not a function\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_function_parameter_count but type is not a function\n", ErrorType::Internal);
     }
+
+   return 0;
 }
 
 void TypeVariable::set_function_parameter_count(unsigned int parameter_count) {
@@ -333,8 +327,7 @@ void TypeVariable::set_function_parameter_count(unsigned int parameter_count) {
         function_ptr->set_parameter_count(parameter_count);
     }
     else{
-        std::cerr << "Requesting set_function_parameter_count but type is not a function\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting set_function_parameter_count but type is not a function\n", ErrorType::Internal);
     }
 }
 
@@ -344,9 +337,10 @@ FunctionTypeTag TypeVariable::get_function_type_tag() {
         return function_ptr->function_type_tag;
     }
     else{
-        std::cerr << "Requesting get_function_type_tag but type is not a function\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_function_type_tag but type is not a function\n", ErrorType::Internal);
     }
+
+   return FunctionTypeTag::Curry;
 }
 void TypeVariable::set_function_type_tag(FunctionTypeTag function_type){
     if(this->type->get_tag() == TypeTag::Function) {
@@ -354,8 +348,7 @@ void TypeVariable::set_function_type_tag(FunctionTypeTag function_type){
         function_ptr->function_type_tag = function_type;
     }
     else{
-        std::cerr << "Requesting set_function_type_tag but type is not a function\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting set_function_type_tag but type is not a function\n", ErrorType::Internal);
     }
 }
 
@@ -364,8 +357,7 @@ void TypeVariable::set_tag_to_default() {
         this->type->set_tag(this->default_type);
     }
     else{
-        std::cerr << "Requesting set_default_tag but type is not uknown\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting set_default_tag but type is not uknown\n", ErrorType::Internal);
     }
 }
 
@@ -375,9 +367,10 @@ DimType TypeVariable::get_array_dim_type() {
         return array_ptr->get_dim_type();
     }
     else{
-        std::cerr << "Requesting get_array_dim_type but type is not an array\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting get_array_dim_type but type is not an array\n", ErrorType::Internal);
     }
+
+   return DimType::Exact;
 }
 
 void TypeVariable::set_array_dim_type(DimType dim_type) {
@@ -386,8 +379,7 @@ void TypeVariable::set_array_dim_type(DimType dim_type) {
         return array_ptr->set_dim_type(dim_type);
     }
     else{
-        std::cerr << "Requesting set_array_dim_type but type is not an array\n";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Requesting set_array_dim_type but type is not an array\n", ErrorType::Internal);
     }
 }
 
@@ -400,10 +392,11 @@ unsigned int TypeVariable::get_complex_type_depth() {
         }
         break;
         default:
-            std::cerr << "get_complex_type_depth not implemented for this type\n";
-            exit(1);
+             error_handler->print_error("get_complex_type_depth not implemented for this type\n", ErrorType::Internal);
         break;
     } 
+
+    return 0;
 }
 
 TypeTag TypeVariable::get_bottom_tag() {
@@ -414,8 +407,9 @@ TypeTag TypeVariable::get_bottom_tag() {
         }
         break;
         default:
-            std::cerr << "get_complex_type_depth not implemented for this type\n";
-            exit(1);
+            error_handler->print_error("get_complex_type_depth not implemented for this type\n", ErrorType::Internal);
         break;
     } 
+
+    return TypeTag::Unit; 
 }

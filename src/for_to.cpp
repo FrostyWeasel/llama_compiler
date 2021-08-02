@@ -1,4 +1,13 @@
 #include "for_to.hpp"
+#include "constant_entry.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include <string>
+#include <iostream>
+
+ForTo::ForTo(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr): For(id, first_condition, second_condition, expr) {}
 
 void ForTo::print(std::ostream &out) const {
     out << "for " << id << " =";

@@ -26,7 +26,7 @@ std::shared_ptr<TypeVariable> FunctionCall::infer() {
     std::shared_ptr<TypeVariable> par_list_type = this->expr_list->infer();
     std::shared_ptr<TypeVariable> correct_type = std::make_shared<TypeVariable>(TypeTag::Function, par_list_type, this->type_variable, this->expr_list->block_size()); 
 
-    this->st->add_constraint(func_type, correct_type);
+    this->st->add_constraint(func_type, correct_type, this->lineno);
 
     return this->type_variable;
 }
@@ -195,7 +195,8 @@ llvm::Value* FunctionCall::library_function_codegen() {
         return Builder.CreateCall(AST::decr, { int_ref }, "decr_function_return");
     }
     else {
-        std::cerr << "Library function: " << this->id << " is not implemented";
-        exit(1); //TODO: Error handling
+        error_handler->print_error("Library function: " + this->id + " is not implemented", ErrorType::Internal);
     }
+    
+    return nullptr;
 }

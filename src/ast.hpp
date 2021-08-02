@@ -1,13 +1,12 @@
 #ifndef __AST_HPP__
 #define __AST_HPP__
 
-#include "symbol_table.hpp"
-#include "type_variable.hpp"
 #include "enums.hpp"
-#include "semantic_analyzer.hpp"
 #include <iostream>
 #include <string>
 #include <map>
+#include <unordered_map>
+#include <memory>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Verifier.h>
@@ -17,6 +16,7 @@
 #include <llvm/Transforms/Scalar/GVN.h>
 #include <llvm/Transforms/Utils.h>
 
+extern int yylineno;
 
 //TODO: In case i implement float
 /*
@@ -26,11 +26,22 @@
 
 */
 
+class SemanticAnalyzer;
+class ErrorHandler;
+class TypeVariable;
+class SymbolTable;
+
 class AST{
 public:
 
-    AST() = default;
-    AST(NodeType node_type) : node_type(node_type) { }
+    AST() {
+        this->lineno = yylineno;
+
+    }
+    AST(NodeType node_type) : node_type(node_type) {
+        this->lineno = yylineno;
+
+    }
     virtual ~AST() = default;
     virtual void print(std::ostream& out) const = 0;
     virtual std::shared_ptr<TypeVariable> infer() = 0;
@@ -41,10 +52,10 @@ public:
     virtual void llvm_compile_and_dump(bool optimize=false);
 
     void close_all_program_scopes();
-    void unify() { st->unify(); }
+    void unify();
     void add_library_functions();
     void close_library_function_scope();
-    void clear_inference_structures() { st->clear_inference_structures(); };
+    void clear_inference_structures();
     static void bind_to_default_types();
 
     virtual NodeType get_node_type() { return node_type; }
@@ -59,7 +70,17 @@ public:
 protected:
     static std::unique_ptr<SymbolTable> st;
     static std::unique_ptr<SemanticAnalyzer> sa;
+    static std::unique_ptr<ErrorHandler> error_handler;
     NodeType node_type;
+
+    //Every last expression in a line is seen as belonging to the next line, because flex increments the yylineno upon seeing /n and before returning the type
+    unsigned int lineno;
+
+    friend ErrorHandler;
+    friend SymbolTable;
+
+    //Map from type variable ids to nodes of the ast with that type so that we can print informative error messages for unbound variables and type errors.
+    static std::unique_ptr<std::unordered_map<unsigned int, AST*>> type_variable_owners;
 
     //Vector of type variables to find unknown types left after inference
     static std::unique_ptr<std::vector<std::shared_ptr<TypeVariable>>> created_type_variables;

@@ -1,4 +1,15 @@
 #include "if.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include <string>
+#include <iostream>
+#include <memory>
+#include <iostream>
+
+If::If(Expr* condition, Expr* if_expr): condition(condition), if_expr(if_expr), else_expr(nullptr), Expr(new TypeVariable(TypeTag::Unit)) {}
+If::If(Expr* condition, Expr* if_expr, Expr* else_expr): condition(condition), if_expr(if_expr), else_expr(else_expr), Expr(new TypeVariable()) {}
 
 void If::print(std::ostream &out) const {
         out << "If(";
@@ -31,16 +42,16 @@ std::shared_ptr<TypeVariable> If::infer() {
     if (else_expr != nullptr) {
         auto else_expr_type = this->else_expr->infer();
 
-        st->add_constraint(if_expr_type, else_expr_type);
+        st->add_constraint(if_expr_type, else_expr_type, this->lineno);
     }
     else {
-        st->add_constraint(if_expr_type, std::make_shared<TypeVariable>(TypeTag::Unit));
+        st->add_constraint(if_expr_type, std::make_shared<TypeVariable>(TypeTag::Unit), this->lineno);
     }
 
     auto condition_type = this->condition->infer();
 
-    st->add_constraint(condition_type, std::make_shared<TypeVariable>(TypeTag::Bool));
-    st->add_constraint(this->type_variable, if_expr_type);
+    st->add_constraint(condition_type, std::make_shared<TypeVariable>(TypeTag::Bool), this->lineno);
+    st->add_constraint(this->type_variable, if_expr_type, this->lineno);
 
     return if_expr_type;
 }
@@ -69,7 +80,7 @@ llvm::Value* If::codegen() {
 
         //Generate code for the then clause
         Builder.SetInsertPoint(then_BB);
-        auto then_value = this->if_expr->codegen();
+        this->if_expr->codegen();
         Builder.CreateBr(if_end_BB);
 
         //Codegen for the then block can change the basic block but it is needed for the phi expression

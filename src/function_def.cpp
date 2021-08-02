@@ -1,8 +1,25 @@
 #include "function_def.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include "function_entry.hpp"
+#include "block.hpp"
+#include "expr.hpp"
+#include "par.hpp"
 #include <string>
+#include <vector>
 #include <iostream>
 #include <map>
     
+FunctionDef::FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
+FunctionDef::FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
+
+FunctionDef::~FunctionDef() {
+    delete expr;
+    delete par_list;
+}
+
 void FunctionDef::print(std::ostream& out) const {
     out << "FunctionDef(";
     out << " Id: " << id;
@@ -101,12 +118,12 @@ std::shared_ptr<TypeVariable> FunctionDef::infer() {
     this->from_type = from_type;
 
     //Function from type must be the same as the type of its parameter list.
-    st->add_constraint(func_entry->get_from_type(), from_type);
+    st->add_constraint(func_entry->get_from_type(), from_type, this->lineno);
 
     std::shared_ptr<TypeVariable> to_type = this->expr->infer();
 
     //Function return type must be the same as its body expr type.
-    st->add_constraint(this->type_variable, to_type);
+    st->add_constraint(this->type_variable, to_type, this->lineno);
 
     st->scope_close();
 
@@ -162,12 +179,10 @@ void FunctionDef::sem() {
     st->scope_close();
 
     if((sa->is_same_tag(to_type, TypeTag::Function))) {
-        std::cerr << "Function " << id << " return type can not be of type function\n" << "offending type is: " << *to_type;
-        exit(1); //TODO: Error handling.
+        error_handler->non_allowed_type(to_type, id, this->lineno, ErrorType::User, TypeTag::Function);
     }
     // if((sa->is_same_tag(to_type, TypeTag::Array))) {
-    //     std::cerr << "Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type;
-    //     exit(1); //TODO: Error handling.
+    //     error_handler->print_error("Function " << id << " return type can not be of type array\n" << "offending type is: " << *to_type, ErrorType::Internal);
     // }
 }
 

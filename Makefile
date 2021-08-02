@@ -3,7 +3,7 @@
 LLVMCONFIG=llvm-config
 
 CXX=g++
-CXXFLAGS=-O0 -Wall -g `$(LLVMCONFIG) --cxxflags`
+CXXFLAGS=-O0 -Wall -g -Wno-reorder `$(LLVMCONFIG) --cxxflags`
 LDFLAGS=`$(LLVMCONFIG) --ldflags --system-libs --libs all`
 
 HPPFILES=$(shell find ./src -name "*.hpp" -not -name "parser.hpp" -not -name "lexer.hpp")

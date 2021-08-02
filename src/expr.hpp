@@ -3,15 +3,15 @@
 
 #include "ast.hpp"
 #include "enums.hpp"
-#include "type_variable.hpp"
+#include <memory>
+
+class SymbolEntry;
+class TypeVariable;
 
 class Expr : public AST{
 public:  
-    Expr() : AST(NodeType::Expr) {}
-    Expr(TypeVariable* type_variable): type_variable(std::shared_ptr<TypeVariable>(type_variable)), AST(NodeType::Expr) {
-        AST::created_type_variables->push_back(this->type_variable);    
-    }
-    // Expr(std::shared_ptr<TypeVariable> type_variable): type_variable(type_variable), AST(NodeType::Expr) { }
+    Expr();
+    Expr(TypeVariable* type_variable);
 
     virtual ~Expr() {}
 

@@ -4,15 +4,13 @@
 #include <iostream>
 #include <string>
 #include "expr.hpp"
-#include "type.hpp"
 #include "enums.hpp"
-#include "symbol_entry.hpp"
-#include "constant_entry.hpp"
-#include "parameter_entry.hpp"
+
+class TypeVariable;
 
 class Id : public Expr{
 public:
-    Id(std::string* id): id(*id) {}
+    Id(std::string* id);
 
     virtual void print(std::ostream& out) const override;
 

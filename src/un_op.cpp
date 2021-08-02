@@ -1,4 +1,16 @@
 #include "un_op.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include <iostream>
+#include <memory>
+
+UnOp::UnOp(Expr* expr, OpType op): expr(expr), op(op) {}
+
+UnOp::~UnOp() {
+    delete expr;
+}
     
 void UnOp::print(std::ostream &out) const {
     switch(op){
@@ -15,8 +27,8 @@ void UnOp::print(std::ostream &out) const {
             out << " +";
             break;
         default:
-            std::cerr << "ERROR: No known op "; //TODO: Error: Replace by error handling
-            exit(1);
+            error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
+
             break;
     }
     if(expr != nullptr)
@@ -31,19 +43,19 @@ std::shared_ptr<TypeVariable> UnOp::infer() {
             expr_type = this->expr->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(expr_type, this->type_variable);
+            this->st->add_constraint(expr_type, this->type_variable, this->lineno);
             break;
         case OpType::Plus:
             expr_type = this->expr->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(expr_type, this->type_variable);
+            this->st->add_constraint(expr_type, this->type_variable, this->lineno);
             break;
         case OpType::Minus:
             expr_type = this->expr->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(expr_type, this->type_variable);
+            this->st->add_constraint(expr_type, this->type_variable, this->lineno);
             break;
         case OpType::Dereference:{
             expr_type = this->expr->infer(); //Type must be t ref
@@ -51,12 +63,12 @@ std::shared_ptr<TypeVariable> UnOp::infer() {
 
             this->created_type_variables->push_back(this->type_variable);
 
-            this->st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Reference, this->type_variable));
+            this->st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Reference, this->type_variable), this->lineno);
             break;
         }
         default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
+            error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
+
             break;
     }
 
@@ -83,8 +95,8 @@ void UnOp::sem() {
             break;
         }
         default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
+            error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
+
             break;
     }  
 }
@@ -115,8 +127,8 @@ llvm::Value* UnOp::codegen() {
             break;
         }
         default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
+            error_handler->print_error("Unknown unary operator type\n", ErrorType::Internal, this->lineno);
+
             break;
     }  
 

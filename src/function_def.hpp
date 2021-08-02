@@ -2,28 +2,26 @@
 #define __FUNCTIONDEF_HPP__
 
 #include "enums.hpp"
-#include "type.hpp"
-#include "block.hpp"
-#include "par.hpp"
-#include "expr.hpp"
 #include "def.hpp"
-#include "symbol_entry.hpp"
-#include "function_entry.hpp"
 #include <string>
 #include <iostream>
 #include <map>
 
 class FunctionEntry;
 
+template <class T>
+class Block;
+
+class Par;
+class TypeVariable;
+class Expr;
+
 class FunctionDef : public Def {
 public:
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
-    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr);
+    FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable);
 
-    virtual ~FunctionDef() {
-        delete expr;
-        delete par_list;
-    }
+    virtual ~FunctionDef();
 
     virtual void print(std::ostream& out) const override;
 

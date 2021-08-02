@@ -1,21 +1,19 @@
 #ifndef __CONSTANTDEF_HPP__
 #define __CONSTANTDEF_HPP__
 
-#include "expr.hpp"
 #include "def.hpp"
-#include "type.hpp"
-#include "symbol_entry.hpp"
-#include "constant_entry.hpp"
 #include <string>
+#include <memory>
+
+class Expr;
+class TypeVariable;
 
 class ConstDef : public Def{
 public:
-    ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new TypeVariable()) {}
-    ConstDef(std::string* id, std::shared_ptr<TypeVariable> type_variable, Expr* expr): id(*id), Def(type_variable), expr(expr) {}
+    ConstDef(std::string* id, Expr* expr);
+    ConstDef(std::string* id, std::shared_ptr<TypeVariable> type_variable, Expr* expr);
 
-    virtual ~ConstDef() {
-        delete expr;
-    }
+    virtual ~ConstDef();
 
     virtual void print(std::ostream& out) const override;
 

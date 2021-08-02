@@ -7,6 +7,7 @@
 #include "enums.hpp"
 
 class Type;
+class ErrorHandler;
 
 class TypeVariable {
 public:
@@ -70,6 +71,8 @@ private:
     static unsigned int counter;
 
     bool is_bound();
+
+    static std::unique_ptr<ErrorHandler> error_handler;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TypeVariable& type_variable){

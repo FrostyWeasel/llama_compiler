@@ -1,21 +1,21 @@
 #ifndef __ARRAYINDEX_HPP__
 #define __ARRAYINDEX_HPP__
 
-#include "expr.hpp"
-#include "block.hpp"
-#include "variable_entry.hpp"
 #include "enums.hpp"
+#include "expr.hpp"
 #include <memory>
 #include <string>
 #include <iostream>
 
+class TypeVariable;
+
+template <class T>
+class Block;
 class ArrayIndex : public Expr{
 public:
-    ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
+    ArrayIndex(std::string* id, Block<Expr>* expr_list);
 
-    virtual ~ArrayIndex() {
-        delete expr_list;
-    }
+    virtual ~ArrayIndex();
 
     virtual void print(std::ostream &out) const override;
 

@@ -2,20 +2,19 @@
 #define __BINOP_HPP__
 
 #include "expr.hpp"
-#include "type_variable.hpp"
 #include "enums.hpp"
 #include <iostream>
 #include <vector>
+#include <memory>
+
+class TypeVariable;
 
 class BinOp : public Expr {
 public:
 
-    BinOp(Expr* lval, Expr* rval, OpType op): lval(lval), rval(rval), op(op) {}
+    BinOp(Expr* lval, Expr* rval, OpType op);
 
-    virtual ~BinOp() {
-        delete lval;
-        delete rval;
-    }
+    virtual ~BinOp();
 
     virtual void print(std::ostream &out) const override;
 

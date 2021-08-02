@@ -5,7 +5,6 @@
 #include "function_type.hpp"
 #include "enums.hpp"
 
-
 class FunctionEntry : public SymbolEntry{
 public:
 

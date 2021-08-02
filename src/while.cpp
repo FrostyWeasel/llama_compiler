@@ -1,4 +1,14 @@
 #include "while.hpp"
+#include "type_variable.hpp"
+#include "symbol_table.hpp"
+#include <iostream>
+
+While::While(Expr* condition, Expr* expr): condition(condition), expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
+
+While::~While() {
+    delete condition;
+    delete expr;
+}
 
 void While::print(std::ostream &out) const {
     out << "While(";
@@ -19,8 +29,8 @@ std::shared_ptr<TypeVariable> While::infer() {
     auto condition_type = this->condition->infer();
     auto expr_type = this->expr->infer();        
     
-    st->add_constraint(condition_type, std::make_shared<TypeVariable>(TypeTag::Bool));
-    st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Unit));
+    st->add_constraint(condition_type, std::make_shared<TypeVariable>(TypeTag::Bool), this->lineno);
+    st->add_constraint(expr_type, std::make_shared<TypeVariable>(TypeTag::Unit), this->lineno);
 
     return this->type_variable;
 }
@@ -32,9 +42,6 @@ void While::sem() {
 
 llvm::Value* While::codegen() { 
     auto current_function = Builder.GetInsertBlock()->getParent();
-
-    //Current BB
-    auto header_BB = Builder.GetInsertBlock();
 
     //Create BB for the loop
     auto loop_start_BB = llvm::BasicBlock::Create(TheContext, "loop_start", current_function);

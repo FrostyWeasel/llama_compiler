@@ -1,2 +1,2 @@
-let f x = x
-let f x y = x < y
+let x = 'c'
+let y = x + 1

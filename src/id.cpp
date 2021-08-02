@@ -1,4 +1,11 @@
 #include "id.hpp"
+#include "type_variable.hpp"
+#include "symbol_table.hpp"
+#include "symbol_entry.hpp"
+#include <string>
+#include <iostream>
+
+Id::Id(std::string* id): id(*id) {}
 
 void Id::print(std::ostream& out) const {
     out << " " << id;

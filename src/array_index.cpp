@@ -1,4 +1,18 @@
 #include "array_index.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include "block.hpp"
+#include <iostream>
+#include <memory>
+#include <string>
+
+ArrayIndex::ArrayIndex(std::string* id, Block<Expr>* expr_list): id(*id), expr_list(expr_list) {}
+
+ArrayIndex::~ArrayIndex() {
+    delete expr_list;
+}
 
 void ArrayIndex::print(std::ostream &out) const {
     out << "ArrayIndex( ";
@@ -29,7 +43,7 @@ std::shared_ptr<TypeVariable> ArrayIndex::infer() {
     this->type_variable = std::make_shared<TypeVariable>(TypeTag::Reference, array_element_type);
 
     st->add_constraint(entry->get_type(), std::make_shared<TypeVariable>(TypeTag::Array,
-        array_element_type, this->expr_list->block_size(), DimType::Exact));
+        array_element_type, this->expr_list->block_size(), DimType::Exact), lineno);
 
     return this->type_variable;
 }
@@ -60,7 +74,7 @@ llvm::Value* ArrayIndex::codegen() {
     //Get all the array dimension size values
     std::vector<llvm::Value*> dim_sizes;
     llvm::Value* dim_size_ptr;
-    for (auto i = 1; i <= dim_count; i++) {
+    for (unsigned int i = 1; i <= dim_count; i++) {
         dim_size_ptr = Builder.CreateStructGEP(entry->get_allocation(), i, "dim_size_ptr");
         dim_sizes.push_back(Builder.CreateLoad(dim_size_ptr, "dim_size"));
     }

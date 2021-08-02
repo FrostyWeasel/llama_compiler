@@ -33,7 +33,10 @@ enum class BlockType    {
 enum class NodeType     {
                             Par,
                             Expr,
-                            Def
+                            Def,
+                            BinOp,
+                            UnOp,
+                            New
                         };   
 
 enum class DimType      {
@@ -49,6 +52,12 @@ enum class FunctionTypeTag  {
 enum class PassStage        {
                                 FunctionDef, //Currently doing a pass on function body
                                 Other
+                            };
+
+enum class ErrorType        {
+                                User,
+                                Internal,
+                                Warning
                             };
 
 #endif

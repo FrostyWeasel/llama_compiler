@@ -1,4 +1,21 @@
 #include "array_def.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include "expr.hpp"
+#include "block.hpp"
+#include "variable_entry.hpp"
+#include <string>
+#include <iostream>
+#include <memory>
+
+ArrayDef::ArrayDef(std::string* id, Block<Expr>* expr_list): id(*id), Def(new TypeVariable(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Unknown), expr_list->block_size(), DimType::Exact)), expr_list(expr_list) {}
+ArrayDef::ArrayDef(std::string* id, Block<Expr>* expr_list, std::shared_ptr<TypeVariable> type_variable): id(*id), expr_list(expr_list), Def(new TypeVariable(TypeTag::Array, type_variable, expr_list->block_size(), DimType::Exact)) {}
+
+ArrayDef::~ArrayDef() {
+    delete expr_list;
+}
 
 void ArrayDef::print(std::ostream &out) const {
     out << "ArrayDef(";

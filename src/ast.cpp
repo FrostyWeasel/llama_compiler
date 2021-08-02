@@ -4,6 +4,9 @@
 #include "enums.hpp"
 #include "semantic_analyzer.hpp"
 #include "ref_type.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "type_variable.hpp"
 #include <llvm/IR/Value.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Verifier.h>
@@ -19,7 +22,8 @@ std::unique_ptr<SemanticAnalyzer> AST::sa = std::make_unique<SemanticAnalyzer>()
 PassStage AST::pass_stage = PassStage::Other;
 std::map<std::string, std::shared_ptr<TypeVariable>>* AST::current_func_def_non_locals = nullptr;
 std::unique_ptr<std::vector<std::shared_ptr<TypeVariable>>> AST::created_type_variables = std::make_unique<std::vector<std::shared_ptr<TypeVariable>>>();
-
+std::unique_ptr<ErrorHandler> AST::error_handler = std::make_unique<ErrorHandler>();
+std::unique_ptr<std::unordered_map<unsigned int, AST*>> AST::type_variable_owners = std::make_unique<std::unordered_map<unsigned int, AST*>>();
 
 llvm::LLVMContext AST::TheContext;
 llvm::IRBuilder<> AST::Builder(TheContext);
@@ -55,6 +59,14 @@ void AST::close_library_function_scope() {
 
 void AST::close_all_program_scopes() {
     st->close_all_program_scopes();
+}
+
+void AST::clear_inference_structures() { 
+    st->clear_inference_structures(); 
+}
+
+void AST::unify() { 
+    st->unify(); 
 }
 
 llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
@@ -97,7 +109,7 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
             //space to store the total array size
             array_type.push_back(i32);
             //space to store the dimension size
-            for(auto i = 0; i < type_variable->get_array_dim(); i++) {
+            for(unsigned int i = 0; i < type_variable->get_array_dim(); i++) {
                 array_type.push_back(i32);
             }
             //space to store the pointer to the first array element
@@ -107,8 +119,7 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
         }
         break;
         default:
-            std::cerr << "Uknown type\n";
-            exit(1); //TODO: Error handling
+            error_handler->print_error("Uknown type\n", ErrorType::Internal);
             break;
     }
     return nullptr;
@@ -234,7 +245,6 @@ void AST::define_conversion_functions() {
     Builder.SetInsertPoint(function_body_BB);
 
     //Get function parameter transform it from char to int and then return it
-    unsigned int i = 0;
     for(auto &par: AST::int_of_char->args()) {
         Builder.CreateRet(Builder.CreateZExt(&par, i32));
     }
@@ -249,7 +259,6 @@ void AST::define_conversion_functions() {
     Builder.SetInsertPoint(function_body_BB);
 
     //Get function parameter transform it from char to int and then return it
-    i = 0;
     for(auto &par: AST::char_of_int->args()) {
         Builder.CreateRet(Builder.CreateTrunc(&par, i8));
     }
@@ -267,7 +276,6 @@ void AST::define_reference_update_functions() {
     Builder.SetInsertPoint(function_body_BB);
 
     //Load pointed to int, increment it and store it back
-    unsigned int i = 0;
     for(auto &par: AST::incr->args()) {
         Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(&par, "value"), c32(1)), &par);
     }
@@ -284,7 +292,6 @@ void AST::define_reference_update_functions() {
     Builder.SetInsertPoint(function_body_BB);
 
     //Load pointed to int, increment it and store it back
-    i = 0;
     for(auto &par: AST::decr->args()) {
         Builder.CreateStore(Builder.CreateSub(Builder.CreateLoad(&par, "value"), c32(1)), &par);
     }
@@ -390,7 +397,8 @@ void AST::bind_to_default_types() {
     for(auto type_it = AST::created_type_variables->begin(); type_it != AST::created_type_variables->end(); type_it++) {
         if((*type_it)->get_tag() == TypeTag::Unknown) {
             (*type_it)->set_tag_to_default();
-            std::cout << "Type variable @" << (*type_it)->get_id()  << " was not bound\n"; //TODO: error handling : Warning
+
+            AST::error_handler->unbound_type(*type_it);
         }
     }
 }

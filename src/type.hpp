@@ -1,63 +1,31 @@
 #ifndef __TYPE_HPP__
 #define __TYPE_HPP__
 
-#include <iostream>
 #include "enums.hpp"
-#include "type_variable.hpp"
+#include <iostream>
+#include <memory>
 
 class TypeVariable;
+class ErrorHandler;
 
 class Type {
 public:
-    Type() : tag(TypeTag::Unknown) {  }
-    Type(TypeTag type) : tag(type) {  }
+    Type();
+    Type(TypeTag type);
 
-    virtual ~Type() { }
+    virtual ~Type();
 
-    virtual TypeTag get_tag() { return tag; };
-    virtual void set_tag(TypeTag tag) { this->tag = tag; }
+    virtual TypeTag get_tag();
+    virtual void set_tag(TypeTag tag);
 
     
-    virtual void print(std::ostream& out) const { 
-        switch(tag){
-            case TypeTag::Bool:
-                out << " bool";
-                break;
-            case TypeTag::Char:
-                out << " char";
-                break;
-            case TypeTag::Int:
-                out << " int";
-                break;
-            case TypeTag::Unit:
-                out << " unit";
-                break;
-            case TypeTag::Unknown:
-                out << " unknown";
-                break;
-            case TypeTag::Array:
-                this->print(out);
-                break;
-            case TypeTag::Function:
-                this->print(out);
-                break;
-            case TypeTag::Reference:
-                this->print(out);
-                break;
-            default:
-                std::cerr << "Unknown typetag\n";
-                exit(1);
-                break;
-        }
-        out << " ";
-    }
+    virtual void print(std::ostream& out) const;
 
-    virtual bool contains(std::shared_ptr<TypeVariable> type_variable) {
-        return false;
-    }
+    virtual bool contains(std::shared_ptr<TypeVariable> type_variable);
 
 protected:
     TypeTag tag;
+    static std::unique_ptr<ErrorHandler> error_handler;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Type& type){

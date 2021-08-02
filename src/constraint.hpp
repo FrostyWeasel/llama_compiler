@@ -1,12 +1,15 @@
+#ifndef __CONSTRAINT_HPP__
+#define __CONSTRAINT_HPP__
+
 #include "enums.hpp"
-#include "type_variable.hpp"
+#include <memory>
+
+class TypeVariable;
 
 class Constraint {
 public:
-    Constraint(std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2) : t1(t1), t2(t2) { 
-
-    }
-    virtual ~Constraint() { }
+    Constraint(std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2);
+    virtual ~Constraint();
 
     std::shared_ptr<TypeVariable> get_t1() { return t1; }
     std::shared_ptr<TypeVariable> get_t2() { return t2; }
@@ -18,3 +21,5 @@ private:
     std::shared_ptr<TypeVariable> t1;
     std::shared_ptr<TypeVariable> t2;
 };
+
+#endif

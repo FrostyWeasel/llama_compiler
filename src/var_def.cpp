@@ -1,4 +1,15 @@
 #include "var_def.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "variable_entry.hpp"
+#include "semantic_analyzer.hpp"
+#include <string>
+#include <memory>
+
+VarDef::VarDef(std::string* id): id(*id), Def(new TypeVariable(TypeTag::Reference, std::make_shared<TypeVariable>(TypeTag::Unknown))) {}
+VarDef::VarDef(std::string* id, std::shared_ptr<TypeVariable> type_variable): id(*id), Def(new TypeVariable(TypeTag::Reference, type_variable)) {}
+
     
 void VarDef::print(std::ostream& out) const {
     out << "VarDef(";

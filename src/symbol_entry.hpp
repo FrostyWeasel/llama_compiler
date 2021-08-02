@@ -8,7 +8,9 @@
 #include <llvm/IR/Instructions.h>
 
 //Forward Declaration
-class Scope; 
+class Scope;
+class TypeVariable;
+
 class SymbolEntry {
 public:
 

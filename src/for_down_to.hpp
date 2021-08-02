@@ -5,8 +5,7 @@
 
 class ForDownTo : public For{
 public:
-    ForDownTo(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr): For(id, first_condition, second_condition, expr) {}
-
+    ForDownTo(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr);
 
     virtual void print(std::ostream &out) const override;
 

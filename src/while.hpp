@@ -2,19 +2,17 @@
 #define __WHILE_HPP__
 
 #include "expr.hpp"
-#include "type_variable.hpp"
 #include "enums.hpp"
 #include <memory>
 #include <iostream>
 
+class TypeVariable;
+
 class While : public Expr{
 public:
-    While(Expr* condition, Expr* expr): condition(condition), expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
+    While(Expr* condition, Expr* expr);
 
-    virtual ~While() {
-        delete condition;
-        delete expr;
-    }
+    virtual ~While();
 
     virtual void print(std::ostream &out) const override;
 

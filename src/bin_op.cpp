@@ -1,4 +1,17 @@
 #include "bin_op.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include <iostream>
+#include <memory>
+
+BinOp::BinOp(Expr* lval, Expr* rval, OpType op): lval(lval), rval(rval), op(op) {}
+
+BinOp::~BinOp() {
+    delete lval;
+    delete rval;
+}
     
 void BinOp::print(std::ostream &out) const {
     if(lval != nullptr)
@@ -79,22 +92,22 @@ std::shared_ptr<TypeVariable> BinOp::infer() {
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
-            this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool));
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
+            this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool), this->lineno);
             break;
         case OpType::Assign:
             lval_type = this->lval->infer(); //Type must be t ref
             rval_type = this->rval->infer(); //Type must be t
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Unit);
 
-            this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Reference, rval_type));
+            this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Reference, rval_type), this->lineno);
             break;
         case OpType::Concat:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Unknown);
 
-            this->st->add_constraint(rval_type, this->type_variable);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);
 
             break;
         case OpType::Divide:
@@ -102,108 +115,107 @@ std::shared_ptr<TypeVariable> BinOp::infer() {
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(lval_type, this->type_variable);
-            this->st->add_constraint(rval_type, this->type_variable);
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);
             break;
         case OpType::Equals:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::GreaterOrEqualThan:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::GreaterThan:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::LessOrEqualThan:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::LessThan:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::Minus:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(lval_type, this->type_variable);
-            this->st->add_constraint(rval_type, this->type_variable);
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);
             break;
         case OpType::Modulo:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(lval_type, this->type_variable);
-            this->st->add_constraint(rval_type, this->type_variable);
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);
             break;
         case OpType::NatEquals:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::NatNotEquals:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::NotEquals:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
             break;
         case OpType::Or:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Bool);
 
-            this->st->add_constraint(lval_type, rval_type);
-            this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool));
+            this->st->add_constraint(lval_type, rval_type, this->lineno);
+            this->st->add_constraint(lval_type, std::make_shared<TypeVariable>(TypeTag::Bool), this->lineno);
             break;
         case OpType::Plus:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(lval_type, this->type_variable);
-            this->st->add_constraint(rval_type, this->type_variable);  
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno);  
             break;
         case OpType::Times:
             lval_type = this->lval->infer();
             rval_type = this->rval->infer();
             this->type_variable = std::make_shared<TypeVariable>(TypeTag::Int);
 
-            this->st->add_constraint(lval_type, this->type_variable);
-            this->st->add_constraint(rval_type, this->type_variable); 
+            this->st->add_constraint(lval_type, this->type_variable, this->lineno);
+            this->st->add_constraint(rval_type, this->type_variable, this->lineno); 
             break;
         default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
+            error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);
             break;
     }
 
@@ -239,26 +251,22 @@ void BinOp::sem() {
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Function))) {
                 
-                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Function))) {
                 
-            std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+            error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
         break;
         case OpType::GreaterOrEqualThan:
@@ -272,14 +280,12 @@ void BinOp::sem() {
             if((sa->is_not_same_tag(this->lval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             break;
         case OpType::GreaterThan:
@@ -292,14 +298,12 @@ void BinOp::sem() {
             if((sa->is_not_same_tag(this->lval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             break;
         case OpType::LessOrEqualThan:
@@ -312,14 +316,12 @@ void BinOp::sem() {
             if((sa->is_not_same_tag(this->lval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             break;
         case OpType::LessThan:
@@ -332,14 +334,12 @@ void BinOp::sem() {
             if((sa->is_not_same_tag(this->lval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_not_same_tag(this->rval->get_type(),
                 std::vector<TypeTag>{TypeTag::Int, TypeTag::Char, TypeTag::Unknown}))) {
                 
-                std::cerr << "Argument must be of type int or float or char\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }             
             break;
         case OpType::Minus:
@@ -358,26 +358,22 @@ void BinOp::sem() {
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Function))) {
                 
-                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Function))) {
                 
-            std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+            error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             } 
 
             
@@ -388,26 +384,22 @@ void BinOp::sem() {
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Function))) {
                 
-                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Function))) {
                 
-            std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+            error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
 
             break;
@@ -417,26 +409,22 @@ void BinOp::sem() {
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Function))) {
                 
-                std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->lval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->lval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->lval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Function))) {
                 
-            std::cerr << "Argument can not be of type function\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+            error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
             if((sa->is_same_tag(this->rval->get_type(),
                 TypeTag::Array))) {
                 
-                std::cerr << "Argument can not be of type array\n" << "offending type is: " << *this->rval->get_type();
-                exit(1); //TODO: Error handling.
+                error_handler->non_allowed_type(this->rval->get_type(), this->lineno, ErrorType::User, NodeType::BinOp);
             }
 
             
@@ -459,8 +447,7 @@ void BinOp::sem() {
             
             break;
         default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
+            error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);
             break;
     }  
 }
@@ -578,8 +565,7 @@ llvm::Value* BinOp::codegen() {
             return Builder.CreateMul(lhs, rhs, "multtmp");
             break;
         default:
-            std::cerr << "Unknown binary operator type\n";
-            exit(1); //TODO:Error handling
+            error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);
             break;
     }
 

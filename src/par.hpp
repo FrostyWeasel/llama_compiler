@@ -2,16 +2,14 @@
 #define __PAR_HPP__
 
 #include "ast.hpp"
-#include "type.hpp"
 #include "enums.hpp"
-#include "symbol_entry.hpp"
-#include "parameter_entry.hpp"
 #include <string>
+#include <memory>
 
 class Par : public AST{
 public:
-    Par(std::string* id): id(*id), type_variable(std::make_shared<TypeVariable>()), AST(NodeType::Par) {}
-    Par(std::string* id, std::shared_ptr<TypeVariable> type_variable): id(*id), type_variable(type_variable), AST(NodeType::Par) {  }
+    Par(std::string* id);
+    Par(std::string* id, std::shared_ptr<TypeVariable> type_variable);
 
     virtual ~Par() {}
 

@@ -9,7 +9,6 @@
 #include "symbol_table.hpp"
 
 // *: This type of expression uses the new x whose value is undefined : let x = 5 let rec x = x + 6 (i think that this is correct)
-
 class LetDef : public AST{
 public:    
     LetDef(Block<Def>* def, LetType let_type): def(def), let_type(let_type) {}

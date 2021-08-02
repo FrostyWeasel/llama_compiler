@@ -2,7 +2,6 @@
 #define __SYMBOLTABLE_HPP__
 
 #include "scope.hpp"
-#include "symbol_entry.hpp"
 #include "enums.hpp"
 #include "constraint.hpp"
 #include <vector>
@@ -10,26 +9,16 @@
 #include <utility>
 #include <unordered_map>
 
+class ErrorHandler;
+class TypeVariable;
+class SymbolEntry;
+
 class SymbolTable{
 public:
 
-    SymbolTable(unsigned int size) : hashtable_size(size), current_scope(nullptr) {
-        hashtable = new SymbolEntry*[size];
+    SymbolTable(unsigned int size);
 
-        for(unsigned int i = 0; i < size; i++) {
-            hashtable[i] = nullptr;
-        }
-    }
-
-    virtual ~SymbolTable() {
-        for(unsigned int i = 0; i < hashtable_size; i++) {
-            SymbolEntry* entry = hashtable[i];
-            if(entry != nullptr)
-                delete entry;
-        }
-        delete[] hashtable;
-        delete current_scope;
-    }
+    ~SymbolTable();
 
     void        scope_open    ();
     void        scope_close   ();
@@ -45,8 +34,8 @@ public:
     SymbolEntry*    lookup_entry   (std::string id, LookupType lookup_type);
     bool            contains       (std::string id, LookupType lookup_type);
 
-    inline void add_constraint (std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2) {
-        contraints.push_back(Constraint(t1, t2));
+    inline void add_constraint (std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2, unsigned int lineno) {
+        contraints.push_back({ Constraint(t1, t2), lineno });
     }
 
     void unify();
@@ -56,7 +45,8 @@ private:
     SymbolEntry**   hashtable;
     Scope*          current_scope;
 
-    std::vector<Constraint> contraints;
+    //Holds a list of type constraints and the line number of the program source that caused the contraint(for error handling)
+    std::vector<std::pair<Constraint, unsigned int>> contraints;
     std::vector<std::pair<std::shared_ptr<TypeVariable>, std::shared_ptr<TypeVariable>>> bound_types;
     std::unordered_map<std::shared_ptr<TypeVariable>, std::shared_ptr<TypeVariable>> substitutions;
 
@@ -66,6 +56,7 @@ private:
     void bind(std::shared_ptr<TypeVariable> type_variable, std::shared_ptr<TypeVariable> type);
     std::shared_ptr<TypeVariable> find_substitute(std::shared_ptr<TypeVariable> type);
 
+    static std::unique_ptr<ErrorHandler> error_handler;
 };
 
 #endif 

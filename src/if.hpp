@@ -3,13 +3,13 @@
 
 #include "expr.hpp"
 #include "enums.hpp"
-#include "type_variable.hpp"
 
+class TypeVariable;
 
 class If : public Expr{
 public:
-    If(Expr* condition, Expr* if_expr): condition(condition), if_expr(if_expr), else_expr(nullptr), Expr(new TypeVariable(TypeTag::Unit)) {}
-    If(Expr* condition, Expr* if_expr, Expr* else_expr): condition(condition), if_expr(if_expr), else_expr(else_expr), Expr(new TypeVariable()) {}
+    If(Expr* condition, Expr* if_expr);
+    If(Expr* condition, Expr* if_expr, Expr* else_expr);
 
     virtual ~If() {
         delete condition;

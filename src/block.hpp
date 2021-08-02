@@ -1,13 +1,15 @@
 #ifndef __BLOCK_HPP__
 #define __BLOCK_HPP__
 
-#include <iostream>
-#include <vector>
 #include "ast.hpp"
 #include "enums.hpp"
 #include "type_variable.hpp"
-
-// class FunctionType;
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include <iostream>
+#include <vector>
+#include <memory>
 
 template <class T>
 class Block : public AST {
@@ -21,7 +23,7 @@ public:
   }
 
   virtual void print(std::ostream &out) const override{
-    int i = 0;
+    unsigned int i = 0;
 
     switch (this->block_type) {
       case BlockType::Par:
@@ -60,8 +62,7 @@ public:
         }
         break;
       default:
-        std::cerr << "Uknown block type\n";
-        exit(1); //TODO: Error handling.
+        error_handler->print_error("Uknown block type\n", ErrorType::Internal);
         break;
     }
   }
@@ -80,15 +81,13 @@ public:
                 (*element_it)->add_to_symbol_table();
               }
               else {
-                std::cerr << "Nullptr in block list.\n";
-                exit(1); //TODO: Error handling
+                error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
               }
             }
             break;
 
       default:
-          std::cerr << "Attempting to add non definitions to symbol table.\n";
-          exit(1); //TODO: Error handling
+          error_handler->print_error("Attempting to add non definitions to symbol table.\n", ErrorType::Internal);
       break;
     }
   }
@@ -101,15 +100,13 @@ public:
                 (*element_it)->allocate();
               }
               else {
-                std::cerr << "Nullptr in block list.\n";
-                exit(1); //TODO: Error handling
+                error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
               }
             }
             break;
 
       default:
-          std::cerr << "Attempting to allocate non definitions.\n";
-          exit(1); //TODO: Error handling
+          error_handler->print_error("Attempting to allocate non definitions.\n", ErrorType::Internal);
       break;
     }
   }
@@ -120,8 +117,7 @@ public:
     switch (this->block_type) {
       case BlockType::Par:
         if(this->list.size() == 0) {
-          std::cerr << "Parameter list is empty.\n";
-          exit(1); //TODO: Error handling
+          error_handler->print_error("Parameter list is empty.\n", ErrorType::Internal);
         }
         else {
           block_type = list[0]->infer();
@@ -129,10 +125,11 @@ public:
               if(*element_it != nullptr){
                 std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
                 block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type, FunctionTypeTag::Curry);
+                
+                AST::type_variable_owners->insert({ block_type->get_id(), this });
               }
               else {
-                std::cerr << "Nullptr in block list.\n";
-                exit(1); //TODO: Error handling
+                error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
               }
           }
         }
@@ -140,8 +137,7 @@ public:
 
       case BlockType::Expr:
         if(this->list.size() == 0) {
-          std::cerr << "Expression list is empty.\n";
-          exit(1); //TODO: Error handling
+          error_handler->print_error("Expression list is empty.\n", ErrorType::Internal);
         }
         else {
           block_type = list[0]->infer();
@@ -149,10 +145,11 @@ public:
               if(*element_it != nullptr){
                 std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
                 block_type = std::make_shared<TypeVariable>(TypeTag::Function, block_type, new_type, FunctionTypeTag::Curry);
+
+                AST::type_variable_owners->insert({ block_type->get_id(), this });
               }
               else {
-                std::cerr << "Nullptr in block list.\n";
-                exit(1); //TODO: Error handling
+                error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
               }
           }
         }
@@ -162,11 +159,13 @@ public:
           for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
             if(*element_it != nullptr){
               std::shared_ptr<TypeVariable> new_type = (*element_it)->infer();
-              st->add_constraint(new_type, std::make_shared<TypeVariable>(TypeTag::Int));
+              auto int_type = std::make_shared<TypeVariable>(TypeTag::Int);
+              st->add_constraint(new_type, int_type, this->lineno);
+              
+              AST::type_variable_owners->insert({ int_type->get_id(), this });
             }
             else {
-              std::cerr << "Nullptr in block list.\n";
-              exit(1); //TODO: Error handling
+              error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
             }
         }
       break;

@@ -6,6 +6,30 @@
 #include "par.hpp"
 #include "def.hpp"
 #include "ast.hpp"
+#include "constraint.hpp"
+#include "error_handler.hpp"
+#include "symbol_entry.hpp"
+#include <memory>
+
+std::unique_ptr<ErrorHandler> SymbolTable::error_handler = std::make_unique<ErrorHandler>();
+
+SymbolTable::SymbolTable(unsigned int size) : hashtable_size(size), current_scope(nullptr) {
+    hashtable = new SymbolEntry*[size];
+
+    for(unsigned int i = 0; i < size; i++) {
+        hashtable[i] = nullptr;
+    }
+}
+
+SymbolTable::~SymbolTable() {
+    for(unsigned int i = 0; i < hashtable_size; i++) {
+        auto entry = hashtable[i];
+        if(entry != nullptr)
+            delete entry;
+    }
+    delete[] hashtable;
+    delete current_scope;
+}
 
 void SymbolTable::scope_open() {
     this->current_scope = new Scope(this->current_scope, nullptr, 
@@ -16,8 +40,7 @@ void SymbolTable::scope_close() {
     auto current_scope = this->current_scope;
 
     if(this->current_scope == nullptr) {
-        std::cerr << "Can't close null Scope\n";
-        exit(1); //TODO: Error Handling
+        error_handler->print_error("Can't close null Scope\n", ErrorType::Internal);
     }
 
     for(auto entry = current_scope->get_entries(); entry != nullptr; entry = entry->get_next_in_scope()){
@@ -48,14 +71,14 @@ void SymbolTable::clear_inference_structures() {
 
 void SymbolTable::scope_hide(Scope* scope, bool flag) {
     if(scope == nullptr)
-        exit(1); //TODO: Error Handling
+        error_handler->print_error("Attempting to hide current scope but there is no open scope\n", ErrorType::Internal);
 
     scope->set_is_hidden(flag);
 }
 
 void SymbolTable::scope_hide(bool flag) {
     if(this->current_scope == nullptr)
-        exit(1); //TODO: Error Handling
+        error_handler->print_error("Attempting to hide current scope but there is no open scope\n", ErrorType::Internal);
 
     this->current_scope->set_is_hidden(flag);
 }
@@ -64,8 +87,7 @@ void SymbolTable::insert_entry(SymbolEntry* entry){
     //Check if entry already in table
     for(auto e = this->current_scope->get_entries(); e != nullptr; e = e->get_next_in_scope()){
         if(e->get_id() == entry->get_id()){
-            std::cerr << "Identifier already exists in scope: " << e->get_id();
-            exit(1); //TODO: Already exists error handling
+            error_handler->redefining_variable(e->get_id());
         }
     }
 
@@ -106,9 +128,8 @@ SymbolEntry* SymbolTable::lookup_entry(std::string id, LookupType lookup_type) {
             break;
     }
 
-    //TODO: Error if unknown identifier.
-    std::cerr << "Unkown identifier: " << id << "\n";
-    exit(1);
+    error_handler->out_of_scope(id);
+
     return nullptr;
 }
 
@@ -169,7 +190,8 @@ void SymbolTable::unify() {
     while(!this->contraints.empty()) {
         matched_rule = false;
 
-        Constraint constraint = this->contraints[this->contraints.size()-1]; 
+        Constraint constraint = this->contraints[this->contraints.size()-1].first;
+        unsigned int lineno = this->contraints[this->contraints.size()-1].second;
         this->contraints.pop_back();
 
         std::shared_ptr<TypeVariable> t1 = constraint.get_t1();
@@ -190,8 +212,8 @@ void SymbolTable::unify() {
             std::shared_ptr<TypeVariable> from_type_t2 = t2->get_function_from_type();
             std::shared_ptr<TypeVariable> to_type_t2 = t2->get_function_to_type();
 
-            this->add_constraint(from_type_t1, from_type_t2);
-            this->add_constraint(to_type_t1, to_type_t2);
+            this->add_constraint(from_type_t1, from_type_t2, lineno);
+            this->add_constraint(to_type_t1, to_type_t2, lineno);
         }
 
       if(!matched_rule && ((t1->get_tag() == TypeTag::Reference) && (t2->get_tag() == TypeTag::Reference))) {
@@ -200,7 +222,7 @@ void SymbolTable::unify() {
             std::shared_ptr<TypeVariable> referenced_type_t1 = t1->get_referenced_type();
             std::shared_ptr<TypeVariable> referenced_type_t2 = t2->get_referenced_type();
 
-            this->add_constraint(referenced_type_t1, referenced_type_t2);
+            this->add_constraint(referenced_type_t1, referenced_type_t2, lineno);
         }
 
       if(!matched_rule && ((t1->get_tag() == TypeTag::Array) && (t2->get_tag() == TypeTag::Array))) {
@@ -216,8 +238,7 @@ void SymbolTable::unify() {
                 //t1 and t2 are exact
                 if(dim_type_t1 == DimType::Exact){
                     if(dim_t1 != dim_t2) {
-                        std::cerr << "Failed to unify : " << *t1 << "and " << *t2 << '\n'; 
-                        exit(1); //TODO: Handle errors.
+                        error_handler->incompatible_types(t1, t2, lineno);
                     }
                 }
                 else {
@@ -242,8 +263,7 @@ void SymbolTable::unify() {
                         t2->set_array_dim_type(DimType::Exact);
                     }
                     else {
-                        std::cerr << "Failed to unify arrays : " << *t1 << "and " << *t2 << '\n'; 
-                        exit(1); //TODO: Handle errors.
+                        error_handler->incompatible_types(t1, t2, lineno);
                     }
                 }
                 //t2 is exact and t1 is atleast
@@ -255,8 +275,7 @@ void SymbolTable::unify() {
                         t2->set_array_dim_type(DimType::Exact);
                     }
                     else {
-                        std::cerr << "Failed to unify arrays : " << *t1 << "and " << *t2 << '\n'; 
-                        exit(1); //TODO: Handle errors.
+                        error_handler->incompatible_types(t1, t2, lineno);
                     }
                 }
             }
@@ -264,7 +283,7 @@ void SymbolTable::unify() {
             std::shared_ptr<TypeVariable> array_type_t1 = t1->get_array_type();
             std::shared_ptr<TypeVariable> array_type_t2 = t2->get_array_type();
 
-            this->add_constraint(array_type_t1, array_type_t2);
+            this->add_constraint(array_type_t1, array_type_t2, lineno);
         }
 
         if((!matched_rule) && ((t1->get_tag() == TypeTag::Unknown)) && (!t2->contains(t1))) {
@@ -286,8 +305,7 @@ void SymbolTable::unify() {
         }
 
         if(!matched_rule){
-            std::cerr << "Failed to unify : " << *t1 << "and " << *t2 << '\n'; 
-            exit(1);
+            error_handler->incompatible_types(t1, t2, lineno);
         }
     }
 
@@ -297,14 +315,18 @@ void SymbolTable::unify() {
     }
 }
 
+//Substitute all occurrences of the type variable with the type
 void SymbolTable::substitute(std::shared_ptr<TypeVariable> type_variable, std::shared_ptr<TypeVariable> type) {
     this->substitutions.insert({type_variable, type});
 }
 
 
 std::shared_ptr<TypeVariable> SymbolTable::find_substitute(std::shared_ptr<TypeVariable> type) {
-    while (this->substitutions.find(type) != this->substitutions.end()) {
-        type = this->substitutions.find(type)->second;
+    auto substitute = this->substitutions.find(type);
+
+    while (substitute != this->substitutions.end()) {
+        type = substitute->second;
+        substitute = this->substitutions.find(type);
     }
 
     return type;

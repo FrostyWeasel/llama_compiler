@@ -1,4 +1,8 @@
 #include "dim.hpp"
+#include "variable_entry.hpp"
+#include "type_variable.hpp"
+#include "symbol_entry.hpp"
+#include "symbol_table.hpp"
 
 void Dim::print(std::ostream &out) const {
     out << " dim " << dimension << " " << id;
@@ -10,7 +14,7 @@ std::shared_ptr<TypeVariable> Dim::infer() {
     SymbolEntry* entry = st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES);
 
     st->add_constraint(entry->get_type(), std::make_shared<TypeVariable>(TypeTag::Array,
-        std::make_shared<TypeVariable>(TypeTag::Unknown), this->dimension, DimType::AtLeast));
+        std::make_shared<TypeVariable>(TypeTag::Unknown), this->dimension, DimType::AtLeast), this->lineno);
 
     return this->type_variable;
 }

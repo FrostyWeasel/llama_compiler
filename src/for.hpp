@@ -2,23 +2,18 @@
 #define __FOR_HPP__
 
 #include "expr.hpp"
-#include "type_variable.hpp"
-#include "constant_entry.hpp"
 #include "enums.hpp"
 #include <memory>
 #include <string>
 #include <iostream>
 
+class TypeVariable;
 class For : public Expr {
 public:
-    For() {}
-    For(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr): id(*id), first_condition(first_condition), second_condition(second_condition), expr(expr), Expr(new TypeVariable(TypeTag::Unit)) {}
+    For();
+    For(std::string* id, Expr* first_condition, Expr* second_condition, Expr* expr);
 
-    virtual ~For() {
-        delete first_condition;
-        delete second_condition;
-        delete expr;
-    }
+    virtual ~For();
 
     virtual void print(std::ostream &out) const override = 0;
 

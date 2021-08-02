@@ -1,4 +1,19 @@
 #include "const_def.hpp"
+#include "expr.hpp"
+#include "constant_entry.hpp"
+#include "type_variable.hpp"
+#include "error_handler.hpp"
+#include "symbol_table.hpp"
+#include "semantic_analyzer.hpp"
+#include <string>
+#include <iostream>
+
+ConstDef::ConstDef(std::string* id, Expr* expr): id(*id), expr(expr), Def(new TypeVariable()) {}
+ConstDef::ConstDef(std::string* id, std::shared_ptr<TypeVariable> type_variable, Expr* expr): id(*id), Def(type_variable), expr(expr) {}
+
+ConstDef::~ConstDef() {
+    delete expr;
+}
 
 void ConstDef::print(std::ostream& out) const {
     out << " " << id;
@@ -30,7 +45,7 @@ void ConstDef::allocate() {
 std::shared_ptr<TypeVariable> ConstDef::infer() {
     auto expr_type = this->expr->infer();
 
-    st->add_constraint(this->type_variable, expr_type);
+    st->add_constraint(this->type_variable, expr_type, this->lineno);
 
     return this->type_variable;
 }

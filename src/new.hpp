@@ -2,12 +2,13 @@
 #define __NEW_HPP__
 
 #include "expr.hpp"
-#include "type_variable.hpp"
 #include "enums.hpp"
+
+class TypeVariable;
 
 class New : public Expr{
 public:
-    New(std::shared_ptr<TypeVariable> type_variable): new_type_variable(type_variable), Expr(new TypeVariable(TypeTag::Reference, type_variable)) { }
+    New(std::shared_ptr<TypeVariable> type_variable);
 
     virtual void print(std::ostream &out) const override;
 

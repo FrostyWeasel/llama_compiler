@@ -1,24 +1,25 @@
 #ifndef __ARRAYDEF_HPP__
 #define __ARRAYDEF_HPP__
 
-#include "type_variable.hpp"
-#include "enums.hpp"
-#include "block.hpp"
 #include "def.hpp"
-#include "expr.hpp"
-#include "variable_entry.hpp"
+#include "enums.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
+
+class Expr;
+class TypeVariable;
+
+template <class T>
+class Block;
 
 class ArrayDef : public Def {
 public:
-    ArrayDef(std::string* id, Block<Expr>* expr_list): id(*id), Def(new TypeVariable(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Unknown), expr_list->block_size(), DimType::Exact)), expr_list(expr_list) {}
-    ArrayDef(std::string* id, Block<Expr>* expr_list, std::shared_ptr<TypeVariable> type_variable): id(*id), expr_list(expr_list), Def(new TypeVariable(TypeTag::Array, type_variable, expr_list->block_size(), DimType::Exact)) {}
+    ArrayDef(std::string* id, Block<Expr>* expr_list);
+    ArrayDef(std::string* id, Block<Expr>* expr_list, std::shared_ptr<TypeVariable> type_variable);
 
-    virtual ~ArrayDef() {
-        delete expr_list;
-    }
+    virtual ~ArrayDef();
 
     virtual void print(std::ostream &out) const override;
 

@@ -1,23 +1,20 @@
 #ifndef __DEF_HPP__
 #define __DEF_HPP__
 
-#include <iostream>
 #include "ast.hpp"
 #include "enums.hpp"
-#include "type_variable.hpp"
-#include "symbol_entry.hpp"
 #include <string>
 #include <memory>
+#include <iostream>
+
+class SymbolEntry;
+class TypeVariable;
 
 class Def : public AST {
 public:    
-    Def() : AST(NodeType::Def) {}
-    Def(TypeVariable* type_variable) : type_variable(std::shared_ptr<TypeVariable>(type_variable)), AST(NodeType::Def) { 
-        AST::created_type_variables->push_back(this->type_variable);    
-    }
-    Def(std::shared_ptr<TypeVariable> type_variable) : type_variable(type_variable), AST(NodeType::Def) { 
-        AST::created_type_variables->push_back(this->type_variable);    
-    }
+    Def();
+    Def(TypeVariable* type_variable);
+    Def(std::shared_ptr<TypeVariable> type_variable);
 
     virtual ~Def()  {}
 
