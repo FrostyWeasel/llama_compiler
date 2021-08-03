@@ -217,11 +217,11 @@ void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag,
     if(final_flag) {
         //Print out the final code.
         auto output_error =  std::error_code();
-        auto output_ir_file = std::make_unique<llvm::raw_fd_ostream>("a.ll", output_error);
+        auto output_ir_file = std::make_unique<llvm::raw_fd_ostream>("a.imm", output_error);
 
         TheModule->print(*output_ir_file, nullptr);
 
-        std::string compile_to_assembly = "llc-12 -o a.s a.ll";
+        std::string compile_to_assembly = "llc-12 -o a.asm a.imm";
         std::system(compile_to_assembly.c_str());
 
         std::ifstream input_asm_file_stream;
@@ -238,16 +238,26 @@ void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag,
         std::ifstream input_source_file_stream;
         input_source_file_stream.open(input_filename);
 
+        std::cout << input_filename << "\n";
+
+        std::string ir_file_name = input_filename + ".imm";
+        std::string asm_file_name = input_filename + ".asm";
+        std::string exec_file_name = input_filename + ".out";
+
         auto output_error =  std::error_code();
-        auto output_ir_file = std::make_unique<llvm::raw_fd_ostream>("a.ll", output_error);
+        auto output_ir_file = std::make_unique<llvm::raw_fd_ostream>(ir_file_name.c_str(), output_error);
 
         TheModule->print(*output_ir_file, nullptr);
+        
+        std::stringstream compile_to_assembly;
+        compile_to_assembly << "llc-12 -o " << asm_file_name << " " << ir_file_name;
+        std::cout << compile_to_assembly.str() << "\n";
+        std::system(compile_to_assembly.str().c_str());
 
-        std::string compile_to_assembly = "llc-12 -o a.s a.ll";
-        std::system(compile_to_assembly.c_str());
-
-        std::string compile_to_object_code = "clang++ -O3 -o a.out a.s";
-        std::system(compile_to_object_code.c_str());
+        std::stringstream compile_to_object_code;
+        compile_to_object_code << "clang++ -O3 -o " << exec_file_name << " " << asm_file_name;
+        std::cout << compile_to_object_code.str() << "\n";
+        std::system(compile_to_object_code.str().c_str());
     }
 }
 

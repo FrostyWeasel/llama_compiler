@@ -284,6 +284,21 @@ asterisk_list:
 
 %%
 
+std::string get_file_name(std::string file_path, char seperator = '/') {
+    auto dot_position = file_path.rfind('.');
+    auto sep_position = file_path.rfind(seperator);
+
+    if(sep_position != std::string::npos) {
+        return file_path.substr(sep_position + 1, file_path.size() - (dot_position == std::string::npos ? 1 : (file_path.size() - dot_position) + 2));
+    }
+    return "";
+}
+
+void yyerror(const char* msg){
+    fprintf(stderr, "Error: %s\n", msg);
+    exit(1);
+}
+
 int main(int argc, char** argv) {
     int option;
 	compiler_path = argv[0];
@@ -326,7 +341,7 @@ int main(int argc, char** argv) {
 		yyin = stdin;
 	else {
 		yyin = fopen(argv[optind], "r");
-		input_filename = std::string(argv[optind]);
+		input_filename = get_file_name(std::string(argv[optind]));
 	}
 
     int result = yyparse();
@@ -337,9 +352,4 @@ int main(int argc, char** argv) {
     }
 
     return result;
-}
-
-void yyerror(const char* msg){
-    fprintf(stderr, "Error: %s\n", msg);
-    exit(1);
 }
