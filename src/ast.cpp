@@ -30,6 +30,8 @@ llvm::IRBuilder<> AST::Builder(TheContext);
 std::unique_ptr<llvm::Module> AST::TheModule;
 std::unique_ptr<llvm::legacy::FunctionPassManager> AST::FPM;
 
+llvm::Function* AST::printf;
+
 llvm::Function* AST::print_string;
 llvm::Function* AST::print_int;
 llvm::Function* AST::print_char;
@@ -206,21 +208,11 @@ void AST::llvm_compile_and_dump(bool optimize) {
 }
 
 void AST::declare_library_functions() {
+    auto printf_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, true);
+    AST::printf = llvm::Function::Create(printf_type, llvm::Function::LinkageTypes::ExternalLinkage, "printf", TheModule.get());
+
     //Print Functions
-    auto print_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), {llvm::PointerType::get(AST::i8, 0)}, false);
-    AST::print_string = llvm::Function::Create(print_string_type, llvm::Function::ExternalLinkage, "writeString", TheModule.get());
-
-    auto print_int_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i32 }, false);
-    AST::print_int = llvm::Function::Create(print_int_type, llvm::Function::ExternalLinkage, "writeInteger", TheModule.get());
-
-    auto print_char_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i8 }, false);
-    AST::print_char = llvm::Function::Create(print_char_type, llvm::Function::ExternalLinkage, "writeChar", TheModule.get());
-
-    auto print_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i1 }, false);
-    AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "writeBoolean", TheModule.get());
-
-    auto print_float_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::f64 }, false);
-    AST::print_float = llvm::Function::Create(print_float_type, llvm::Function::ExternalLinkage, "writeReal", TheModule.get());
+    define_print_functions();
 
     //Read Functions
     auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { i32, llvm::PointerType::get(i8, 0) }, false);
@@ -293,6 +285,88 @@ void AST::declare_library_functions() {
 
 }
 
+void AST::define_print_functions() {
+    auto print_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), {llvm::PointerType::get(AST::i8, 0)}, false);
+    AST::print_string = llvm::Function::Create(print_string_type, llvm::Function::ExternalLinkage, "print_string", TheModule.get());
+
+    auto previous_insert_point = Builder.GetInsertBlock();
+    auto function_body_BB = llvm::BasicBlock::Create(TheContext, "print_string_entry", AST::print_string );
+    Builder.SetInsertPoint(function_body_BB);
+
+    auto format_string = Builder.CreateGlobalStringPtr("%s");
+
+    for(auto &par: AST::print_string->args()) {
+        Builder.CreateCall(AST::printf, { format_string, &par });
+    }
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //*
+    auto print_int_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i32 }, false);
+    AST::print_int = llvm::Function::Create(print_int_type, llvm::Function::ExternalLinkage, "print_int", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "print_int_entry", AST::print_int );
+    Builder.SetInsertPoint(function_body_BB);
+
+    format_string = Builder.CreateGlobalStringPtr("%i");
+
+    for(auto &par: AST::print_int->args()) {
+        Builder.CreateCall(AST::printf, { format_string, &par });
+    }
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //*
+    auto print_char_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i8 }, false);
+    AST::print_char = llvm::Function::Create(print_char_type, llvm::Function::ExternalLinkage, "print_char", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "print_char_entry", AST::print_char );
+    Builder.SetInsertPoint(function_body_BB);
+
+    format_string = Builder.CreateGlobalStringPtr("%c");
+
+    for(auto &par: AST::print_char->args()) {
+        Builder.CreateCall(AST::printf, { format_string, &par });
+    }
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //*
+    auto print_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i1 }, false);
+    AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "print_bool", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "print_bool_entry", AST::print_bool );
+    Builder.SetInsertPoint(function_body_BB);
+
+    format_string = Builder.CreateGlobalStringPtr("%i");
+
+    for(auto &par: AST::print_bool->args()) {
+        Builder.CreateCall(AST::printf, { format_string, &par });
+    }
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+    Builder.SetInsertPoint(previous_insert_point);
+
+    //*
+    auto print_float_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::f64 }, false);
+    AST::print_float = llvm::Function::Create(print_float_type, llvm::Function::ExternalLinkage, "print_float", TheModule.get());
+
+    previous_insert_point = Builder.GetInsertBlock();
+    function_body_BB = llvm::BasicBlock::Create(TheContext, "print_float_entry", AST::print_float );
+    Builder.SetInsertPoint(function_body_BB);
+
+    format_string = Builder.CreateGlobalStringPtr("%lf");
+
+    for(auto &par: AST::print_float->args()) {
+        Builder.CreateCall(AST::printf, { format_string, &par });
+    }
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+    Builder.SetInsertPoint(previous_insert_point);
+
+}
+
 void AST::define_conversion_functions() {
     //Definition of int_of_char function
     auto int_of_char_type = llvm::FunctionType::get(i32, { i8 }, false);
@@ -306,7 +380,6 @@ void AST::define_conversion_functions() {
     for(auto &par: AST::int_of_char->args()) {
         Builder.CreateRet(Builder.CreateZExt(&par, i32));
     }
-
     Builder.SetInsertPoint(previous_insert_point);
 
     //Definition of char_of_int function

@@ -71,7 +71,6 @@ llvm::Value* FunctionCall::codegen() {
     }
 }
 
-//TODO: Check that the par values are not null and handle errors
 llvm::Value* FunctionCall::library_function_codegen() {
     std::vector<llvm::Value*> par_values;
     for(auto exp: expr_list->get_list()) {
@@ -83,6 +82,7 @@ llvm::Value* FunctionCall::library_function_codegen() {
         auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
         Builder.CreateStore(string_struct, string_struct_alloca);
         auto string_pointer = Builder.CreateStructGEP(string_struct_alloca, 2, "string_ptr");
+
         return Builder.CreateCall(AST::print_string, { Builder.CreateLoad(string_pointer) }, "print_string_function_return");
     }
     if(this->id == "print_int") {
@@ -99,7 +99,6 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "print_float") {
         auto float_value = par_values[0];
-        // auto truncated_value = Builder.CreateFPTrBuilder.CreateFPTrunc(float_value, f32));
         return Builder.CreateCall(AST::print_float, { float_value }, "print_float_function_return");
     }
     if(this->id == "read_string") {

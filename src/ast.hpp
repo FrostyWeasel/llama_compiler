@@ -96,6 +96,9 @@ protected:
     static std::unique_ptr<llvm::Module> TheModule;
     static std::unique_ptr<llvm::legacy::FunctionPassManager> FPM;
 
+    //libc is used to do the printing, llama functions format the input and then give it to printf to output it
+    static llvm::Function* printf;
+
     static llvm::Function* print_string;
     static llvm::Function* print_int;
     static llvm::Function* print_char;
@@ -180,6 +183,7 @@ private:
     static void declare_library_functions();
     static void define_conversion_functions();
     static void define_reference_update_functions();
+    static void define_print_functions();
 };
 
 inline std::ostream& operator<<(std::ostream& out, const AST& ast){
