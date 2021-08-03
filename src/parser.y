@@ -8,10 +8,20 @@
 #include "lexer.hpp"
 #include <memory>
 #include <vector>
+#include <unistd.h>
+#include <cstdio>
 
 std::vector<std::string*> str_to_delete;
-
 constexpr bool debug = false;
+
+std::string compiler_path;
+std::string input_filename;
+
+bool intermediate_flag;
+bool final_flag;
+bool optimizations_flag;
+
+extern FILE* yyin;
 
 %}
 
@@ -141,7 +151,7 @@ program:
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             $1->close_all_program_scopes();
 
-            $1->llvm_compile_and_dump();
+            $1->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
 
             $1->close_all_program_scopes();
             $1->close_library_function_scope();
@@ -274,11 +284,58 @@ asterisk_list:
 
 %%
 
-int main(){
+int main(int argc, char** argv) {
+    int option;
+	compiler_path = argv[0];
+
+    //If no option was given output help and exit
+	if (argc == 1) {
+		std::cerr <<
+			"OVERVIEW: llama compiler\n"
+            "USAGE: llamac [OPTIONS] [FILE]\n"
+            "OPTIONS:\n"
+			"-O:    enable optimizations\n"
+			"-i:    the input must be given on standard input and the intermediate code will be printed on standard output\n"
+			"-f:    the input must be given on standard input and the final code will be printed on standard output\n"
+			"\n"
+			"If no -i or -f options are selected the input file must be given as an argument\n";
+		exit(1);
+	}
+
+	optimizations_flag = intermediate_flag = final_flag = false;
+	while ((option = getopt(argc, argv, "Ofi")) != -1) {
+		switch(option) {
+			case 'O':
+				optimizations_flag = true;
+				break;
+			case 'f':
+				final_flag = true;
+				break;
+			case 'i':
+				intermediate_flag = true;
+				break;
+			case '?':
+				std::cerr << "Enter ./llamac to see usage information\n";
+				exit(1);
+			default:
+				break;
+		}
+	}
+
+	if(intermediate_flag || final_flag)
+		yyin = stdin;
+	else {
+		yyin = fopen(argv[optind], "r");
+		input_filename = std::string(argv[optind]);
+	}
+
     int result = yyparse();
+
+    //delete all allocated strings
     for(auto string_ptr: str_to_delete) {
         delete string_ptr;
     }
+
     return result;
 }
 

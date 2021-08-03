@@ -78,13 +78,23 @@
 #include "lexer.hpp"
 #include <memory>
 #include <vector>
+#include <unistd.h>
+#include <cstdio>
 
 std::vector<std::string*> str_to_delete;
-
 constexpr bool debug = false;
 
+std::string compiler_path;
+std::string input_filename;
 
-#line 88 "./src/parser.cpp"
+bool intermediate_flag;
+bool final_flag;
+bool optimizations_flag;
+
+extern FILE* yyin;
+
+
+#line 98 "./src/parser.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -574,15 +584,15 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   129,   129,   154,   155,   159,   160,   164,   165,   169,
-     170,   171,   172,   173,   174,   175,   176,   180,   181,   185,
-     186,   190,   191,   195,   196,   197,   198,   199,   200,   201,
-     202,   203,   204,   205,   206,   207,   208,   209,   210,   211,
+       0,   139,   139,   164,   165,   169,   170,   174,   175,   179,
+     180,   181,   182,   183,   184,   185,   186,   190,   191,   195,
+     196,   200,   201,   205,   206,   207,   208,   209,   210,   211,
      212,   213,   214,   215,   216,   217,   218,   219,   220,   221,
      222,   223,   224,   225,   226,   227,   228,   229,   230,   231,
-     232,   233,   234,   238,   239,   240,   241,   242,   243,   244,
-     245,   246,   247,   248,   252,   253,   256,   257,   258,   259,
-     260,   261,   262,   263,   264,   265,   271,   272
+     232,   233,   234,   235,   236,   237,   238,   239,   240,   241,
+     242,   243,   244,   248,   249,   250,   251,   252,   253,   254,
+     255,   256,   257,   258,   262,   263,   266,   267,   268,   269,
+     270,   271,   272,   273,   274,   275,   281,   282
 };
 #endif
 
@@ -1430,7 +1440,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: letdef_list  */
-#line 129 "./src/parser.y"
+#line 139 "./src/parser.y"
                 { 
             // AST::make_table(); //Make a static symboltable
             (yyvsp[0].letdef_list)->add_library_functions();
@@ -1446,528 +1456,528 @@ yyreduce:
             if(debug) std::cout << "AST: " << *(yyvsp[0].letdef_list) << std::endl;
             (yyvsp[0].letdef_list)->close_all_program_scopes();
 
-            (yyvsp[0].letdef_list)->llvm_compile_and_dump();
+            (yyvsp[0].letdef_list)->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
 
             (yyvsp[0].letdef_list)->close_all_program_scopes();
             (yyvsp[0].letdef_list)->close_library_function_scope();
             
             delete (yyvsp[0].letdef_list);
         }
-#line 1457 "./src/parser.cpp"
+#line 1467 "./src/parser.cpp"
     break;
 
   case 3: /* letdef_list: %empty  */
-#line 154 "./src/parser.y"
+#line 164 "./src/parser.y"
                         { (yyval.letdef_list) = new Block<LetDef>(BlockType::LetDef); }
-#line 1463 "./src/parser.cpp"
+#line 1473 "./src/parser.cpp"
     break;
 
   case 4: /* letdef_list: letdef_list letdef  */
-#line 155 "./src/parser.y"
+#line 165 "./src/parser.y"
                         { (yyvsp[-1].letdef_list)->append((yyvsp[0].let_def)); }
-#line 1469 "./src/parser.cpp"
+#line 1479 "./src/parser.cpp"
     break;
 
   case 5: /* letdef: "let" "rec" def def_list  */
-#line 159 "./src/parser.y"
+#line 169 "./src/parser.y"
                                 { (yyvsp[0].def_list)->insert((yyvsp[0].def_list)->begin(), (yyvsp[-1].def)); (yyval.let_def) = new LetDef((yyvsp[0].def_list), LetType::Rec); }
-#line 1475 "./src/parser.cpp"
+#line 1485 "./src/parser.cpp"
     break;
 
   case 6: /* letdef: "let" def def_list  */
-#line 160 "./src/parser.y"
+#line 170 "./src/parser.y"
                                 { (yyvsp[0].def_list)->insert((yyvsp[0].def_list)->begin(), (yyvsp[-1].def)); (yyval.let_def) = new LetDef((yyvsp[0].def_list), LetType::NoRec); }
-#line 1481 "./src/parser.cpp"
+#line 1491 "./src/parser.cpp"
     break;
 
   case 7: /* def_list: %empty  */
-#line 164 "./src/parser.y"
+#line 174 "./src/parser.y"
                         { (yyval.def_list) = new Block<Def>(BlockType::Def); }
-#line 1487 "./src/parser.cpp"
+#line 1497 "./src/parser.cpp"
     break;
 
   case 8: /* def_list: def_list "and" def  */
-#line 165 "./src/parser.y"
+#line 175 "./src/parser.y"
                         { (yyvsp[-2].def_list)->append((yyvsp[0].def)); }
-#line 1493 "./src/parser.cpp"
+#line 1503 "./src/parser.cpp"
     break;
 
   case 9: /* def: T_ID '=' expr  */
-#line 169 "./src/parser.y"
+#line 179 "./src/parser.y"
                                                             { (yyval.def) = new ConstDef((yyvsp[-2].id), (yyvsp[0].expr)); str_to_delete.push_back((yyvsp[-2].id)); }
-#line 1499 "./src/parser.cpp"
+#line 1509 "./src/parser.cpp"
     break;
 
   case 10: /* def: T_ID ':' type '=' expr  */
-#line 170 "./src/parser.y"
+#line 180 "./src/parser.y"
                                                             { (yyval.def) = new ConstDef((yyvsp[-4].id), std::shared_ptr<TypeVariable>((yyvsp[-2].type)), (yyvsp[0].expr)); str_to_delete.push_back((yyvsp[-4].id)); }
-#line 1505 "./src/parser.cpp"
+#line 1515 "./src/parser.cpp"
     break;
 
   case 11: /* def: T_ID par par_list ':' type '=' expr  */
-#line 171 "./src/parser.y"
+#line 181 "./src/parser.y"
                                                             { (yyvsp[-4].par_list)->insert((yyvsp[-4].par_list)->begin(), (yyvsp[-5].par)); (yyval.def) = new FunctionDef((yyvsp[-6].id), (yyvsp[-4].par_list), (yyvsp[0].expr), std::shared_ptr<TypeVariable>((yyvsp[-2].type))); str_to_delete.push_back((yyvsp[-6].id)); }
-#line 1511 "./src/parser.cpp"
+#line 1521 "./src/parser.cpp"
     break;
 
   case 12: /* def: T_ID par par_list '=' expr  */
-#line 172 "./src/parser.y"
+#line 182 "./src/parser.y"
                                                             { (yyvsp[-2].par_list)->insert((yyvsp[-2].par_list)->begin(), (yyvsp[-3].par)); (yyval.def) = new FunctionDef((yyvsp[-4].id), (yyvsp[-2].par_list), (yyvsp[0].expr)); str_to_delete.push_back((yyvsp[-4].id)); }
-#line 1517 "./src/parser.cpp"
+#line 1527 "./src/parser.cpp"
     break;
 
   case 13: /* def: "mutable" T_ID  */
-#line 173 "./src/parser.y"
+#line 183 "./src/parser.y"
                                                             { (yyval.def) = new VarDef((yyvsp[0].id)); str_to_delete.push_back((yyvsp[0].id)); }
-#line 1523 "./src/parser.cpp"
+#line 1533 "./src/parser.cpp"
     break;
 
   case 14: /* def: "mutable" T_ID ':' type  */
-#line 174 "./src/parser.y"
+#line 184 "./src/parser.y"
                                                             { (yyval.def) = new VarDef((yyvsp[-2].id), std::shared_ptr<TypeVariable>((yyvsp[0].type))); str_to_delete.push_back((yyvsp[-2].id)); }
-#line 1529 "./src/parser.cpp"
+#line 1539 "./src/parser.cpp"
     break;
 
   case 15: /* def: "mutable" T_ID '[' expr expr_comma_list ']'  */
-#line 175 "./src/parser.y"
+#line 185 "./src/parser.y"
                                                             { (yyvsp[-1].expr_comma_list)->insert((yyvsp[-1].expr_comma_list)->begin(), (yyvsp[-2].expr)); (yyval.def) = new ArrayDef((yyvsp[-4].id), (yyvsp[-1].expr_comma_list)); str_to_delete.push_back((yyvsp[-4].id)); }
-#line 1535 "./src/parser.cpp"
+#line 1545 "./src/parser.cpp"
     break;
 
   case 16: /* def: "mutable" T_ID '[' expr expr_comma_list ']' ':' type  */
-#line 176 "./src/parser.y"
+#line 186 "./src/parser.y"
                                                             { (yyvsp[-3].expr_comma_list)->insert((yyvsp[-3].expr_comma_list)->begin(), (yyvsp[-4].expr)); (yyval.def) = new ArrayDef((yyvsp[-6].id), (yyvsp[-3].expr_comma_list), std::shared_ptr<TypeVariable>((yyvsp[0].type))); str_to_delete.push_back((yyvsp[-6].id)); }
-#line 1541 "./src/parser.cpp"
+#line 1551 "./src/parser.cpp"
     break;
 
   case 17: /* par_list: %empty  */
-#line 180 "./src/parser.y"
+#line 190 "./src/parser.y"
                     { (yyval.par_list) = new Block<Par>(BlockType::Par); }
-#line 1547 "./src/parser.cpp"
+#line 1557 "./src/parser.cpp"
     break;
 
   case 18: /* par_list: par_list par  */
-#line 181 "./src/parser.y"
+#line 191 "./src/parser.y"
                     { (yyvsp[-1].par_list)->append((yyvsp[0].par)); }
-#line 1553 "./src/parser.cpp"
+#line 1563 "./src/parser.cpp"
     break;
 
   case 19: /* par: T_ID  */
-#line 185 "./src/parser.y"
+#line 195 "./src/parser.y"
                             { (yyval.par) = new Par((yyvsp[0].id)); str_to_delete.push_back((yyvsp[0].id)); }
-#line 1559 "./src/parser.cpp"
+#line 1569 "./src/parser.cpp"
     break;
 
   case 20: /* par: '(' T_ID ':' type ')'  */
-#line 186 "./src/parser.y"
+#line 196 "./src/parser.y"
                             { (yyval.par) = new Par((yyvsp[-3].id), std::shared_ptr<TypeVariable>((yyvsp[-1].type))); str_to_delete.push_back((yyvsp[-3].id)); }
-#line 1565 "./src/parser.cpp"
+#line 1575 "./src/parser.cpp"
     break;
 
   case 21: /* expr_comma_list: %empty  */
-#line 190 "./src/parser.y"
+#line 200 "./src/parser.y"
                                 { (yyval.expr_comma_list) = new Block<Expr>(BlockType::ExprComma); }
-#line 1571 "./src/parser.cpp"
+#line 1581 "./src/parser.cpp"
     break;
 
   case 22: /* expr_comma_list: expr_comma_list ',' expr  */
-#line 191 "./src/parser.y"
+#line 201 "./src/parser.y"
                                 { (yyvsp[-2].expr_comma_list)->append((yyvsp[0].expr)); }
-#line 1577 "./src/parser.cpp"
+#line 1587 "./src/parser.cpp"
     break;
 
   case 23: /* expr: func_expr  */
-#line 195 "./src/parser.y"
+#line 205 "./src/parser.y"
                                                             { (yyval.expr) = (yyvsp[0].expr); }
-#line 1583 "./src/parser.cpp"
+#line 1593 "./src/parser.cpp"
     break;
 
   case 24: /* expr: T_ID func_expr func_expr_list  */
-#line 196 "./src/parser.y"
+#line 206 "./src/parser.y"
                                                             { (yyvsp[0].func_expr_list)->insert((yyvsp[0].func_expr_list)->begin(), (yyvsp[-1].expr)); (yyval.expr) = new FunctionCall((yyvsp[-2].id), (yyvsp[0].func_expr_list)); str_to_delete.push_back((yyvsp[-2].id)); }
-#line 1589 "./src/parser.cpp"
+#line 1599 "./src/parser.cpp"
     break;
 
   case 25: /* expr: "dim" T_ID  */
-#line 197 "./src/parser.y"
+#line 207 "./src/parser.y"
                                                             { (yyval.expr) = new Dim((yyvsp[0].id)); str_to_delete.push_back((yyvsp[0].id)); }
-#line 1595 "./src/parser.cpp"
+#line 1605 "./src/parser.cpp"
     break;
 
   case 26: /* expr: "dim" T_CONST_INT T_ID  */
-#line 198 "./src/parser.y"
+#line 208 "./src/parser.y"
                                                             { (yyval.expr) = new Dim((yyvsp[0].id), (yyvsp[-1].number)); str_to_delete.push_back((yyvsp[0].id)); }
-#line 1601 "./src/parser.cpp"
+#line 1611 "./src/parser.cpp"
     break;
 
   case 27: /* expr: "new" type  */
-#line 199 "./src/parser.y"
+#line 209 "./src/parser.y"
                                                             { (yyval.expr) = new New(std::shared_ptr<TypeVariable>((yyvsp[0].type))); }
-#line 1607 "./src/parser.cpp"
+#line 1617 "./src/parser.cpp"
     break;
 
   case 28: /* expr: "delete" expr  */
-#line 200 "./src/parser.y"
+#line 210 "./src/parser.y"
                                                             { (yyval.expr) = new Delete((yyvsp[0].expr)); }
-#line 1613 "./src/parser.cpp"
+#line 1623 "./src/parser.cpp"
     break;
 
   case 29: /* expr: letdef "in" expr  */
-#line 201 "./src/parser.y"
+#line 211 "./src/parser.y"
                                                             { (yyval.expr) = new LetIn((yyvsp[-2].let_def), (yyvsp[0].expr)); }
-#line 1619 "./src/parser.cpp"
+#line 1629 "./src/parser.cpp"
     break;
 
   case 30: /* expr: "begin" expr "end"  */
-#line 202 "./src/parser.y"
+#line 212 "./src/parser.y"
                                                             { (yyval.expr) = (yyvsp[-1].expr); }
-#line 1625 "./src/parser.cpp"
+#line 1635 "./src/parser.cpp"
     break;
 
   case 31: /* expr: "if" expr "then" expr  */
-#line 203 "./src/parser.y"
+#line 213 "./src/parser.y"
                                                             { (yyval.expr) = new If((yyvsp[-2].expr), (yyvsp[0].expr)); }
-#line 1631 "./src/parser.cpp"
+#line 1641 "./src/parser.cpp"
     break;
 
   case 32: /* expr: "if" expr "then" expr "else" expr  */
-#line 204 "./src/parser.y"
+#line 214 "./src/parser.y"
                                                             { (yyval.expr) = new If((yyvsp[-4].expr), (yyvsp[-2].expr), (yyvsp[0].expr)); }
-#line 1637 "./src/parser.cpp"
+#line 1647 "./src/parser.cpp"
     break;
 
   case 33: /* expr: "while" expr "do" expr "done"  */
-#line 205 "./src/parser.y"
+#line 215 "./src/parser.y"
                                                             { (yyval.expr) = new While((yyvsp[-3].expr), (yyvsp[-1].expr)); }
-#line 1643 "./src/parser.cpp"
+#line 1653 "./src/parser.cpp"
     break;
 
   case 34: /* expr: "for" T_ID '=' expr "to" expr "do" expr "done"  */
-#line 206 "./src/parser.y"
+#line 216 "./src/parser.y"
                                                             { (yyval.expr) = new ForTo((yyvsp[-7].id), (yyvsp[-5].expr), (yyvsp[-3].expr), (yyvsp[-1].expr)); str_to_delete.push_back((yyvsp[-7].id)); }
-#line 1649 "./src/parser.cpp"
+#line 1659 "./src/parser.cpp"
     break;
 
   case 35: /* expr: "for" T_ID '=' expr "downto" expr "do" expr "done"  */
-#line 207 "./src/parser.y"
+#line 217 "./src/parser.y"
                                                             { (yyval.expr) = new ForDownTo((yyvsp[-7].id), (yyvsp[-5].expr), (yyvsp[-3].expr), (yyvsp[-1].expr)); str_to_delete.push_back((yyvsp[-7].id)); }
-#line 1655 "./src/parser.cpp"
+#line 1665 "./src/parser.cpp"
     break;
 
   case 36: /* expr: '+' expr  */
-#line 208 "./src/parser.y"
+#line 218 "./src/parser.y"
                                                             { (yyval.expr) = new UnOp((yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1661 "./src/parser.cpp"
+#line 1671 "./src/parser.cpp"
     break;
 
   case 37: /* expr: '-' expr  */
-#line 209 "./src/parser.y"
+#line 219 "./src/parser.y"
                                                             { (yyval.expr) = new UnOp((yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1667 "./src/parser.cpp"
+#line 1677 "./src/parser.cpp"
     break;
 
   case 38: /* expr: "+." expr  */
-#line 210 "./src/parser.y"
+#line 220 "./src/parser.y"
                                                             { (yyval.expr) = new UnOp((yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1673 "./src/parser.cpp"
+#line 1683 "./src/parser.cpp"
     break;
 
   case 39: /* expr: "-." expr  */
-#line 211 "./src/parser.y"
+#line 221 "./src/parser.y"
                                                             { (yyval.expr) = new UnOp((yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1679 "./src/parser.cpp"
+#line 1689 "./src/parser.cpp"
     break;
 
   case 40: /* expr: "not" expr  */
-#line 212 "./src/parser.y"
+#line 222 "./src/parser.y"
                                                             { (yyval.expr) = new UnOp((yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1685 "./src/parser.cpp"
+#line 1695 "./src/parser.cpp"
     break;
 
   case 41: /* expr: expr '+' expr  */
-#line 213 "./src/parser.y"
+#line 223 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1691 "./src/parser.cpp"
+#line 1701 "./src/parser.cpp"
     break;
 
   case 42: /* expr: expr '-' expr  */
-#line 214 "./src/parser.y"
+#line 224 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1697 "./src/parser.cpp"
+#line 1707 "./src/parser.cpp"
     break;
 
   case 43: /* expr: expr '*' expr  */
-#line 215 "./src/parser.y"
+#line 225 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1703 "./src/parser.cpp"
+#line 1713 "./src/parser.cpp"
     break;
 
   case 44: /* expr: expr '/' expr  */
-#line 216 "./src/parser.y"
+#line 226 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1709 "./src/parser.cpp"
+#line 1719 "./src/parser.cpp"
     break;
 
   case 45: /* expr: expr "+." expr  */
-#line 217 "./src/parser.y"
+#line 227 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1715 "./src/parser.cpp"
+#line 1725 "./src/parser.cpp"
     break;
 
   case 46: /* expr: expr "-." expr  */
-#line 218 "./src/parser.y"
+#line 228 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1721 "./src/parser.cpp"
+#line 1731 "./src/parser.cpp"
     break;
 
   case 47: /* expr: expr "*." expr  */
-#line 219 "./src/parser.y"
+#line 229 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1727 "./src/parser.cpp"
+#line 1737 "./src/parser.cpp"
     break;
 
   case 48: /* expr: expr "/." expr  */
-#line 220 "./src/parser.y"
+#line 230 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1733 "./src/parser.cpp"
+#line 1743 "./src/parser.cpp"
     break;
 
   case 49: /* expr: expr "**" expr  */
-#line 221 "./src/parser.y"
+#line 231 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1739 "./src/parser.cpp"
+#line 1749 "./src/parser.cpp"
     break;
 
   case 50: /* expr: expr '=' expr  */
-#line 222 "./src/parser.y"
+#line 232 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1745 "./src/parser.cpp"
+#line 1755 "./src/parser.cpp"
     break;
 
   case 51: /* expr: expr "<>" expr  */
-#line 223 "./src/parser.y"
+#line 233 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1751 "./src/parser.cpp"
+#line 1761 "./src/parser.cpp"
     break;
 
   case 52: /* expr: expr '<' expr  */
-#line 224 "./src/parser.y"
+#line 234 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1757 "./src/parser.cpp"
+#line 1767 "./src/parser.cpp"
     break;
 
   case 53: /* expr: expr '>' expr  */
-#line 225 "./src/parser.y"
+#line 235 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1763 "./src/parser.cpp"
+#line 1773 "./src/parser.cpp"
     break;
 
   case 54: /* expr: expr "<=" expr  */
-#line 226 "./src/parser.y"
+#line 236 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1769 "./src/parser.cpp"
+#line 1779 "./src/parser.cpp"
     break;
 
   case 55: /* expr: expr ">=" expr  */
-#line 227 "./src/parser.y"
+#line 237 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1775 "./src/parser.cpp"
+#line 1785 "./src/parser.cpp"
     break;
 
   case 56: /* expr: expr "==" expr  */
-#line 228 "./src/parser.y"
+#line 238 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1781 "./src/parser.cpp"
+#line 1791 "./src/parser.cpp"
     break;
 
   case 57: /* expr: expr "!=" expr  */
-#line 229 "./src/parser.y"
+#line 239 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1787 "./src/parser.cpp"
+#line 1797 "./src/parser.cpp"
     break;
 
   case 58: /* expr: expr "&&" expr  */
-#line 230 "./src/parser.y"
+#line 240 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1793 "./src/parser.cpp"
+#line 1803 "./src/parser.cpp"
     break;
 
   case 59: /* expr: expr "||" expr  */
-#line 231 "./src/parser.y"
+#line 241 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1799 "./src/parser.cpp"
+#line 1809 "./src/parser.cpp"
     break;
 
   case 60: /* expr: expr ';' expr  */
-#line 232 "./src/parser.y"
+#line 242 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1805 "./src/parser.cpp"
+#line 1815 "./src/parser.cpp"
     break;
 
   case 61: /* expr: expr ":=" expr  */
-#line 233 "./src/parser.y"
+#line 243 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1811 "./src/parser.cpp"
+#line 1821 "./src/parser.cpp"
     break;
 
   case 62: /* expr: expr "mod" expr  */
-#line 234 "./src/parser.y"
+#line 244 "./src/parser.y"
                                                             { (yyval.expr) = new BinOp((yyvsp[-2].expr), (yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1817 "./src/parser.cpp"
+#line 1827 "./src/parser.cpp"
     break;
 
   case 63: /* func_expr: '!' func_expr  */
-#line 238 "./src/parser.y"
+#line 248 "./src/parser.y"
                                                             { (yyval.expr) = new UnOp((yyvsp[0].expr), (yyvsp[-1].op)); }
-#line 1823 "./src/parser.cpp"
+#line 1833 "./src/parser.cpp"
     break;
 
   case 64: /* func_expr: '(' expr ')'  */
-#line 239 "./src/parser.y"
+#line 249 "./src/parser.y"
                                                             { (yyval.expr) = (yyvsp[-1].expr); }
-#line 1829 "./src/parser.cpp"
+#line 1839 "./src/parser.cpp"
     break;
 
   case 65: /* func_expr: '(' ')'  */
-#line 240 "./src/parser.y"
+#line 250 "./src/parser.y"
                                                             { (yyval.expr) = new Unit(); }
-#line 1835 "./src/parser.cpp"
+#line 1845 "./src/parser.cpp"
     break;
 
   case 66: /* func_expr: T_ID  */
-#line 241 "./src/parser.y"
+#line 251 "./src/parser.y"
                                                             { (yyval.expr) = new Id((yyvsp[0].id)); str_to_delete.push_back((yyvsp[0].id)); }
-#line 1841 "./src/parser.cpp"
+#line 1851 "./src/parser.cpp"
     break;
 
   case 67: /* func_expr: T_CONST_INT  */
-#line 242 "./src/parser.y"
+#line 252 "./src/parser.y"
                                                             { (yyval.expr) = new Int((yyvsp[0].number)); }
-#line 1847 "./src/parser.cpp"
+#line 1857 "./src/parser.cpp"
     break;
 
   case 68: /* func_expr: T_CONST_FLOAT  */
-#line 243 "./src/parser.y"
+#line 253 "./src/parser.y"
                                                             { (yyval.expr) = new Float((yyvsp[0].float_value)); }
-#line 1853 "./src/parser.cpp"
+#line 1863 "./src/parser.cpp"
     break;
 
   case 69: /* func_expr: T_CONST_CHAR  */
-#line 244 "./src/parser.y"
+#line 254 "./src/parser.y"
                                                             { (yyval.expr) = new Char((yyvsp[0].const_char)); }
-#line 1859 "./src/parser.cpp"
+#line 1869 "./src/parser.cpp"
     break;
 
   case 70: /* func_expr: T_STRING_LITERAL  */
-#line 245 "./src/parser.y"
+#line 255 "./src/parser.y"
                                                             { (yyval.expr) = new String((yyvsp[0].string_literal)); str_to_delete.push_back((yyvsp[0].string_literal)); }
-#line 1865 "./src/parser.cpp"
+#line 1875 "./src/parser.cpp"
     break;
 
   case 71: /* func_expr: "true"  */
-#line 246 "./src/parser.y"
+#line 256 "./src/parser.y"
                                                             { (yyval.expr) = new Bool(true); }
-#line 1871 "./src/parser.cpp"
+#line 1881 "./src/parser.cpp"
     break;
 
   case 72: /* func_expr: "false"  */
-#line 247 "./src/parser.y"
+#line 257 "./src/parser.y"
                                                             { (yyval.expr) = new Bool(false); }
-#line 1877 "./src/parser.cpp"
+#line 1887 "./src/parser.cpp"
     break;
 
   case 73: /* func_expr: T_ID '[' expr expr_comma_list ']'  */
-#line 248 "./src/parser.y"
+#line 258 "./src/parser.y"
                                                             { (yyvsp[-1].expr_comma_list)->insert((yyvsp[-1].expr_comma_list)->begin(), (yyvsp[-2].expr)); (yyval.expr) = new ArrayIndex((yyvsp[-4].id), (yyvsp[-1].expr_comma_list)); str_to_delete.push_back((yyvsp[-4].id)); }
-#line 1883 "./src/parser.cpp"
+#line 1893 "./src/parser.cpp"
     break;
 
   case 74: /* func_expr_list: %empty  */
-#line 252 "./src/parser.y"
+#line 262 "./src/parser.y"
                                                             { (yyval.func_expr_list) = new Block<Expr>(BlockType::Expr); }
-#line 1889 "./src/parser.cpp"
+#line 1899 "./src/parser.cpp"
     break;
 
   case 75: /* func_expr_list: func_expr_list func_expr  */
-#line 253 "./src/parser.y"
+#line 263 "./src/parser.y"
                                                             { (yyvsp[-1].func_expr_list)->append((yyvsp[0].expr)); }
-#line 1895 "./src/parser.cpp"
+#line 1905 "./src/parser.cpp"
     break;
 
   case 76: /* type: "unit"  */
-#line 256 "./src/parser.y"
+#line 266 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Unit); }
-#line 1901 "./src/parser.cpp"
+#line 1911 "./src/parser.cpp"
     break;
 
   case 77: /* type: "int"  */
-#line 257 "./src/parser.y"
+#line 267 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Int); }
-#line 1907 "./src/parser.cpp"
+#line 1917 "./src/parser.cpp"
     break;
 
   case 78: /* type: "char"  */
-#line 258 "./src/parser.y"
+#line 268 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Char); }
-#line 1913 "./src/parser.cpp"
+#line 1923 "./src/parser.cpp"
     break;
 
   case 79: /* type: "bool"  */
-#line 259 "./src/parser.y"
+#line 269 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Bool); }
-#line 1919 "./src/parser.cpp"
+#line 1929 "./src/parser.cpp"
     break;
 
   case 80: /* type: "float"  */
-#line 260 "./src/parser.y"
+#line 270 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Float); }
-#line 1925 "./src/parser.cpp"
+#line 1935 "./src/parser.cpp"
     break;
 
   case 81: /* type: '(' type ')'  */
-#line 261 "./src/parser.y"
+#line 271 "./src/parser.y"
                                                             { (yyval.type) = (yyvsp[-1].type); }
-#line 1931 "./src/parser.cpp"
+#line 1941 "./src/parser.cpp"
     break;
 
   case 82: /* type: type "->" type  */
-#line 262 "./src/parser.y"
+#line 272 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Function, std::shared_ptr<TypeVariable>((yyvsp[-2].type)), std::shared_ptr<TypeVariable>((yyvsp[0].type)), FunctionTypeTag::Actual); }
-#line 1937 "./src/parser.cpp"
+#line 1947 "./src/parser.cpp"
     break;
 
   case 83: /* type: type "ref"  */
-#line 263 "./src/parser.y"
+#line 273 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Reference, std::shared_ptr<TypeVariable>((yyvsp[-1].type))); }
-#line 1943 "./src/parser.cpp"
+#line 1953 "./src/parser.cpp"
     break;
 
   case 84: /* type: "array" "of" type  */
-#line 264 "./src/parser.y"
+#line 274 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>((yyvsp[0].type)), 1, DimType::Exact); }
-#line 1949 "./src/parser.cpp"
+#line 1959 "./src/parser.cpp"
     break;
 
   case 85: /* type: "array" '[' asterisk_list ']' "of" type  */
-#line 265 "./src/parser.y"
+#line 275 "./src/parser.y"
                                                             { (yyval.type) = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>((yyvsp[0].type)), (yyvsp[-3].dimension_count), DimType::Exact); }
-#line 1955 "./src/parser.cpp"
+#line 1965 "./src/parser.cpp"
     break;
 
   case 86: /* asterisk_list: '*'  */
-#line 271 "./src/parser.y"
+#line 281 "./src/parser.y"
                             { (yyval.dimension_count) = 1; }
-#line 1961 "./src/parser.cpp"
+#line 1971 "./src/parser.cpp"
     break;
 
   case 87: /* asterisk_list: asterisk_list ',' '*'  */
-#line 272 "./src/parser.y"
+#line 282 "./src/parser.y"
                             { (yyval.dimension_count) = 1 + (yyvsp[-2].dimension_count); }
-#line 1967 "./src/parser.cpp"
+#line 1977 "./src/parser.cpp"
     break;
 
 
-#line 1971 "./src/parser.cpp"
+#line 1981 "./src/parser.cpp"
 
       default: break;
     }
@@ -2161,14 +2171,61 @@ yyreturn:
   return yyresult;
 }
 
-#line 275 "./src/parser.y"
+#line 285 "./src/parser.y"
 
 
-int main(){
+int main(int argc, char** argv) {
+    int option;
+	compiler_path = argv[0];
+
+    //If no option was given output help and exit
+	if (argc == 1) {
+		std::cerr <<
+			"OVERVIEW: llama compiler\n"
+            "USAGE: llamac [OPTIONS] [FILE]\n"
+            "OPTIONS:\n"
+			"-O:    enable optimizations\n"
+			"-i:    the input must be given on standard input and the intermediate code will be printed on standard output\n"
+			"-f:    the input must be given on standard input and the final code will be printed on standard output\n"
+			"\n"
+			"If no -i or -f options are selected the input file must be given as an argument\n";
+		exit(1);
+	}
+
+	optimizations_flag = intermediate_flag = final_flag = false;
+	while ((option = getopt(argc, argv, "Ofi")) != -1) {
+		switch(option) {
+			case 'O':
+				optimizations_flag = true;
+				break;
+			case 'f':
+				final_flag = true;
+				break;
+			case 'i':
+				intermediate_flag = true;
+				break;
+			case '?':
+				std::cerr << "Enter ./llamac to see usage information\n";
+				exit(1);
+			default:
+				break;
+		}
+	}
+
+	if(intermediate_flag || final_flag)
+		yyin = stdin;
+	else {
+		yyin = fopen(argv[optind], "r");
+		input_filename = std::string(argv[optind]);
+	}
+
     int result = yyparse();
+
+    //delete all allocated strings
     for(auto string_ptr: str_to_delete) {
         delete string_ptr;
     }
+
     return result;
 }
 

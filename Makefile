@@ -3,14 +3,14 @@
 LLVMCONFIG=llvm-config
 
 CXX=g++
-CXXFLAGS=-O0 -Wall -g -Wno-reorder `$(LLVMCONFIG) --cxxflags`
+CXXFLAGS=-O3 -Wall -Wno-reorder `$(LLVMCONFIG) --cxxflags`
 LDFLAGS=`$(LLVMCONFIG) --ldflags --system-libs --libs all`
 
 HPPFILES=$(shell find ./src -name "*.hpp" -not -name "parser.hpp" -not -name "lexer.hpp")
 CPPFILES=$(shell find ./src -name "*.cpp" -not -name "parser.cpp" -not -name "lexer.cpp")
 OBJFILES=$(patsubst %.cpp,%.o,$(CPPFILES))
 
-all: compiler
+all: llamac
 
 ./src/lexer.cpp: ./src/lexer.l
 	flex -s -o ./src/lexer.cpp ./src/lexer.l
@@ -25,7 +25,7 @@ all: compiler
 
 ./src/parser.o: ./src/parser.cpp ./src/lexer.hpp
 
-compiler: ./src/lexer.o ./src/parser.o $(OBJFILES)
+llamac: ./src/lexer.o ./src/parser.o $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o $@ ./src/lexer.o ./src/parser.o $(OBJFILES) $(LDFLAGS)
 
 clean:

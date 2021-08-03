@@ -15,7 +15,11 @@
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
 #include <llvm/Transforms/Utils.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Target/TargetMachine.h>
 #include <iostream>
+#include <fstream>
+#include <cstdlib>
 
 std::unique_ptr<SymbolTable> AST::st = std::make_unique<SymbolTable>(20000);
 std::unique_ptr<SemanticAnalyzer> AST::sa = std::make_unique<SemanticAnalyzer>();
@@ -163,12 +167,12 @@ void AST::map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable,
     par_types.insert(par_types.begin(), map_to_llvm_type(type_variable));
 }
 
-void AST::llvm_compile_and_dump(bool optimize) {
+void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag, bool final_flag, std::string input_filename, std::string compiler_path) {
     // Initialize
     TheModule = std::make_unique<llvm::Module>("Llama program", TheContext);
    
     FPM = std::make_unique<llvm::legacy::FunctionPassManager>(TheModule.get());
-    if(optimize) {
+    if(optimizations_flag) {
         FPM->add(llvm::createPromoteMemoryToRegisterPass()); //https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl07.html#memory-in-llvm
         FPM->add(llvm::createInstructionCombiningPass());
         FPM->add(llvm::createReassociatePass());
@@ -204,8 +208,47 @@ void AST::llvm_compile_and_dump(bool optimize) {
     // Optimize!
     FPM->run(*main);
 
-    // Print out the IR.
-    TheModule->print(llvm::outs(), nullptr);
+    if(intermediate_flag) {
+        //Print out the IR.
+        TheModule->print(llvm::outs(), nullptr);
+        return;
+    }
+
+    if(final_flag) {
+        //Print out the final code.
+        auto output_error =  std::error_code();
+        auto output_ir_file = std::make_unique<llvm::raw_fd_ostream>("a.ll", output_error);
+
+        TheModule->print(*output_ir_file, nullptr);
+
+        std::string compile_to_assembly = "llc-12 -o a.s a.ll";
+        std::system(compile_to_assembly.c_str());
+
+        std::ifstream input_asm_file_stream;
+        input_asm_file_stream.open("a.s");
+        std::stringstream buffer;
+
+        buffer << input_asm_file_stream.rdbuf();
+        std::cout << buffer.str() << std::endl;
+
+        return;
+    }
+    else {
+        //Compile and store executable in ./a.out
+        std::ifstream input_source_file_stream;
+        input_source_file_stream.open(input_filename);
+
+        auto output_error =  std::error_code();
+        auto output_ir_file = std::make_unique<llvm::raw_fd_ostream>("a.ll", output_error);
+
+        TheModule->print(*output_ir_file, nullptr);
+
+        std::string compile_to_assembly = "llc-12 -o a.s a.ll";
+        std::system(compile_to_assembly.c_str());
+
+        std::string compile_to_object_code = "clang++ -O3 -o a.out a.s";
+        std::system(compile_to_object_code.c_str());
+    }
 }
 
 void AST::declare_library_functions() {

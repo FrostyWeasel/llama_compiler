@@ -31,7 +31,7 @@ class ErrorHandler;
 class TypeVariable;
 class SymbolTable;
 
-class AST{
+class AST {
 public:
 
     AST() {
@@ -48,8 +48,7 @@ public:
     virtual void sem() = 0;
     virtual llvm::Value* codegen() = 0;
 
-    //TODO: Set to true
-    virtual void llvm_compile_and_dump(bool optimize=false);
+    virtual void llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag, bool final_flag, std::string input_filename, std::string compiler_path);
 
     void close_all_program_scopes();
     void unify();
