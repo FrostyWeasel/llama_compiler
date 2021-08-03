@@ -103,16 +103,18 @@ llvm::Value* FunctionCall::library_function_codegen() {
     }
     if(this->id == "read_string") {
         auto string_struct = par_values[0];
+        auto string_struct_element_count = string_struct->getType()->getStructNumElements();
         auto string_struct_alloca = Builder.CreateAlloca(string_struct->getType(), nullptr, "string_struct_alloca");
         Builder.CreateStore(string_struct, string_struct_alloca);
-        auto string_ptr = Builder.CreateStructGEP(string_struct_alloca, 2, "string_ptr");
+
+        //String is last element of struct
+        auto string_ptr = Builder.CreateStructGEP(string_struct_alloca, string_struct_element_count - 1, "string_ptr");
         auto array_size_ptr = Builder.CreateStructGEP(string_struct_alloca, 0, "array_size_ptr");
 
-        return Builder.CreateCall(AST::read_string, { Builder.CreateLoad(array_size_ptr), Builder.CreateLoad(string_ptr) }, "read_stringfunction_return");
+        return Builder.CreateCall(AST::read_string, { Builder.CreateLoad(array_size_ptr), Builder.CreateLoad(string_ptr) }, "read_string_function_return");
     }
     if(this->id == "read_int") {
-        // * Return of read integer is not 32 bit so it needs to be truncated before it is sign extended or negative numbers are read as large positive ones
-        return Builder.CreateSExt(Builder.CreateTrunc(Builder.CreateCall(AST::read_int, {  }), i16), i32);
+        return Builder.CreateCall(AST::read_int, {  });
     }
     if(this->id == "read_char") {
         return Builder.CreateCall(AST::read_char, {  });
@@ -121,7 +123,6 @@ llvm::Value* FunctionCall::library_function_codegen() {
         return Builder.CreateCall(AST::read_bool, {  });
     }
     if(this->id == "read_float") {
-        // * Return of read float is double
         return Builder.CreateCall(AST::read_float, {  });
     }
     if(this->id == "strlen") {

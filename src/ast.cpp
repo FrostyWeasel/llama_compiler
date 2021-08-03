@@ -31,6 +31,7 @@ std::unique_ptr<llvm::Module> AST::TheModule;
 std::unique_ptr<llvm::legacy::FunctionPassManager> AST::FPM;
 
 llvm::Function* AST::printf;
+llvm::Function* AST::scanf;
 
 llvm::Function* AST::print_string;
 llvm::Function* AST::print_int;
@@ -208,28 +209,18 @@ void AST::llvm_compile_and_dump(bool optimize) {
 }
 
 void AST::declare_library_functions() {
+    //libc functions
     auto printf_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, true);
     AST::printf = llvm::Function::Create(printf_type, llvm::Function::LinkageTypes::ExternalLinkage, "printf", TheModule.get());
+
+    auto scanf_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, true);
+    AST::scanf = llvm::Function::Create(scanf_type, llvm::Function::LinkageTypes::ExternalLinkage, "scanf", TheModule.get());
 
     //Print Functions
     define_print_functions();
 
     //Read Functions
-    auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { i32, llvm::PointerType::get(i8, 0) }, false);
-    AST::read_string = llvm::Function::Create(read_string_type, llvm::Function::ExternalLinkage, "readString", TheModule.get());
-
-    auto read_int_type = llvm::FunctionType::get(i32, {  }, false);
-    AST::read_int = llvm::Function::Create(read_int_type, llvm::Function::ExternalLinkage, "readInteger", TheModule.get());
-    AST::read_int->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
-
-    auto read_char_type = llvm::FunctionType::get(i8, {  }, false);
-    AST::read_char = llvm::Function::Create(read_char_type, llvm::Function::ExternalLinkage, "readChar", TheModule.get());
-
-    auto read_bool_type = llvm::FunctionType::get(i1, {  }, false);
-    AST::read_bool = llvm::Function::Create(read_bool_type, llvm::Function::ExternalLinkage, "readBoolean", TheModule.get());
-
-    auto read_float_type = llvm::FunctionType::get(f64, {  }, false);
-    AST::read_float = llvm::Function::Create(read_float_type, llvm::Function::ExternalLinkage, "readReal", TheModule.get());
+    define_read_functions();
 
     //Reference update Functions
     define_reference_update_functions();
@@ -247,8 +238,7 @@ void AST::declare_library_functions() {
     auto atan_type = llvm::FunctionType::get(f64, { f64 }, false);
     AST::atan = llvm::Function::Create(atan_type, llvm::Function::LinkageTypes::ExternalLinkage, "atan", TheModule.get());
 
-    auto pi_type = llvm::FunctionType::get(f64, { }, false);
-    AST::pi = llvm::Function::Create(pi_type, llvm::Function::LinkageTypes::ExternalLinkage, "pi", TheModule.get());
+    define_pi();
 
     auto abs_type = llvm::FunctionType::get(i32, { i32 }, false);
     AST::abs = llvm::Function::Create(abs_type, llvm::Function::LinkageTypes::ExternalLinkage, "abs", TheModule.get());
@@ -283,6 +273,217 @@ void AST::declare_library_functions() {
     AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
     AST::strlen->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
 
+}
+
+void AST::define_pi() {
+    auto pi_type = llvm::FunctionType::get(f64, { }, false);
+    AST::pi = llvm::Function::Create(pi_type, llvm::Function::LinkageTypes::ExternalLinkage, "pi", TheModule.get());
+
+    auto previous_insert_point = Builder.GetInsertBlock();
+    auto function_body_BB = llvm::BasicBlock::Create(TheContext, "pi_entry", AST::pi );
+    Builder.SetInsertPoint(function_body_BB);
+
+    Builder.CreateRet(cf64(M_PIf64));
+    Builder.SetInsertPoint(previous_insert_point);
+}
+
+void AST::define_read_functions() {
+    //Reads characters into array until array is full or \n is encountered.
+    {
+        auto read_string_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), {  i32, llvm::PointerType::get(AST::i8, 0) }, false);
+        AST::read_string = llvm::Function::Create(read_string_type, llvm::Function::ExternalLinkage, "read_string", TheModule.get());
+
+        auto previous_insert_point = Builder.GetInsertBlock();
+        auto function_body_BB = llvm::BasicBlock::Create(TheContext, "read_string_entry", AST::read_string );
+        Builder.SetInsertPoint(function_body_BB);
+
+        auto array_size_par = AST::read_string->getArg(0);
+        auto array_elements_ptr = AST::read_string->getArg(1);
+
+        auto format_string = Builder.CreateGlobalStringPtr("%c");
+        auto input_character_alloca = Builder.CreateAlloca(i8, nullptr, "input_character_alloca");
+
+        //Get initial value of iterator variable
+        auto start_value = c32(0);
+
+        auto current_function = Builder.GetInsertBlock()->getParent();
+
+        //Current BB
+        auto header_BB = Builder.GetInsertBlock();
+
+        //Create BB for the loop
+        auto loop_start_BB = llvm::BasicBlock::Create(TheContext, "loop_start", current_function);
+        auto loop_body_BB = llvm::BasicBlock::Create(TheContext, "loop_body");
+        auto loop_body_store_input_BB = llvm::BasicBlock::Create(TheContext, "loop_body_store_input_BB");
+        auto loop_end_BB = llvm::BasicBlock::Create(TheContext, "loop_end");
+        auto function_end_BB = llvm::BasicBlock::Create(TheContext, "function_end");
+
+        auto iterator_alloca = Builder.CreateAlloca(i32, nullptr, "iterator_alloca");
+
+        //Go to function end immediately in the spacial case that array size is zero
+        auto array_size_zero_check = Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, array_size_par, c32(0), "array_size_zero_check");
+        Builder.CreateCondBr(array_size_zero_check, function_end_BB, loop_start_BB);
+
+        //Enter the loop
+        Builder.SetInsertPoint(loop_start_BB);
+
+        auto phi_node = Builder.CreatePHI(i32, 2, "iterator");
+        phi_node->addIncoming(start_value, header_BB);
+        Builder.CreateStore(phi_node, iterator_alloca);
+
+        //array_size_check = (iterator == array_size - 1 ) ? 1 : 0
+        auto array_size_check = Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, phi_node, Builder.CreateSub(array_size_par, c32(1)), "array_size_check");
+
+        Builder.CreateCondBr(array_size_check, loop_end_BB, loop_body_BB);
+
+        //Start loop body BB
+        current_function->getBasicBlockList().push_back(loop_body_BB);
+        Builder.SetInsertPoint(loop_body_BB);
+
+        //Read a character from stdin
+        Builder.CreateCall(AST::scanf, { format_string, input_character_alloca });
+        auto input_char = Builder.CreateLoad(input_character_alloca, "input_char");
+
+        //Check if character is '\n'
+        //read_new_line_check = (input_character == '\n') ? 1 : 0
+        auto read_new_line_check = Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, input_char, c8('\n'), "read_new_line_check");
+
+        Builder.CreateCondBr(read_new_line_check, loop_end_BB, loop_body_store_input_BB);
+
+        //Start loop body store input BB
+        current_function->getBasicBlockList().push_back(loop_body_store_input_BB);
+        Builder.SetInsertPoint(loop_body_store_input_BB);
+
+        //Store character just read in array
+        auto input_destination_ptr = Builder.CreateGEP(array_elements_ptr, phi_node, "input_destination_ptr");
+        Builder.CreateStore(input_char, input_destination_ptr);
+
+        auto next_value = Builder.CreateAdd(phi_node, c32(1), "increment_iterator");
+        loop_body_BB = Builder.GetInsertBlock();
+        phi_node->addIncoming(next_value, loop_body_BB);
+        Builder.CreateBr(loop_start_BB);
+
+        //end of loop
+        current_function->getBasicBlockList().push_back(loop_end_BB);
+        Builder.SetInsertPoint(loop_end_BB);
+
+        //Put '\0' at end of array
+        auto null_termination_destination_ptr = Builder.CreateGEP(array_elements_ptr, Builder.CreateLoad(iterator_alloca), "null_termination_destination_ptr");
+        Builder.CreateStore(c8('\0'), null_termination_destination_ptr);    
+
+        Builder.CreateBr(function_end_BB);
+
+        current_function->getBasicBlockList().push_back(function_end_BB);
+        Builder.SetInsertPoint(function_end_BB);
+
+        Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+        Builder.SetInsertPoint(previous_insert_point);
+    }
+
+    //*
+    {
+        auto read_int_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Int)), {  }, false);
+        AST::read_int = llvm::Function::Create(read_int_type, llvm::Function::ExternalLinkage, "read_int", TheModule.get());
+
+        auto previous_insert_point = Builder.GetInsertBlock();
+        auto function_body_BB = llvm::BasicBlock::Create(TheContext, "read_int_entry", AST::read_int );
+        Builder.SetInsertPoint(function_body_BB);
+
+        auto format_string = Builder.CreateGlobalStringPtr("%i");
+        auto return_value_ptr = Builder.CreateAlloca(i32, nullptr, "input_integer_ptr");
+
+        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+
+        Builder.CreateRet(Builder.CreateLoad(return_value_ptr));
+        Builder.SetInsertPoint(previous_insert_point);
+    }
+    //*
+    {    
+        auto read_char_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Char)), {  }, false);
+        AST::read_char = llvm::Function::Create(read_char_type, llvm::Function::ExternalLinkage, "read_char", TheModule.get());
+
+        auto previous_insert_point = Builder.GetInsertBlock();
+        auto function_body_BB = llvm::BasicBlock::Create(TheContext, "read_char_entry", AST::read_char );
+        Builder.SetInsertPoint(function_body_BB);
+
+        auto format_string = Builder.CreateGlobalStringPtr("%c");
+        auto return_value_ptr = Builder.CreateAlloca(i8, nullptr, "input_character_ptr");
+
+        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+
+        Builder.CreateRet(Builder.CreateLoad(return_value_ptr));
+        Builder.SetInsertPoint(previous_insert_point);
+    }
+
+    //*
+    {
+        //Return 1 if first character of input is t (for true) was read and 0 otherwise
+        auto read_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Bool)), {  }, false);
+        AST::read_bool = llvm::Function::Create(read_bool_type, llvm::Function::ExternalLinkage, "read_bool", TheModule.get());
+
+        auto previous_insert_point = Builder.GetInsertBlock();
+        auto function_body_BB = llvm::BasicBlock::Create(TheContext, "read_bool_entry", AST::read_bool );
+        Builder.SetInsertPoint(function_body_BB);
+
+        auto format_string = Builder.CreateGlobalStringPtr("%s");
+        auto return_value_ptr = Builder.CreateAlloca(i8, c32(10), "input_boolean_ptr");
+
+        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+
+        auto first_character_of_input_ptr = Builder.CreateGEP(return_value_ptr, c32(0), "first_character_of_inpu_ptr");
+        auto condition_result = Builder.CreateCmp(llvm::CmpInst::Predicate::ICMP_EQ, Builder.CreateLoad(first_character_of_input_ptr), c8('t')); 
+
+        auto current_fuction = Builder.GetInsertBlock()->getParent();
+        auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_fuction);
+        auto else_BB = llvm::BasicBlock::Create(TheContext, "else");
+        auto if_end_BB = llvm::BasicBlock::Create(TheContext, "endif");
+
+        Builder.CreateCondBr(condition_result, then_BB, else_BB);
+
+        //Generate code for the then clause
+        Builder.SetInsertPoint(then_BB);
+        auto then_value = c1(true);
+        Builder.CreateBr(if_end_BB);
+        //Codegen for the then block can change the basic block but it is needed for the phi expression
+        then_BB = Builder.GetInsertBlock();
+
+        //A bunch of new basic blocks could have been inserted by the then expression above, now we also add the else BB after them
+        current_fuction->getBasicBlockList().push_back(else_BB);
+        Builder.SetInsertPoint(else_BB);
+
+        //Generate code for the else clause
+        Builder.SetInsertPoint(else_BB);
+        auto else_value = c1(false);
+        Builder.CreateBr(if_end_BB);
+        else_BB = Builder.GetInsertBlock();
+
+        current_fuction->getBasicBlockList().push_back(if_end_BB);
+        Builder.SetInsertPoint(if_end_BB);
+
+        auto phi_node = Builder.CreatePHI(i1, 2, "iftmp");
+        phi_node->addIncoming(then_value, then_BB);
+        phi_node->addIncoming(else_value, else_BB);
+
+        Builder.CreateRet(phi_node);
+        Builder.SetInsertPoint(previous_insert_point);
+    }
+    //*
+    {
+        auto read_float_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)), {  }, false);
+        AST::read_float = llvm::Function::Create(read_float_type, llvm::Function::ExternalLinkage, "read_float", TheModule.get());
+
+        auto previous_insert_point = Builder.GetInsertBlock();
+        auto function_body_BB = llvm::BasicBlock::Create(TheContext, "read_float_entry", AST::read_float );
+        Builder.SetInsertPoint(function_body_BB);
+
+        auto format_string = Builder.CreateGlobalStringPtr("%lf");
+        auto return_value_ptr = Builder.CreateAlloca(f64, nullptr, "input_float_ptr");
+
+        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+
+        Builder.CreateRet(Builder.CreateLoad(return_value_ptr));
+        Builder.SetInsertPoint(previous_insert_point);
+    }
 }
 
 void AST::define_print_functions() {
@@ -334,6 +535,7 @@ void AST::define_print_functions() {
     Builder.SetInsertPoint(previous_insert_point);
 
     //*
+    //Print false if boolean is 0 and true otherwise 
     auto print_bool_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { AST::i1 }, false);
     AST::print_bool = llvm::Function::Create(print_bool_type, llvm::Function::ExternalLinkage, "print_bool", TheModule.get());
 
@@ -341,11 +543,43 @@ void AST::define_print_functions() {
     function_body_BB = llvm::BasicBlock::Create(TheContext, "print_bool_entry", AST::print_bool );
     Builder.SetInsertPoint(function_body_BB);
 
-    format_string = Builder.CreateGlobalStringPtr("%i");
+    format_string = Builder.CreateGlobalStringPtr("%s");
 
-    for(auto &par: AST::print_bool->args()) {
-        Builder.CreateCall(AST::printf, { format_string, &par });
-    }
+    auto par = AST::print_bool->getArg(0);
+
+    auto current_fuction = Builder.GetInsertBlock()->getParent();
+    auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_fuction);
+    auto else_BB = llvm::BasicBlock::Create(TheContext, "else");
+    auto if_end_BB = llvm::BasicBlock::Create(TheContext, "endif");
+
+    Builder.CreateCondBr(par, then_BB, else_BB);
+
+    //Generate code for the then clause
+    Builder.SetInsertPoint(then_BB);
+    auto then_value = Builder.CreateGlobalStringPtr("true");
+    Builder.CreateBr(if_end_BB);
+    //Codegen for the then block can change the basic block but it is needed for the phi expression
+    then_BB = Builder.GetInsertBlock();
+
+    //A bunch of new basic blocks could have been inserted by the then expression above, now we also add the else BB after them
+    current_fuction->getBasicBlockList().push_back(else_BB);
+    Builder.SetInsertPoint(else_BB);
+
+    //Generate code for the else clause
+    Builder.SetInsertPoint(else_BB);
+    auto else_value = Builder.CreateGlobalStringPtr("false");
+    Builder.CreateBr(if_end_BB);
+    else_BB = Builder.GetInsertBlock();
+
+    current_fuction->getBasicBlockList().push_back(if_end_BB);
+    Builder.SetInsertPoint(if_end_BB);
+
+    auto phi_node = Builder.CreatePHI(llvm::PointerType::get(i8, 0), 2, "iftmp");
+    phi_node->addIncoming(then_value, then_BB);
+    phi_node->addIncoming(else_value, else_BB);
+
+    Builder.CreateCall(AST::printf, { format_string, phi_node });
+
     Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
 
