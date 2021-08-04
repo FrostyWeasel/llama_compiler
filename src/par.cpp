@@ -68,5 +68,3 @@ llvm::Value* Par::codegen() {
     entry->set_allocation(alloc_ptr);
     return alloc_ptr;
 }
-
-std::string Par::get_id() { return this->id; }

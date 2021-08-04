@@ -23,6 +23,8 @@ public:
 
     virtual SymbolEntry* get_entry() { return this->entry; }
 
+    virtual std::string get_id() override = 0;
+
 protected:
     std::shared_ptr<TypeVariable> type_variable;
     //The entry in the ST corresponding to this definition 

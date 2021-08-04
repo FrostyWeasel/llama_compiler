@@ -37,6 +37,7 @@ public:
 
     virtual void make_non_local_variable_stack() override;
 
+    virtual std::string get_id() override { return this->id; }
 
 private:
     std::string id;

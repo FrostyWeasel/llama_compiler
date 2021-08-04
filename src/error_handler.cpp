@@ -1,4 +1,5 @@
 #include "error_handler.hpp"
+#include "def.hpp"
 
 
 //Type errors
@@ -8,7 +9,11 @@ void ErrorHandler::unbound_type(std::shared_ptr<TypeVariable> type_variable) {
 
     auto type_variable_owner = AST::type_variable_owners->find(type_variable->get_id());
     if(type_variable_owner != AST::type_variable_owners->end()) {
-        std::cerr << "In line " << type_variable_owner->second->lineno << ":\n";
+        std::cerr << "In line " << type_variable_owner->second->lineno;
+        auto id = type_variable_owner->second->get_id();
+        if(id != "") {
+            std::cerr << " in " << id << ":\n";
+        }
     }
 
     std::cerr << "\ttype variable @ "<< type_variable->get_id() << " was not substituted\n";

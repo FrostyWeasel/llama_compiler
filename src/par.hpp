@@ -23,7 +23,7 @@ public:
     
     virtual llvm::Value* codegen() override;
 
-    virtual std::string get_id();
+    virtual std::string get_id() override { return this->id; }
 
 private:
     std::string id;

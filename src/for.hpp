@@ -23,6 +23,8 @@ public:
 
     virtual llvm::Value* codegen() override = 0;
 
+    virtual std::string get_id() override { return this->id; }
+
 protected:
     std::string id;
     Expr* first_condition;

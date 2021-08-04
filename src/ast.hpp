@@ -65,6 +65,10 @@ public:
 
     virtual void make_non_local_variable_stack() { }
 
+    virtual std::string get_id() {
+        return "";
+    }
+
 
 protected:
     static std::unique_ptr<SymbolTable> st;
