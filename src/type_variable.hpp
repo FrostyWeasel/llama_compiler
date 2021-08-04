@@ -23,6 +23,8 @@ public:
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, unsigned int dim);
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, DimType dim_type);
     TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, unsigned int dim, DimType dim_type);
+    TypeVariable(TypeTag type_tag, std::string* user_type_id);
+    TypeVariable(TypeTag type_tag, std::string user_type_id);
 
     ~TypeVariable() = default;
 
@@ -61,6 +63,8 @@ public:
     inline unsigned int get_id() { return this->id; }
 
     void set_tag_to_default();
+
+    static bool are_user_types_the_same(std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2);
 
 private:
     std::shared_ptr<Type> type;

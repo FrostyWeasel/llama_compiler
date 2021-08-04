@@ -1,6 +1,17 @@
 %{
 #include <cstdlib>
 #include <string>
+#include "constructor.hpp"
+#include "pattern.hpp"
+#include "clause.hpp"
+#include "int_pattern.hpp"
+#include "float_pattern.hpp"
+#include "bool_pattern.hpp"
+#include "id_pattern.hpp"
+#include "match.hpp"
+#include "definition.hpp"
+#include "type_def.hpp"
+#include "t_def.hpp"
 #include "includes.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
@@ -150,7 +161,7 @@ W [ \t\n\r]
 "then"		{ return T_THEN; }
 "to"		{ return T_TO; }
 "true"		{ return T_TRUE; }
-"type"		{ yyerror("User defined types not currently supported\n"); }
+"type"		{ return T_TYPE; }
 "unit"		{ return T_UNIT; }
 "while"		{ return T_WHILE; }
 "with"		{ return T_WITH; }

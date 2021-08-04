@@ -1,0 +1,24 @@
+#ifndef __TYPE_ENTRY_HPP__
+#define __TYPE_ENTRY_HPP__
+
+#include "symbol_entry.hpp"
+#include "enums.hpp"
+
+class TypeEntry : public SymbolEntry {
+public:
+
+    TypeEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> type) : type(type), 
+        SymbolEntry(id, entry_type) { count = TypeEntry::counter++; }
+    
+    virtual ~TypeEntry() {  }
+
+    virtual std::shared_ptr<TypeVariable> get_type() const override { return this->type; }
+    unsigned int get_count() { return this->count; }
+
+private:
+    std::shared_ptr<TypeVariable>       type;
+    unsigned int        count;
+    static unsigned int counter;    /* Unique counter to differentiate between user types of the same name */
+};
+
+#endif

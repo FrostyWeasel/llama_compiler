@@ -203,6 +203,17 @@ void SymbolTable::unify() {
         if(t1 == t2)
             matched_rule = true;
 
+        if(!matched_rule && ((t1->get_tag() == TypeTag::UserType) && (t2->get_tag() == TypeTag::UserType))) {
+
+            if(TypeVariable::are_user_types_the_same(t1, t2)) {
+                matched_rule = true;
+            }
+            else {
+                error_handler->incompatible_types(t1, t2, lineno);
+            }
+
+        }
+
         if(!matched_rule && ((t1->get_tag() == TypeTag::Function) && (t2->get_tag() == TypeTag::Function))) {
             matched_rule = true;
 

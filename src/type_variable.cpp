@@ -5,6 +5,7 @@
 #include "ref_type.hpp"
 #include "enums.hpp"
 #include "error_handler.hpp"
+#include "user_type.hpp"
 #include <memory>
 
 unsigned int TypeVariable::counter = 0;
@@ -168,6 +169,34 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::shared_ptr<TypeVariable> t1, D
     }
 }
 
+TypeVariable::TypeVariable(TypeTag type_tag, std::string* user_type_id) {
+    switch (type_tag) {
+        case TypeTag::UserType:
+            this->type = std::make_shared<UserType>(*user_type_id);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking user_type_id\n", ErrorType::Internal);
+            break;
+    }
+}
+
+TypeVariable::TypeVariable(TypeTag type_tag, std::string user_type_id) {
+    switch (type_tag) {
+        case TypeTag::UserType:
+            this->type = std::make_shared<UserType>(user_type_id);
+            this->tag = TypeVariableTag::Bound;
+            this->id = 0;
+            break;
+
+        default:
+             error_handler->print_error("Invalid TypeVariableTag for constractor taking user_type_id\n", ErrorType::Internal);
+            break;
+    }
+}
+
 bool TypeVariable::operator== (const TypeVariable& rhs) const {
     if(this->type->get_tag() != rhs.type->get_tag()) {
         return false;
@@ -212,7 +241,6 @@ bool TypeVariable::contains(std::shared_ptr<TypeVariable> type_variable) {
 }
 
 void TypeVariable::bind(std::shared_ptr<TypeVariable> bound_type) {
-    //TODO: Remove from free list if i make one during error handling.
     this->type = bound_type->type;
     this->tag = bound_type->tag;
 }
@@ -412,4 +440,18 @@ TypeTag TypeVariable::get_bottom_tag() {
     } 
 
     return TypeTag::Unit; 
+}
+
+bool TypeVariable::are_user_types_the_same(std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2) {
+    if ((t1->get_tag() == TypeTag::UserType) && (t2->get_tag() == TypeTag::UserType)) {
+        auto user_type_1 = std::dynamic_pointer_cast<UserType>(t1->type);
+        auto user_type_2 = std::dynamic_pointer_cast<UserType>(t2->type);
+
+        return user_type_1->id == user_type_2->id;
+    }
+    else{
+        error_handler->print_error("Requesting are_user_types_the_same but type is not a user type\n", ErrorType::Internal);
+    }
+
+    return false;
 }

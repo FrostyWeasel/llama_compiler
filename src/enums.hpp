@@ -2,7 +2,7 @@
 #define __ENUMS_HPP__
 
 enum class OpType           { Plus, Minus, Times, Divide, Equals, NotEquals, LessThan, GreaterThan, LessOrEqualThan, GreaterOrEqualThan, NatEquals, NatNotEquals, And, Or, Concat, Assign, Dereference, Not, Modulo, PlusFloat, MinusFloat, TimesFloat, DivideFloat, ExponentiateFloat };
-enum class TypeTag          { Unit, Int, Float, Char, Bool, Unknown, Array, Function, Reference };
+enum class TypeTag          { Unit, Int, Float, Char, Bool, Unknown, Array, Function, Reference, UserType };
 enum class TypeVariableTag  { Free, Bound };
 enum class LetType          { Rec, NoRec };
 enum class DefType          { Mutable, NonMutable };
@@ -13,7 +13,9 @@ enum class EntryType    {   ENTRY_VARIABLE,                       /* Μεταβ�
                             ENTRY_CONSTANT,                       /* Σταθερές                   */
                             ENTRY_FUNCTION,                       /* Συναρτήσεις                */
                             ENTRY_PARAMETER,                      /* Παράμετροι συναρτήσεων     */
-                            ENTRY_IDENTIFIER
+                            ENTRY_IDENTIFIER,
+                            ENTRY_TYPE,                             /* User defined type */
+                            ENTRY_CONSTRACTOR                       /* Constractor of user defined type */
                         };
 
 /* Τύπος αναζήτησης στον πίνακα συμβόλων */
@@ -27,7 +29,12 @@ enum class BlockType    {
                             Def,
                             Par,
                             Expr,
-                            ExprComma
+                            ExprComma,
+                            Definition,
+                            TDef,
+                            Constructor,
+                            Clause,
+                            Pattern
                         };
 
 enum class NodeType     {
@@ -50,7 +57,7 @@ enum class FunctionTypeTag  {
                             };
 
 enum class PassStage        {
-                                FunctionDef, //Currently doing a pass on function body
+                                FunctionDef, //Currently doing a pass in function body
                                 Other
                             };
 
@@ -59,5 +66,13 @@ enum class ErrorType        {
                                 Internal,
                                 Warning
                             };
+
+enum class PatternType      {
+                                Int,
+                                Float,
+                                Bool,
+                                Id,
+                                Constructor
+                            }; 
 
 #endif

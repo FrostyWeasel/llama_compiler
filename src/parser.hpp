@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.7.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -119,18 +119,28 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 103 "./src/parser.y"
+#line 121 "./src/parser.y"
 
     LetDef* let_def;
+    TypeDef* type_def;
     Def* def;
+    TDef* t_def;
+    Constructor* constructor;
     Par* par;
     Expr* expr;
     TypeVariable* type;
+    Pattern* pattern;
+    Clause* clause;
     Block<Expr>* func_expr_list;
     Block<Expr>* expr_comma_list;
     Block<Par>* par_list;
     Block<Def>* def_list;
-    Block<LetDef>* letdef_list;
+    Block<TDef>* t_def_list;
+    Block<Definition>* definition_list;
+    std::vector<std::shared_ptr<TypeVariable>>* type_list;
+    Block<Constructor>* constructor_list;
+    Block<Pattern>* pattern_list;
+    Block<Clause>* clause_list;
     OpType op;
 
     std::string* id;
@@ -140,7 +150,7 @@ union YYSTYPE
     double float_value;
     unsigned int dimension_count;
 
-#line 144 "./src/parser.hpp"
+#line 154 "./src/parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

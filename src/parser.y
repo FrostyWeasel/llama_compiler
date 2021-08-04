@@ -4,6 +4,19 @@
 #include <string>
 #include <iostream>
 #include "block.hpp"
+#include "constructor.hpp"
+#include "pattern.hpp"
+#include "clause.hpp"
+#include "int_pattern.hpp"
+#include "float_pattern.hpp"
+#include "bool_pattern.hpp"
+#include "id_pattern.hpp"
+#include "match.hpp"
+#include "definition.hpp"
+#include "type_def.hpp"
+#include "constructor_pattern.hpp"
+#include "constructor_call.hpp"
+#include "t_def.hpp"
 #include "includes.hpp"
 #include "lexer.hpp"
 #include <memory>
@@ -11,8 +24,13 @@
 #include <unistd.h>
 #include <cstdio>
 
+/*TODO: Allowed when it should be a syntax error cause of "of" in Blue of 3 
+    type color = Red | Green | Blue of int
+    let y = Red
+    let z = Blue of 3
+*/
 std::vector<std::string*> str_to_delete;
-constexpr bool debug = false;
+constexpr bool debug = true;
 
 std::string compiler_path;
 std::string input_filename;
@@ -75,7 +93,7 @@ extern FILE* yyin;
 %token T_EXPONENTIATE_FLOAT     "**"      
 
 %token<id> T_ID    
-%token T_CONSTRUCTOR_ID
+%token<id> T_CONSTRUCTOR_ID
 %token<const_char> T_CONST_CHAR 
 %token<number> T_CONST_INT
 %token<float_value> T_CONST_FLOAT 
@@ -102,15 +120,25 @@ extern FILE* yyin;
 
 %union{
     LetDef* let_def;
+    TypeDef* type_def;
     Def* def;
+    TDef* t_def;
+    Constructor* constructor;
     Par* par;
     Expr* expr;
     TypeVariable* type;
+    Pattern* pattern;
+    Clause* clause;
     Block<Expr>* func_expr_list;
     Block<Expr>* expr_comma_list;
     Block<Par>* par_list;
     Block<Def>* def_list;
-    Block<LetDef>* letdef_list;
+    Block<TDef>* t_def_list;
+    Block<Definition>* definition_list;
+    std::vector<std::shared_ptr<TypeVariable>>* type_list;
+    Block<Constructor>* constructor_list;
+    Block<Pattern>* pattern_list;
+    Block<Clause>* clause_list;
     OpType op;
 
     std::string* id;
@@ -121,48 +149,65 @@ extern FILE* yyin;
     unsigned int dimension_count;
 }
 
+%type<definition_list> program definition_list
+
 %type<let_def> letdef
+%type<type_def> typedef
+
 %type<def> def
+%type<t_def> tdef
+
+%type<constructor> constr
+
 %type<par> par
 %type<expr> expr func_expr
 %type<type> type
+%type<pattern> pattern_high pattern
+%type<clause> clause
 %type<dimension_count> asterisk_list
+
+%type<t_def_list> tdef_list
+%type<constructor_list> constr_list
+%type<type_list> type_list
+
+%type<pattern_list> pattern_high_list
+%type<clause_list> clause_list
+
 %type<func_expr_list> func_expr_list
 %type<expr_comma_list> expr_comma_list
 %type<par_list> par_list
 %type<def_list> def_list
-%type<letdef_list> program letdef_list
 
 %%
 
 program:
-    letdef_list { 
-            // AST::make_table(); //Make a static symboltable
+    definition_list { 
             $1->add_library_functions();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
             
             $1->infer();
             $1->unify();
-            $1->clear_inference_structures();
-            $1->close_all_program_scopes();
+            // $1->clear_inference_structures();
+            // $1->close_all_program_scopes();
 
-            $1->sem();
-            $1->bind_to_default_types();
+            // $1->sem();
+            // $1->bind_to_default_types();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
-            $1->close_all_program_scopes();
+            // $1->close_all_program_scopes();
 
-            $1->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
+            // $1->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
 
-            $1->close_all_program_scopes();
-            $1->close_library_function_scope();
+            // $1->close_all_program_scopes();
+            // $1->close_library_function_scope();
             
             delete $1;
         }  
 ;
 
-letdef_list:
-    %empty              { $$ = new Block<LetDef>(BlockType::LetDef); }
-|   letdef_list letdef  { $1->append($2); }
+definition_list:
+    %empty                      { $$ = new Block<Definition>(BlockType::Definition); }
+|   definition_list letdef      { $1->append($2); }
+|   definition_list typedef     { $1->append($2); }
 ;
 
 letdef:
@@ -186,6 +231,29 @@ def:
 |   "mutable" T_ID '[' expr expr_comma_list ']' ':' type    { $5->insert($5->begin(), $4); $$ = new ArrayDef($2, $5, std::shared_ptr<TypeVariable>($8)); str_to_delete.push_back($2); }
 ;
 
+typedef:
+    "type" tdef tdef_list   { $3->insert($3->begin(), $2); $$ = new TypeDef($3); }
+;
+
+tdef_list:
+    %empty                  { $$ = new Block<TDef>(BlockType::TDef); }
+|   tdef_list "and" tdef    { $1->append($3); }
+;
+
+tdef:
+    T_ID '=' constr constr_list     { $4->insert($4->begin(), $3); $$ = new TDef($1, $4); }
+;
+
+constr_list:
+    %empty                  { $$ = new Block<Constructor>(BlockType::Constructor); }
+|   constr_list '|' constr  { $1->append($3); }
+;
+
+constr:
+    T_CONSTRUCTOR_ID                        { $$ = new Constructor($1); }
+|   T_CONSTRUCTOR_ID "of" type type_list    { $4->insert($4->begin(), std::shared_ptr<TypeVariable>($3)); $$ = new Constructor($1, $4); }
+;
+
 par_list:
     %empty          { $$ = new Block<Par>(BlockType::Par); }
 |   par_list par    { $1->append($2); }
@@ -204,6 +272,7 @@ expr_comma_list:
 expr:
     func_expr                                               { $$ = $1; }
 |   T_ID func_expr func_expr_list                           { $3->insert($3->begin(), $2); $$ = new FunctionCall($1, $3); str_to_delete.push_back($1); }
+|   T_CONSTRUCTOR_ID func_expr func_expr_list               { $3->insert($3->begin(), $2); $$ = new ConstructorCall($1, $3); str_to_delete.push_back($1); }
 |   "dim" T_ID                                              { $$ = new Dim($2); str_to_delete.push_back($2); }
 |   "dim" T_CONST_INT T_ID                                  { $$ = new Dim($3, $2); str_to_delete.push_back($3); }
 |   "new" type                                              { $$ = new New(std::shared_ptr<TypeVariable>($2)); }
@@ -242,6 +311,7 @@ expr:
 |   expr ';' expr                                           { $$ = new BinOp($1, $3, $2); }
 |   expr ":=" expr                                          { $$ = new BinOp($1, $3, $2); }
 |   expr "mod" expr                                         { $$ = new BinOp($1, $3, $2); }
+|   "match" expr "with" clause clause_list "end"            { $5->insert($5->begin(), $4); $$ = new Match($2, $5); }  
 ;
 
 func_expr:
@@ -249,6 +319,7 @@ func_expr:
 |   '(' expr ')'                                            { $$ = $2; }
 |   '(' ')'                                                 { $$ = new Unit(); }
 |   T_ID                                                    { $$ = new Id($1); str_to_delete.push_back($1); }
+|   T_CONSTRUCTOR_ID                                        { $$ = new ConstructorCall($1); str_to_delete.push_back($1); }
 |   T_CONST_INT                                             { $$ = new Int($1); }
 |   T_CONST_FLOAT                                           { $$ = new Float($1); }                                        
 |   T_CONST_CHAR                                            { $$ = new Char($1); }
@@ -256,11 +327,17 @@ func_expr:
 |   "true"                                                  { $$ = new Bool(true); }
 |   "false"                                                 { $$ = new Bool(false); }
 |   T_ID '[' expr expr_comma_list ']'                       { $4->insert($4->begin(), $3); $$ = new ArrayIndex($1, $4); str_to_delete.push_back($1); }
-
+;
 
 func_expr_list:          
     %empty                                                  { $$ = new Block<Expr>(BlockType::Expr); }
 |   func_expr_list func_expr                                { $1->append($2); }
+;
+
+type_list:
+    %empty                                                  { $$ = new std::vector<std::shared_ptr<TypeVariable>>(); }
+|   type_list type                                          { $1->push_back(std::shared_ptr<TypeVariable>($2)); }
+;
 
 type:
     "unit"                                                  { $$ = new TypeVariable(TypeTag::Unit); }
@@ -273,13 +350,44 @@ type:
 |   type "ref"                                              { $$ = new TypeVariable(TypeTag::Reference, std::shared_ptr<TypeVariable>($1)); }
 |   "array" "of" type                                       { $$ = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>($3), 1, DimType::Exact); }
 |   "array" '[' asterisk_list ']' "of" type                 { $$ = new TypeVariable(TypeTag::Array, std::shared_ptr<TypeVariable>($6), $3, DimType::Exact); }
-/* |   T_ID                                            { $$ = }  propably not possible due to no user defined types*/
+|   T_ID                                                    { $$ = new TypeVariable(TypeTag::UserType, $1); }
 ;
 
-/* ugly replace block? */
 asterisk_list:
     '*'                     { $$ = 1; }
 |   asterisk_list ',' '*'   { $$ = 1 + $1; }
+;
+
+clause_list:
+    %empty                      { $$ = new Block<Clause>(BlockType::Clause); }
+|   clause_list '|' clause      { $1->append($3); }
+;
+
+clause:
+    pattern "->" expr           { $$ = new Clause($1, $3); }
+;
+
+pattern:
+    pattern_high                        { $$ = $1; }                     
+|   T_CONSTRUCTOR_ID pattern_high_list  { $$ = new ConstructorPattern($1, $2); }
+;
+
+pattern_high_list:
+    %empty                              { $$ = new Block<Pattern>(BlockType::Pattern); }
+|   pattern_high_list pattern_high      { $1->append($2); }
+;
+
+pattern_high:
+    '+' T_CONST_INT %prec UNOP          { $$ = new IntPattern($2);      }
+|   '-' T_CONST_INT %prec UNOP          { $$ = new IntPattern(-$2);     }
+|   T_CONST_INT                         { $$ = new IntPattern($1);      }
+|   "+." T_CONST_FLOAT  %prec UNOP      { $$ = new FloatPattern($2);    }
+|   "-." T_CONST_FLOAT  %prec UNOP      { $$ = new FloatPattern(-$2);   }
+|   T_CONST_FLOAT                       { $$ = new FloatPattern($1);    }
+|   "true"                              { $$ = new BoolPattern(true);   }
+|   "false"                             { $$ = new BoolPattern(false);  }
+|   T_ID                                { $$ = new IdPattern($1);       }
+|   '(' pattern ')'                     { $$ = $2;                      }
 ;
 
 %%

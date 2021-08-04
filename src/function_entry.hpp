@@ -11,7 +11,7 @@ public:
     FunctionEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type, unsigned int parameter_count) : from_type(from_type), to_type(to_type), 
         parameter_count(parameter_count), SymbolEntry(id, entry_type) { count = FunctionEntry::counter++; }
     
-    virtual ~FunctionEntry() { FunctionEntry::counter--; }
+    virtual ~FunctionEntry() {  }
 
     void set_from_type(std::shared_ptr<TypeVariable> from_type) { this->from_type = from_type; }
     void set_to_type(std::shared_ptr<TypeVariable> to_type) { this->to_type = to_type; }

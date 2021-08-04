@@ -55,7 +55,22 @@ public:
           (*element_it)->print(out);
         }
         break;
-      case BlockType::LetDef:
+      case BlockType::TDef:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+        }
+        break;
+      case BlockType::Clause:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+        }
+        break;
+      case BlockType::Constructor:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+        }
+        break;
+      case BlockType::Definition:
         for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
           (*element_it)->print(out);
           out << "\n";
@@ -74,21 +89,13 @@ public:
   virtual unsigned int block_size() { return list.size(); }
 
   virtual void add_to_symbol_table() {
-    switch (this->block_type) {
-          case BlockType::Def:
-            for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
-              if(*element_it != nullptr){
-                (*element_it)->add_to_symbol_table();
-              }
-              else {
-                error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
-              }
-            }
-            break;
-
-      default:
-          error_handler->print_error("Attempting to add non definitions to symbol table.\n", ErrorType::Internal);
-      break;
+    for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+      if(*element_it != nullptr){
+        (*element_it)->add_to_symbol_table();
+      }
+      else {
+        error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
+      }
     }
   }
 
@@ -104,7 +111,16 @@ public:
               }
             }
             break;
-
+          case BlockType::TDef:
+            for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+              if(*element_it != nullptr){
+                (*element_it)->allocate();
+              }
+              else {
+                error_handler->print_error("Nullptr in block list.\n", ErrorType::Internal);
+              }
+            }
+            break;
       default:
           error_handler->print_error("Attempting to allocate non definitions.\n", ErrorType::Internal);
       break;
@@ -189,7 +205,6 @@ public:
 
   virtual llvm::Value* codegen()  override {
       llvm::Value* block_value = nullptr;
-
     
       for(T* element: list) {
         if(element != nullptr)
@@ -200,12 +215,10 @@ public:
     }
 
   virtual void make_non_local_variable_stack()  override {
-
     for(T* element: list) {
       if(element != nullptr)
         element->make_non_local_variable_stack();
     }
-
   }
 
   std::vector<T*>& get_list() { return list; }
