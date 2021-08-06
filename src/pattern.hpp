@@ -6,7 +6,7 @@
 
 class Pattern : public AST {
 public:
-    Pattern(PatternType pattern_type) : pattern_type(pattern_type) {  }
+    Pattern(PatternType pattern_type, std::shared_ptr<TypeVariable> type_variable) : pattern_type(pattern_type), type_variable(type_variable) {  }
     
     ~Pattern() = default;
 
@@ -20,8 +20,10 @@ public:
 
     virtual std::string get_id() override { return ""; }
 
-private:
+protected:
     PatternType pattern_type;
+    std::shared_ptr<TypeVariable> type_variable;
+
 };
 
 #endif

@@ -70,6 +70,7 @@ enum class ErrorType        {
 enum class PatternType      {
                                 Int,
                                 Float,
+                                Char,
                                 Bool,
                                 Id,
                                 Constructor

@@ -6,7 +6,9 @@
 #include "block.hpp"
 #include "type_variable.hpp"
 #include "constructor_entry.hpp"
+#include "type_entry.hpp"
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <memory>
     
@@ -19,6 +21,9 @@ ConstructorCall::ConstructorCall(std::string* id, Block<Expr>* expr_list) : id(*
 }
 
 ConstructorCall::~ConstructorCall() {
+
+    if(this->expr_list != nullptr)
+        delete this->expr_list;
 
 }
 
@@ -40,6 +45,29 @@ void ConstructorCall::print(std::ostream &out) const {
 
 std::shared_ptr<TypeVariable> ConstructorCall::infer() {
     auto entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES));
+    
+    //Check that user type which constructor constructs is currently the one in scope. For example here Red has type color but currently color has no constructor Red but Something and Else:
+    /*
+        type color = Red | Green | Blue
+        type color = Something | Else
+        let y = Red 
+    */
+    auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry(entry->get_type()->get_user_type_id(), LookupType::LOOKUP_ALL_SCOPES));
+    auto includes_this_constructor = false;
+    for(auto constructor: type_entry->get_constructors()) {
+        if(constructor->get_id() == this->id) {
+            includes_this_constructor = true;
+            break;
+        }
+    }
+
+    if(!includes_this_constructor) {
+        std::stringstream msg;
+        msg << "The constructor " << this->id << " does not belong to type " <<
+            entry->get_type()->get_user_type_id() << " as was expected.\n";
+        
+        error_handler->print_error(msg.str(), ErrorType::User, this->lineno);
+    }
 
     auto constructor_type_list = *entry->get_constructor_type_list();
 
@@ -58,7 +86,7 @@ std::shared_ptr<TypeVariable> ConstructorCall::infer() {
                 st->add_constraint(constructor_expr_type, constructor_expected_type, this->lineno);
             }
             else {
-                error_handler->print_error("Nullptr in constructor type list.\n", ErrorType::Internal);
+                error_handler->print_error("Nullptr in constructor expr list.\n", ErrorType::Internal);
             }
         }
     }

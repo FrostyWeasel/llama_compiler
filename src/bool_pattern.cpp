@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 
-BoolPattern::BoolPattern(bool value) : value(value), Pattern(PatternType::Bool) {
+BoolPattern::BoolPattern(bool value) : value(value), Pattern(PatternType::Bool, std::make_shared<TypeVariable>(TypeTag::Bool)) {
     
 }
 
@@ -12,7 +12,7 @@ void BoolPattern::print(std::ostream& out) const {
 }
 
 std::shared_ptr<TypeVariable> BoolPattern::infer() {
-
+    return this->type_variable;
 }
 
 void BoolPattern::sem() {

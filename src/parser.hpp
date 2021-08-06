@@ -119,7 +119,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 121 "./src/parser.y"
+#line 118 "./src/parser.y"
 
     LetDef* let_def;
     TypeDef* type_def;

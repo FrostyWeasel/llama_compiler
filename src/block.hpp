@@ -70,6 +70,11 @@ public:
           (*element_it)->print(out);
         }
         break;
+      case BlockType::Pattern:
+        for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
+          (*element_it)->print(out);
+        }
+        break;
       case BlockType::Definition:
         for(auto element_it = this->list.begin(); element_it != this->list.end(); element_it++) {
           (*element_it)->print(out);

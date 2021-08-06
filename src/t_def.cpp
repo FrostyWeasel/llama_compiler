@@ -33,7 +33,7 @@ void TDef::print(std::ostream& out) const {
 }
 
 void TDef::add_to_symbol_table()  {
-    auto entry = new TypeEntry(id, EntryType::ENTRY_TYPE, this->type_variable);
+    auto entry = new TypeEntry(id, EntryType::ENTRY_TYPE, this->type_variable, this->constructor_list->get_list());
 
     st->insert_entry(entry);
     this->entry = entry;

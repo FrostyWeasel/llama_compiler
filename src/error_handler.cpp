@@ -70,7 +70,7 @@ void ErrorHandler::out_of_scope(std::string id) {
 //TODO: Put lineno in error message by giving the lineno of the expression to insert entry
 void ErrorHandler::redefining_variable(std::string id) {
     std::cerr << "Error:\n";
-    std::cerr << "\tVariable " << id << " is already defined in this scope"; 
+    std::cerr << "\nIdentifier " << id << " is already defined in this scope"; 
     exit(1);
 }
 

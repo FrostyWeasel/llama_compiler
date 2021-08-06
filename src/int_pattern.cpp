@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 
-IntPattern::IntPattern(int value) : value(value), Pattern(PatternType::Int) {
+IntPattern::IntPattern(int value) : value(value), Pattern(PatternType::Int, std::make_shared<TypeVariable>(TypeTag::Int)) {
     
 }
 
@@ -12,7 +12,7 @@ void IntPattern::print(std::ostream& out) const {
 }
 
 std::shared_ptr<TypeVariable> IntPattern::infer() {
-
+    return this->type_variable;
 }
 
 void IntPattern::sem() {

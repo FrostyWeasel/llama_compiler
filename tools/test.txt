@@ -1,4 +1,7 @@
-let x = 5
-type color = Red | Green | Blue of int
-let y = Red
-let z = Blue of 3
+type color = Red | Green | Blue
+let x = Red 
+let y = match x with
+		Red -> ()
+		| Green -> ()
+		| k -> ()
+	end

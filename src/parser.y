@@ -9,6 +9,7 @@
 #include "clause.hpp"
 #include "int_pattern.hpp"
 #include "float_pattern.hpp"
+#include "char_pattern.hpp"
 #include "bool_pattern.hpp"
 #include "id_pattern.hpp"
 #include "match.hpp"
@@ -24,11 +25,6 @@
 #include <unistd.h>
 #include <cstdio>
 
-/*TODO: Allowed when it should be a syntax error cause of "of" in Blue of 3 
-    type color = Red | Green | Blue of int
-    let y = Red
-    let z = Blue of 3
-*/
 std::vector<std::string*> str_to_delete;
 constexpr bool debug = true;
 
@@ -112,11 +108,12 @@ extern FILE* yyin;
 %left<op> '*' '/' "mod" "*." "/." 
 %right<op> "**"
 %left<op> UNOP "not" "delete"
-%right "->"
-%left "ref"
-%right "array" "of"
 %nonassoc<op> '!'
 %nonassoc "new"
+
+%right "->"
+%right "of"
+%left "ref"
 
 %union{
     LetDef* let_def;
@@ -270,8 +267,7 @@ expr_comma_list:
 ;
 
 expr:
-    func_expr                                               { $$ = $1; }
-|   T_ID func_expr func_expr_list                           { $3->insert($3->begin(), $2); $$ = new FunctionCall($1, $3); str_to_delete.push_back($1); }
+    T_ID func_expr func_expr_list                           { $3->insert($3->begin(), $2); $$ = new FunctionCall($1, $3); str_to_delete.push_back($1); }
 |   T_CONSTRUCTOR_ID func_expr func_expr_list               { $3->insert($3->begin(), $2); $$ = new ConstructorCall($1, $3); str_to_delete.push_back($1); }
 |   "dim" T_ID                                              { $$ = new Dim($2); str_to_delete.push_back($2); }
 |   "dim" T_CONST_INT T_ID                                  { $$ = new Dim($3, $2); str_to_delete.push_back($3); }
@@ -312,10 +308,11 @@ expr:
 |   expr ":=" expr                                          { $$ = new BinOp($1, $3, $2); }
 |   expr "mod" expr                                         { $$ = new BinOp($1, $3, $2); }
 |   "match" expr "with" clause clause_list "end"            { $5->insert($5->begin(), $4); $$ = new Match($2, $5); }  
+|   func_expr                                               { $$ = $1; }
 ;
 
 func_expr:
-   '!' func_expr                                            { $$ = new UnOp($2, $1); }
+    '!' func_expr                                           { $$ = new UnOp($2, $1); }
 |   '(' expr ')'                                            { $$ = $2; }
 |   '(' ')'                                                 { $$ = new Unit(); }
 |   T_ID                                                    { $$ = new Id($1); str_to_delete.push_back($1); }
@@ -384,6 +381,7 @@ pattern_high:
 |   "+." T_CONST_FLOAT  %prec UNOP      { $$ = new FloatPattern($2);    }
 |   "-." T_CONST_FLOAT  %prec UNOP      { $$ = new FloatPattern(-$2);   }
 |   T_CONST_FLOAT                       { $$ = new FloatPattern($1);    }
+|   T_CONST_CHAR                        { $$ = new CharPattern($1);     }
 |   "true"                              { $$ = new BoolPattern(true);   }
 |   "false"                             { $$ = new BoolPattern(false);  }
 |   T_ID                                { $$ = new IdPattern($1);       }

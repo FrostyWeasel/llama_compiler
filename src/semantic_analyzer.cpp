@@ -45,7 +45,7 @@ bool SemanticAnalyzer::is_same_tag(std::shared_ptr<TypeVariable> t1, std::vector
     return false;
 }
 
-//t1 has same tag (Function, Array, Reference, int, etc.) as t2
+//t1 does not have has same tag (Function, Array, Reference, int, etc.) as t2
 bool SemanticAnalyzer::is_not_same_tag(std::shared_ptr<TypeVariable> t1, TypeTag tag) {
     return t1->get_tag() != tag;
 }

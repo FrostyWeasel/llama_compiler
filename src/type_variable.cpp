@@ -197,6 +197,19 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::string user_type_id) {
     }
 }
 
+std::string& TypeVariable::get_user_type_id() {
+    switch (this->type->get_tag()) {
+        case TypeTag::UserType: {
+            auto user_type = std::dynamic_pointer_cast<UserType>(this->type);
+            return user_type->id;
+            break;
+        }
+        default:
+             error_handler->print_error("Invalid get_user_type_id typetag is not UserType\n", ErrorType::Internal);
+            break;
+    }
+}
+
 bool TypeVariable::operator== (const TypeVariable& rhs) const {
     if(this->type->get_tag() != rhs.type->get_tag()) {
         return false;

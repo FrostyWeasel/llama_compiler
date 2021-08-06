@@ -40,8 +40,8 @@ public:
     }
     AST(NodeType node_type) : node_type(node_type) {
         this->lineno = yylineno;
-
     }
+    
     virtual ~AST() = default;
     virtual void print(std::ostream& out) const = 0;
     virtual std::shared_ptr<TypeVariable> infer() = 0;

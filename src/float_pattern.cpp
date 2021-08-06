@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 
-FloatPattern::FloatPattern(float value) : value(value), Pattern(PatternType::Float) {
+FloatPattern::FloatPattern(float value) : value(value), Pattern(PatternType::Float, std::make_shared<TypeVariable>(TypeTag::Float)) {
     
 }
 
@@ -12,7 +12,7 @@ void FloatPattern::print(std::ostream& out) const {
 }
 
 std::shared_ptr<TypeVariable> FloatPattern::infer() {
-
+    return this->type_variable;
 }
 
 void FloatPattern::sem() {

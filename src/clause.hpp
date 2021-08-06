@@ -19,6 +19,9 @@ public:
     virtual void sem() override;
     virtual llvm::Value* codegen() override;
 
+    std::shared_ptr<TypeVariable> infer_pattern();
+    std::shared_ptr<TypeVariable> infer_expression();
+
 private:
     Pattern* pattern;
     Expr* expr;

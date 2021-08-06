@@ -48,48 +48,48 @@ Grammar
    29 expr_comma_list: %empty
    30                | expr_comma_list ',' expr
 
-   31 expr: func_expr
-   32     | T_ID func_expr func_expr_list
-   33     | T_CONSTRUCTOR_ID func_expr func_expr_list
-   34     | "dim" T_ID
-   35     | "dim" T_CONST_INT T_ID
-   36     | "new" type
-   37     | "delete" expr
-   38     | letdef "in" expr
-   39     | "begin" expr "end"
-   40     | "if" expr "then" expr
-   41     | "if" expr "then" expr "else" expr
-   42     | "while" expr "do" expr "done"
-   43     | "for" T_ID '=' expr "to" expr "do" expr "done"
-   44     | "for" T_ID '=' expr "downto" expr "do" expr "done"
-   45     | '+' expr
-   46     | '-' expr
-   47     | "+." expr
-   48     | "-." expr
-   49     | "not" expr
-   50     | expr '+' expr
-   51     | expr '-' expr
-   52     | expr '*' expr
-   53     | expr '/' expr
-   54     | expr "+." expr
-   55     | expr "-." expr
-   56     | expr "*." expr
-   57     | expr "/." expr
-   58     | expr "**" expr
-   59     | expr '=' expr
-   60     | expr "<>" expr
-   61     | expr '<' expr
-   62     | expr '>' expr
-   63     | expr "<=" expr
-   64     | expr ">=" expr
-   65     | expr "==" expr
-   66     | expr "!=" expr
-   67     | expr "&&" expr
-   68     | expr "||" expr
-   69     | expr ';' expr
-   70     | expr ":=" expr
-   71     | expr "mod" expr
-   72     | "match" expr "with" clause clause_list "end"
+   31 expr: T_ID func_expr func_expr_list
+   32     | T_CONSTRUCTOR_ID func_expr func_expr_list
+   33     | "dim" T_ID
+   34     | "dim" T_CONST_INT T_ID
+   35     | "new" type
+   36     | "delete" expr
+   37     | letdef "in" expr
+   38     | "begin" expr "end"
+   39     | "if" expr "then" expr
+   40     | "if" expr "then" expr "else" expr
+   41     | "while" expr "do" expr "done"
+   42     | "for" T_ID '=' expr "to" expr "do" expr "done"
+   43     | "for" T_ID '=' expr "downto" expr "do" expr "done"
+   44     | '+' expr
+   45     | '-' expr
+   46     | "+." expr
+   47     | "-." expr
+   48     | "not" expr
+   49     | expr '+' expr
+   50     | expr '-' expr
+   51     | expr '*' expr
+   52     | expr '/' expr
+   53     | expr "+." expr
+   54     | expr "-." expr
+   55     | expr "*." expr
+   56     | expr "/." expr
+   57     | expr "**" expr
+   58     | expr '=' expr
+   59     | expr "<>" expr
+   60     | expr '<' expr
+   61     | expr '>' expr
+   62     | expr "<=" expr
+   63     | expr ">=" expr
+   64     | expr "==" expr
+   65     | expr "!=" expr
+   66     | expr "&&" expr
+   67     | expr "||" expr
+   68     | expr ';' expr
+   69     | expr ":=" expr
+   70     | expr "mod" expr
+   71     | "match" expr "with" clause clause_list "end"
+   72     | func_expr
 
    73 func_expr: '!' func_expr
    74          | '(' expr ')'
@@ -142,84 +142,85 @@ Grammar
   112             | "+." T_CONST_FLOAT
   113             | "-." T_CONST_FLOAT
   114             | T_CONST_FLOAT
-  115             | "true"
-  116             | "false"
-  117             | T_ID
-  118             | '(' pattern ')'
+  115             | T_CONST_CHAR
+  116             | "true"
+  117             | "false"
+  118             | T_ID
+  119             | '(' pattern ')'
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     '!' <op> (33) 73
-    '(' (40) 28 74 75 94 118
-    ')' (41) 28 74 75 94 118
-    '*' <op> (42) 52 100 101
-    '+' <op> (43) 45 50 109
+    '(' (40) 28 74 75 94 119
+    ')' (41) 28 74 75 94 119
+    '*' <op> (42) 51 100 101
+    '+' <op> (43) 44 49 109
     ',' (44) 30 101
-    '-' <op> (45) 46 51 110
-    '/' <op> (47) 53
+    '-' <op> (45) 45 50 110
+    '/' <op> (47) 52
     ':' (58) 10 11 14 16 28
-    ';' <op> (59) 69
-    '<' <op> (60) 61
-    '=' <op> (61) 9 10 11 12 20 43 44 59
-    '>' <op> (62) 62
+    ';' <op> (59) 68
+    '<' <op> (60) 60
+    '=' <op> (61) 9 10 11 12 20 42 43 58
+    '>' <op> (62) 61
     '[' (91) 15 16 84 98
     ']' (93) 15 16 84 98
     '|' (124) 22 103
     error (256)
     "and" (258) 8 19
     "array" (259) 97 98
-    "begin" (260) 39
+    "begin" (260) 38
     "bool" (261) 92
     "char" (262) 91
-    "delete" <op> (263) 37
-    "dim" (264) 34 35
-    "do" (265) 42 43 44
-    "done" (266) 42 43 44
-    "downto" (267) 44
-    "else" (268) 41
-    "end" (269) 39 72
-    "false" (270) 83 116
-    "for" (271) 43 44
-    "if" (272) 40 41
-    "in" (273) 38
+    "delete" <op> (263) 36
+    "dim" (264) 33 34
+    "do" (265) 41 42 43
+    "done" (266) 41 42 43
+    "downto" (267) 43
+    "else" (268) 40
+    "end" (269) 38 71
+    "false" (270) 83 117
+    "for" (271) 42 43
+    "if" (272) 39 40
+    "in" (273) 37
     "int" (274) 90
     "float" (275) 93
     "let" (276) 5 6
-    "match" (277) 72
-    "mod" <op> (278) 71
+    "match" (277) 71
+    "mod" <op> (278) 70
     "mutable" (279) 13 14 15 16
-    "new" (280) 36
-    "not" <op> (281) 49
+    "new" (280) 35
+    "not" <op> (281) 48
     "of" (282) 24 97 98
     "rec" (283) 5
     "ref" (284) 96
-    "then" (285) 40 41
-    "to" (286) 43
-    "true" (287) 82 115
+    "then" (285) 39 40
+    "to" (286) 42
+    "true" (287) 82 116
     "type" (288) 17
     "unit" (289) 89
-    "while" (290) 42
-    "with" (291) 72
+    "while" (290) 41
+    "with" (291) 71
     "->" (292) 95 104
-    "&&" <op> (293) 67
-    "||" <op> (294) 68
-    "<>" <op> (295) 60
-    "<=" <op> (296) 63
-    ">=" <op> (297) 64
-    "==" <op> (298) 65
-    "!=" <op> (299) 66
-    ":=" <op> (300) 70
-    "+." <op> (301) 47 54 112
-    "-." <op> (302) 48 55 113
-    "*." <op> (303) 56
-    "/." <op> (304) 57
-    "**" <op> (305) 58
-    T_ID <id> (306) 9 10 11 12 13 14 15 16 20 27 28 32 34 35 43 44 76 84 99 117
-    T_CONSTRUCTOR_ID <id> (307) 23 24 33 77 106
-    T_CONST_CHAR <const_char> (308) 80
-    T_CONST_INT <number> (309) 35 78 109 110 111
+    "&&" <op> (293) 66
+    "||" <op> (294) 67
+    "<>" <op> (295) 59
+    "<=" <op> (296) 62
+    ">=" <op> (297) 63
+    "==" <op> (298) 64
+    "!=" <op> (299) 65
+    ":=" <op> (300) 69
+    "+." <op> (301) 46 53 112
+    "-." <op> (302) 47 54 113
+    "*." <op> (303) 55
+    "/." <op> (304) 56
+    "**" <op> (305) 57
+    T_ID <id> (306) 9 10 11 12 13 14 15 16 20 27 28 31 33 34 42 43 76 84 99 118
+    T_CONSTRUCTOR_ID <id> (307) 23 24 32 77 106
+    T_CONST_CHAR <const_char> (308) 80 115
+    T_CONST_INT <number> (309) 34 78 109 110 111
     T_CONST_FLOAT <float_value> (310) 79 112 113 114
     T_STRING_LITERAL <string_literal> (311) 81
     IF_THEN (312)
@@ -239,7 +240,7 @@ Nonterminals, with rules where they appear
         on right: 1 3 4
     letdef <let_def> (79)
         on left: 5 6
-        on right: 3 38
+        on right: 3 37
     def_list <def_list> (80)
         on left: 7 8
         on right: 5 6 8
@@ -272,36 +273,36 @@ Nonterminals, with rules where they appear
         on right: 15 16 30 84
     expr <expr> (90)
         on left: 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72
-        on right: 9 10 11 12 15 16 30 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 74 84 104
+        on right: 9 10 11 12 15 16 30 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 74 84 104
     func_expr <expr> (91)
         on left: 73 74 75 76 77 78 79 80 81 82 83 84
-        on right: 31 32 33 73 86
+        on right: 31 32 72 73 86
     func_expr_list <func_expr_list> (92)
         on left: 85 86
-        on right: 32 33 86
+        on right: 31 32 86
     type_list <type_list> (93)
         on left: 87 88
         on right: 24 88
     type <type> (94)
         on left: 89 90 91 92 93 94 95 96 97 98 99
-        on right: 10 11 14 16 24 28 36 88 94 95 96 97 98
+        on right: 10 11 14 16 24 28 35 88 94 95 96 97 98
     asterisk_list <dimension_count> (95)
         on left: 100 101
         on right: 98 101
     clause_list <clause_list> (96)
         on left: 102 103
-        on right: 72 103
+        on right: 71 103
     clause <clause> (97)
         on left: 104
-        on right: 72 103
+        on right: 71 103
     pattern <pattern> (98)
         on left: 105 106
-        on right: 104 118
+        on right: 104 119
     pattern_high_list <pattern_list> (99)
         on left: 107 108
         on right: 106 108
     pattern_high <pattern> (100)
-        on left: 109 110 111 112 113 114 115 116 117 118
+        on left: 109 110 111 112 113 114 115 116 117 118 119
         on right: 105 108
 
 
@@ -627,7 +628,7 @@ State 26
 
 State 27
 
-   39 expr: "begin" . expr "end"
+   38 expr: "begin" . expr "end"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -661,7 +662,7 @@ State 27
 
 State 28
 
-   37 expr: "delete" . expr
+   36 expr: "delete" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -695,8 +696,8 @@ State 28
 
 State 29
 
-   34 expr: "dim" . T_ID
-   35     | "dim" . T_CONST_INT T_ID
+   33 expr: "dim" . T_ID
+   34     | "dim" . T_CONST_INT T_ID
 
     T_ID         shift, and go to state 72
     T_CONST_INT  shift, and go to state 73
@@ -711,16 +712,16 @@ State 30
 
 State 31
 
-   43 expr: "for" . T_ID '=' expr "to" expr "do" expr "done"
-   44     | "for" . T_ID '=' expr "downto" expr "do" expr "done"
+   42 expr: "for" . T_ID '=' expr "to" expr "do" expr "done"
+   43     | "for" . T_ID '=' expr "downto" expr "do" expr "done"
 
     T_ID  shift, and go to state 74
 
 
 State 32
 
-   40 expr: "if" . expr "then" expr
-   41     | "if" . expr "then" expr "else" expr
+   39 expr: "if" . expr "then" expr
+   40     | "if" . expr "then" expr "else" expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -754,7 +755,7 @@ State 32
 
 State 33
 
-   72 expr: "match" . expr "with" clause clause_list "end"
+   71 expr: "match" . expr "with" clause clause_list "end"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -788,7 +789,7 @@ State 33
 
 State 34
 
-   36 expr: "new" . type
+   35 expr: "new" . type
 
     "array"  shift, and go to state 53
     "bool"   shift, and go to state 54
@@ -804,7 +805,7 @@ State 34
 
 State 35
 
-   49 expr: "not" . expr
+   48 expr: "not" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -845,7 +846,7 @@ State 36
 
 State 37
 
-   42 expr: "while" . expr "do" expr "done"
+   41 expr: "while" . expr "do" expr "done"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -879,7 +880,7 @@ State 37
 
 State 38
 
-   47 expr: "+." . expr
+   46 expr: "+." . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -913,7 +914,7 @@ State 38
 
 State 39
 
-   48 expr: "-." . expr
+   47 expr: "-." . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -947,7 +948,7 @@ State 39
 
 State 40
 
-   32 expr: T_ID . func_expr func_expr_list
+   31 expr: T_ID . func_expr func_expr_list
    76 func_expr: T_ID .
    84          | T_ID . '[' expr expr_comma_list ']'
 
@@ -970,7 +971,7 @@ State 40
 
 State 41
 
-   33 expr: T_CONSTRUCTOR_ID . func_expr func_expr_list
+   32 expr: T_CONSTRUCTOR_ID . func_expr func_expr_list
    77 func_expr: T_CONSTRUCTOR_ID .
 
     "false"           shift, and go to state 30
@@ -1019,7 +1020,7 @@ State 45
 
 State 46
 
-   45 expr: '+' . expr
+   44 expr: '+' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -1053,7 +1054,7 @@ State 46
 
 State 47
 
-   46 expr: '-' . expr
+   45 expr: '-' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -1141,7 +1142,7 @@ State 49
 
 State 50
 
-   38 expr: letdef . "in" expr
+   37 expr: letdef . "in" expr
 
     "in"  shift, and go to state 92
 
@@ -1149,28 +1150,28 @@ State 50
 State 51
 
     9 def: T_ID '=' expr .
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -1200,9 +1201,9 @@ State 51
 
 State 52
 
-   31 expr: func_expr .
+   72 expr: func_expr .
 
-    $default  reduce using rule 31 (expr)
+    $default  reduce using rule 72 (expr)
 
 
 State 53
@@ -1358,28 +1359,28 @@ State 69
 
    15 def: "mutable" T_ID '[' expr . expr_comma_list ']'
    16    | "mutable" T_ID '[' expr . expr_comma_list ']' ':' type
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -1411,29 +1412,29 @@ State 69
 
 State 70
 
-   39 expr: "begin" expr . "end"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   38 expr: "begin" expr . "end"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "end"  shift, and go to state 130
     "mod"  shift, and go to state 93
@@ -1462,81 +1463,81 @@ State 70
 
 State 71
 
-   37 expr: "delete" expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   36 expr: "delete" expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 37 (expr)
+    $default  reduce using rule 36 (expr)
 
 
 State 72
 
-   34 expr: "dim" T_ID .
+   33 expr: "dim" T_ID .
 
-    $default  reduce using rule 34 (expr)
+    $default  reduce using rule 33 (expr)
 
 
 State 73
 
-   35 expr: "dim" T_CONST_INT . T_ID
+   34 expr: "dim" T_CONST_INT . T_ID
 
     T_ID  shift, and go to state 131
 
 
 State 74
 
-   43 expr: "for" T_ID . '=' expr "to" expr "do" expr "done"
-   44     | "for" T_ID . '=' expr "downto" expr "do" expr "done"
+   42 expr: "for" T_ID . '=' expr "to" expr "do" expr "done"
+   43     | "for" T_ID . '=' expr "downto" expr "do" expr "done"
 
     '='  shift, and go to state 132
 
 
 State 75
 
-   40 expr: "if" expr . "then" expr
-   41     | "if" expr . "then" expr "else" expr
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   39 expr: "if" expr . "then" expr
+   40     | "if" expr . "then" expr "else" expr
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"   shift, and go to state 93
     "then"  shift, and go to state 133
@@ -1565,29 +1566,29 @@ State 75
 
 State 76
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-   72     | "match" expr . "with" clause clause_list "end"
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+   71     | "match" expr . "with" clause clause_list "end"
 
     "mod"   shift, and go to state 93
     "with"  shift, and go to state 134
@@ -1616,70 +1617,70 @@ State 76
 
 State 77
 
-   36 expr: "new" type .
+   35 expr: "new" type .
    95 type: type . "->" type
    96     | type . "ref"
 
     "ref"  shift, and go to state 118
     "->"   shift, and go to state 119
 
-    $default  reduce using rule 36 (expr)
+    $default  reduce using rule 35 (expr)
 
 
 State 78
 
-   49 expr: "not" expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   48 expr: "not" expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 49 (expr)
+    $default  reduce using rule 48 (expr)
 
 
 State 79
 
-   42 expr: "while" expr . "do" expr "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   41 expr: "while" expr . "do" expr "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "do"   shift, and go to state 135
     "mod"  shift, and go to state 93
@@ -1708,60 +1709,60 @@ State 79
 
 State 80
 
-   47 expr: "+." expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   46 expr: "+." expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 47 (expr)
+    $default  reduce using rule 46 (expr)
 
 
 State 81
 
-   48 expr: "-." expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   47 expr: "-." expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 48 (expr)
+    $default  reduce using rule 47 (expr)
 
 
 State 82
@@ -1817,7 +1818,7 @@ State 84
 
 State 85
 
-   32 expr: T_ID func_expr . func_expr_list
+   31 expr: T_ID func_expr . func_expr_list
 
     $default  reduce using rule 85 (func_expr_list)
 
@@ -1826,7 +1827,7 @@ State 85
 
 State 86
 
-   33 expr: T_CONSTRUCTOR_ID func_expr . func_expr_list
+   32 expr: T_CONSTRUCTOR_ID func_expr . func_expr_list
 
     $default  reduce using rule 85 (func_expr_list)
 
@@ -1835,60 +1836,60 @@ State 86
 
 State 87
 
-   45 expr: '+' expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   44 expr: '+' expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 45 (expr)
+    $default  reduce using rule 44 (expr)
 
 
 State 88
 
-   46 expr: '-' expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   45 expr: '-' expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 46 (expr)
+    $default  reduce using rule 45 (expr)
 
 
 State 89
@@ -1907,28 +1908,28 @@ State 90
 
 State 91
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
    74 func_expr: '(' expr . ')'
 
     "mod"  shift, and go to state 93
@@ -1958,7 +1959,7 @@ State 91
 
 State 92
 
-   38 expr: letdef "in" . expr
+   37 expr: letdef "in" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -1992,7 +1993,7 @@ State 92
 
 State 93
 
-   71 expr: expr "mod" . expr
+   70 expr: expr "mod" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2026,7 +2027,7 @@ State 93
 
 State 94
 
-   67 expr: expr "&&" . expr
+   66 expr: expr "&&" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2060,7 +2061,7 @@ State 94
 
 State 95
 
-   68 expr: expr "||" . expr
+   67 expr: expr "||" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2094,7 +2095,7 @@ State 95
 
 State 96
 
-   60 expr: expr "<>" . expr
+   59 expr: expr "<>" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2128,7 +2129,7 @@ State 96
 
 State 97
 
-   63 expr: expr "<=" . expr
+   62 expr: expr "<=" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2162,7 +2163,7 @@ State 97
 
 State 98
 
-   64 expr: expr ">=" . expr
+   63 expr: expr ">=" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2196,7 +2197,7 @@ State 98
 
 State 99
 
-   65 expr: expr "==" . expr
+   64 expr: expr "==" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2230,7 +2231,7 @@ State 99
 
 State 100
 
-   66 expr: expr "!=" . expr
+   65 expr: expr "!=" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2264,7 +2265,7 @@ State 100
 
 State 101
 
-   70 expr: expr ":=" . expr
+   69 expr: expr ":=" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2298,7 +2299,7 @@ State 101
 
 State 102
 
-   54 expr: expr "+." . expr
+   53 expr: expr "+." . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2332,7 +2333,7 @@ State 102
 
 State 103
 
-   55 expr: expr "-." . expr
+   54 expr: expr "-." . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2366,7 +2367,7 @@ State 103
 
 State 104
 
-   56 expr: expr "*." . expr
+   55 expr: expr "*." . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2400,7 +2401,7 @@ State 104
 
 State 105
 
-   57 expr: expr "/." . expr
+   56 expr: expr "/." . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2434,7 +2435,7 @@ State 105
 
 State 106
 
-   58 expr: expr "**" . expr
+   57 expr: expr "**" . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2468,7 +2469,7 @@ State 106
 
 State 107
 
-   69 expr: expr ';' . expr
+   68 expr: expr ';' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2502,7 +2503,7 @@ State 107
 
 State 108
 
-   59 expr: expr '=' . expr
+   58 expr: expr '=' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2536,7 +2537,7 @@ State 108
 
 State 109
 
-   62 expr: expr '>' . expr
+   61 expr: expr '>' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2570,7 +2571,7 @@ State 109
 
 State 110
 
-   61 expr: expr '<' . expr
+   60 expr: expr '<' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2604,7 +2605,7 @@ State 110
 
 State 111
 
-   50 expr: expr '+' . expr
+   49 expr: expr '+' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2638,7 +2639,7 @@ State 111
 
 State 112
 
-   51 expr: expr '-' . expr
+   50 expr: expr '-' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2672,7 +2673,7 @@ State 112
 
 State 113
 
-   52 expr: expr '*' . expr
+   51 expr: expr '*' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2706,7 +2707,7 @@ State 113
 
 State 114
 
-   53 expr: expr '/' . expr
+   52 expr: expr '/' . expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -2956,22 +2957,22 @@ State 129
 
 State 130
 
-   39 expr: "begin" expr "end" .
+   38 expr: "begin" expr "end" .
 
-    $default  reduce using rule 39 (expr)
+    $default  reduce using rule 38 (expr)
 
 
 State 131
 
-   35 expr: "dim" T_CONST_INT T_ID .
+   34 expr: "dim" T_CONST_INT T_ID .
 
-    $default  reduce using rule 35 (expr)
+    $default  reduce using rule 34 (expr)
 
 
 State 132
 
-   43 expr: "for" T_ID '=' . expr "to" expr "do" expr "done"
-   44     | "for" T_ID '=' . expr "downto" expr "do" expr "done"
+   42 expr: "for" T_ID '=' . expr "to" expr "do" expr "done"
+   43     | "for" T_ID '=' . expr "downto" expr "do" expr "done"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -3005,8 +3006,8 @@ State 132
 
 State 133
 
-   40 expr: "if" expr "then" . expr
-   41     | "if" expr "then" . expr "else" expr
+   39 expr: "if" expr "then" . expr
+   40     | "if" expr "then" . expr "else" expr
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -3040,7 +3041,7 @@ State 133
 
 State 134
 
-   72 expr: "match" expr "with" . clause clause_list "end"
+   71 expr: "match" expr "with" . clause clause_list "end"
 
     "false"           shift, and go to state 178
     "true"            shift, and go to state 179
@@ -3048,20 +3049,21 @@ State 134
     "-."              shift, and go to state 181
     T_ID              shift, and go to state 182
     T_CONSTRUCTOR_ID  shift, and go to state 183
-    T_CONST_INT       shift, and go to state 184
-    T_CONST_FLOAT     shift, and go to state 185
-    '+'               shift, and go to state 186
-    '-'               shift, and go to state 187
-    '('               shift, and go to state 188
+    T_CONST_CHAR      shift, and go to state 184
+    T_CONST_INT       shift, and go to state 185
+    T_CONST_FLOAT     shift, and go to state 186
+    '+'               shift, and go to state 187
+    '-'               shift, and go to state 188
+    '('               shift, and go to state 189
 
-    clause        go to state 189
-    pattern       go to state 190
-    pattern_high  go to state 191
+    clause        go to state 190
+    pattern       go to state 191
+    pattern_high  go to state 192
 
 
 State 135
 
-   42 expr: "while" expr "do" . expr "done"
+   41 expr: "while" expr "do" . expr "done"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -3089,34 +3091,34 @@ State 135
     '('               shift, and go to state 49
 
     letdef     go to state 50
-    expr       go to state 192
+    expr       go to state 193
     func_expr  go to state 52
 
 
 State 136
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
    84 func_expr: T_ID '[' expr . expr_comma_list ']'
 
     "mod"  shift, and go to state 93
@@ -3144,12 +3146,33 @@ State 136
 
     $default  reduce using rule 29 (expr_comma_list)
 
-    expr_comma_list  go to state 193
+    expr_comma_list  go to state 194
 
 
 State 137
 
-   32 expr: T_ID func_expr func_expr_list .
+   31 expr: T_ID func_expr func_expr_list .
+   86 func_expr_list: func_expr_list . func_expr
+
+    "false"           shift, and go to state 30
+    "true"            shift, and go to state 36
+    T_ID              shift, and go to state 82
+    T_CONSTRUCTOR_ID  shift, and go to state 83
+    T_CONST_CHAR      shift, and go to state 42
+    T_CONST_INT       shift, and go to state 43
+    T_CONST_FLOAT     shift, and go to state 44
+    T_STRING_LITERAL  shift, and go to state 45
+    '!'               shift, and go to state 48
+    '('               shift, and go to state 49
+
+    $default  reduce using rule 31 (expr)
+
+    func_expr  go to state 195
+
+
+State 138
+
+   32 expr: T_CONSTRUCTOR_ID func_expr func_expr_list .
    86 func_expr_list: func_expr_list . func_expr
 
     "false"           shift, and go to state 30
@@ -3165,28 +3188,7 @@ State 137
 
     $default  reduce using rule 32 (expr)
 
-    func_expr  go to state 194
-
-
-State 138
-
-   33 expr: T_CONSTRUCTOR_ID func_expr func_expr_list .
-   86 func_expr_list: func_expr_list . func_expr
-
-    "false"           shift, and go to state 30
-    "true"            shift, and go to state 36
-    T_ID              shift, and go to state 82
-    T_CONSTRUCTOR_ID  shift, and go to state 83
-    T_CONST_CHAR      shift, and go to state 42
-    T_CONST_INT       shift, and go to state 43
-    T_CONST_FLOAT     shift, and go to state 44
-    T_STRING_LITERAL  shift, and go to state 45
-    '!'               shift, and go to state 48
-    '('               shift, and go to state 49
-
-    $default  reduce using rule 33 (expr)
-
-    func_expr  go to state 194
+    func_expr  go to state 195
 
 
 State 139
@@ -3198,29 +3200,29 @@ State 139
 
 State 140
 
-   38 expr: letdef "in" expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   37 expr: letdef "in" expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -3245,67 +3247,116 @@ State 140
     '*'    shift, and go to state 113
     '/'    shift, and go to state 114
 
-    $default  reduce using rule 38 (expr)
+    $default  reduce using rule 37 (expr)
 
 
 State 141
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-   71     | expr "mod" expr .
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+   70     | expr "mod" expr .
 
     "**"  shift, and go to state 106
 
-    $default  reduce using rule 71 (expr)
+    $default  reduce using rule 70 (expr)
 
 
 State 142
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   67     | expr "&&" expr .
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   66     | expr "&&" expr .
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
+    "<>"   shift, and go to state 96
+    "<="   shift, and go to state 97
+    ">="   shift, and go to state 98
+    "=="   shift, and go to state 99
+    "!="   shift, and go to state 100
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '='    shift, and go to state 108
+    '>'    shift, and go to state 109
+    '<'    shift, and go to state 110
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    $default  reduce using rule 66 (expr)
+
+
+State 143
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   67     | expr "||" expr .
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "&&"   shift, and go to state 94
     "<>"   shift, and go to state 96
     "<="   shift, and go to state 97
     ">="   shift, and go to state 98
@@ -3327,593 +3378,31 @@ State 142
     $default  reduce using rule 67 (expr)
 
 
-State 143
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   68     | expr "||" expr .
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "&&"   shift, and go to state 94
-    "<>"   shift, and go to state 96
-    "<="   shift, and go to state 97
-    ">="   shift, and go to state 98
-    "=="   shift, and go to state 99
-    "!="   shift, and go to state 100
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '='    shift, and go to state 108
-    '>'    shift, and go to state 109
-    '<'    shift, and go to state 110
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    $default  reduce using rule 68 (expr)
-
-
 State 144
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   60     | expr "<>" expr .
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    "<>"  error (nonassociative)
-    "<="  error (nonassociative)
-    ">="  error (nonassociative)
-    "=="  error (nonassociative)
-    "!="  error (nonassociative)
-    '='   error (nonassociative)
-    '>'   error (nonassociative)
-    '<'   error (nonassociative)
-
-    $default  reduce using rule 60 (expr)
-
-
-State 145
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   63     | expr "<=" expr .
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    "<>"  error (nonassociative)
-    "<="  error (nonassociative)
-    ">="  error (nonassociative)
-    "=="  error (nonassociative)
-    "!="  error (nonassociative)
-    '='   error (nonassociative)
-    '>'   error (nonassociative)
-    '<'   error (nonassociative)
-
-    $default  reduce using rule 63 (expr)
-
-
-State 146
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   64     | expr ">=" expr .
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    "<>"  error (nonassociative)
-    "<="  error (nonassociative)
-    ">="  error (nonassociative)
-    "=="  error (nonassociative)
-    "!="  error (nonassociative)
-    '='   error (nonassociative)
-    '>'   error (nonassociative)
-    '<'   error (nonassociative)
-
-    $default  reduce using rule 64 (expr)
-
-
-State 147
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   65     | expr "==" expr .
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    "<>"  error (nonassociative)
-    "<="  error (nonassociative)
-    ">="  error (nonassociative)
-    "=="  error (nonassociative)
-    "!="  error (nonassociative)
-    '='   error (nonassociative)
-    '>'   error (nonassociative)
-    '<'   error (nonassociative)
-
-    $default  reduce using rule 65 (expr)
-
-
-State 148
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   66     | expr "!=" expr .
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    "<>"  error (nonassociative)
-    "<="  error (nonassociative)
-    ">="  error (nonassociative)
-    "=="  error (nonassociative)
-    "!="  error (nonassociative)
-    '='   error (nonassociative)
-    '>'   error (nonassociative)
-    '<'   error (nonassociative)
-
-    $default  reduce using rule 66 (expr)
-
-
-State 149
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   70     | expr ":=" expr .
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "&&"   shift, and go to state 94
-    "||"   shift, and go to state 95
-    "<>"   shift, and go to state 96
-    "<="   shift, and go to state 97
-    ">="   shift, and go to state 98
-    "=="   shift, and go to state 99
-    "!="   shift, and go to state 100
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '='    shift, and go to state 108
-    '>'    shift, and go to state 109
-    '<'    shift, and go to state 110
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    ":="  error (nonassociative)
-
-    $default  reduce using rule 70 (expr)
-
-
-State 150
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   54     | expr "+." expr .
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    $default  reduce using rule 54 (expr)
-
-
-State 151
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   55     | expr "-." expr .
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    $default  reduce using rule 55 (expr)
-
-
-State 152
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   56     | expr "*." expr .
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "**"  shift, and go to state 106
-
-    $default  reduce using rule 56 (expr)
-
-
-State 153
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   57     | expr "/." expr .
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "**"  shift, and go to state 106
-
-    $default  reduce using rule 57 (expr)
-
-
-State 154
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   58     | expr "**" expr .
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "**"  shift, and go to state 106
-
-    $default  reduce using rule 58 (expr)
-
-
-State 155
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   69     | expr ';' expr .
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "mod"  shift, and go to state 93
-    "&&"   shift, and go to state 94
-    "||"   shift, and go to state 95
-    "<>"   shift, and go to state 96
-    "<="   shift, and go to state 97
-    ">="   shift, and go to state 98
-    "=="   shift, and go to state 99
-    "!="   shift, and go to state 100
-    ":="   shift, and go to state 101
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '='    shift, and go to state 108
-    '>'    shift, and go to state 109
-    '<'    shift, and go to state 110
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-    $default  reduce using rule 69 (expr)
-
-
-State 156
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   59     | expr '=' expr .
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   59     | expr "<>" expr .
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "+."   shift, and go to state 102
@@ -3938,31 +3427,31 @@ State 156
     $default  reduce using rule 59 (expr)
 
 
-State 157
+State 145
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   62     | expr '>' expr .
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   62     | expr "<=" expr .
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "+."   shift, and go to state 102
@@ -3987,31 +3476,495 @@ State 157
     $default  reduce using rule 62 (expr)
 
 
-State 158
+State 146
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   61     | expr '<' expr .
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   63     | expr ">=" expr .
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    "<>"  error (nonassociative)
+    "<="  error (nonassociative)
+    ">="  error (nonassociative)
+    "=="  error (nonassociative)
+    "!="  error (nonassociative)
+    '='   error (nonassociative)
+    '>'   error (nonassociative)
+    '<'   error (nonassociative)
+
+    $default  reduce using rule 63 (expr)
+
+
+State 147
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   64     | expr "==" expr .
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    "<>"  error (nonassociative)
+    "<="  error (nonassociative)
+    ">="  error (nonassociative)
+    "=="  error (nonassociative)
+    "!="  error (nonassociative)
+    '='   error (nonassociative)
+    '>'   error (nonassociative)
+    '<'   error (nonassociative)
+
+    $default  reduce using rule 64 (expr)
+
+
+State 148
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   65     | expr "!=" expr .
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    "<>"  error (nonassociative)
+    "<="  error (nonassociative)
+    ">="  error (nonassociative)
+    "=="  error (nonassociative)
+    "!="  error (nonassociative)
+    '='   error (nonassociative)
+    '>'   error (nonassociative)
+    '<'   error (nonassociative)
+
+    $default  reduce using rule 65 (expr)
+
+
+State 149
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   69     | expr ":=" expr .
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "&&"   shift, and go to state 94
+    "||"   shift, and go to state 95
+    "<>"   shift, and go to state 96
+    "<="   shift, and go to state 97
+    ">="   shift, and go to state 98
+    "=="   shift, and go to state 99
+    "!="   shift, and go to state 100
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '='    shift, and go to state 108
+    '>'    shift, and go to state 109
+    '<'    shift, and go to state 110
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    ":="  error (nonassociative)
+
+    $default  reduce using rule 69 (expr)
+
+
+State 150
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   53     | expr "+." expr .
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    $default  reduce using rule 53 (expr)
+
+
+State 151
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   54     | expr "-." expr .
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    $default  reduce using rule 54 (expr)
+
+
+State 152
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   55     | expr "*." expr .
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "**"  shift, and go to state 106
+
+    $default  reduce using rule 55 (expr)
+
+
+State 153
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   56     | expr "/." expr .
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "**"  shift, and go to state 106
+
+    $default  reduce using rule 56 (expr)
+
+
+State 154
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   57     | expr "**" expr .
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "**"  shift, and go to state 106
+
+    $default  reduce using rule 57 (expr)
+
+
+State 155
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   68     | expr ';' expr .
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "&&"   shift, and go to state 94
+    "||"   shift, and go to state 95
+    "<>"   shift, and go to state 96
+    "<="   shift, and go to state 97
+    ">="   shift, and go to state 98
+    "=="   shift, and go to state 99
+    "!="   shift, and go to state 100
+    ":="   shift, and go to state 101
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '='    shift, and go to state 108
+    '>'    shift, and go to state 109
+    '<'    shift, and go to state 110
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    $default  reduce using rule 68 (expr)
+
+
+State 156
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   58     | expr '=' expr .
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    "<>"  error (nonassociative)
+    "<="  error (nonassociative)
+    ">="  error (nonassociative)
+    "=="  error (nonassociative)
+    "!="  error (nonassociative)
+    '='   error (nonassociative)
+    '>'   error (nonassociative)
+    '<'   error (nonassociative)
+
+    $default  reduce using rule 58 (expr)
+
+
+State 157
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   61     | expr '>' expr .
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "+."   shift, and go to state 102
@@ -4036,31 +3989,116 @@ State 158
     $default  reduce using rule 61 (expr)
 
 
+State 158
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   60     | expr '<' expr .
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    "<>"  error (nonassociative)
+    "<="  error (nonassociative)
+    ">="  error (nonassociative)
+    "=="  error (nonassociative)
+    "!="  error (nonassociative)
+    '='   error (nonassociative)
+    '>'   error (nonassociative)
+    '<'   error (nonassociative)
+
+    $default  reduce using rule 60 (expr)
+
+
 State 159
 
-   50 expr: expr . '+' expr
-   50     | expr '+' expr .
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   49     | expr '+' expr .
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "mod"  shift, and go to state 93
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+    $default  reduce using rule 49 (expr)
+
+
+State 160
+
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   50     | expr '-' expr .
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "*."   shift, and go to state 104
@@ -4072,102 +4110,66 @@ State 159
     $default  reduce using rule 50 (expr)
 
 
-State 160
+State 161
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   51     | expr '-' expr .
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   51     | expr '*' expr .
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    "mod"  shift, and go to state 93
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
+    "**"  shift, and go to state 106
 
     $default  reduce using rule 51 (expr)
 
 
-State 161
+State 162
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   52     | expr '*' expr .
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   52     | expr '/' expr .
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "**"  shift, and go to state 106
 
     $default  reduce using rule 52 (expr)
-
-
-State 162
-
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   53     | expr '/' expr .
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "**"  shift, and go to state 106
-
-    $default  reduce using rule 53 (expr)
 
 
 State 163
@@ -4175,6 +4177,8 @@ State 163
    95 type: type . "->" type
    96     | type . "ref"
    97     | "array" "of" type .
+
+    "ref"  shift, and go to state 118
 
     $default  reduce using rule 97 (type)
 
@@ -4191,8 +4195,8 @@ State 165
    98 type: "array" '[' asterisk_list . ']' "of" type
   101 asterisk_list: asterisk_list . ',' '*'
 
-    ']'  shift, and go to state 195
-    ','  shift, and go to state 196
+    ']'  shift, and go to state 196
+    ','  shift, and go to state 197
 
 
 State 166
@@ -4217,28 +4221,28 @@ State 167
 State 168
 
    10 def: T_ID ':' type '=' expr .
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -4274,34 +4278,34 @@ State 169
 
     "ref"  shift, and go to state 118
     "->"   shift, and go to state 119
-    ')'    shift, and go to state 197
+    ')'    shift, and go to state 198
 
 
 State 170
 
    12 def: T_ID par par_list '=' expr .
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -4337,7 +4341,7 @@ State 171
 
     "ref"  shift, and go to state 118
     "->"   shift, and go to state 119
-    '='    shift, and go to state 198
+    '='    shift, and go to state 199
 
 
 State 172
@@ -4351,7 +4355,7 @@ State 172
 
     $default  reduce using rule 87 (type_list)
 
-    type_list  go to state 199
+    type_list  go to state 200
 
 
 State 173
@@ -4360,7 +4364,7 @@ State 173
 
     T_CONSTRUCTOR_ID  shift, and go to state 65
 
-    constr  go to state 200
+    constr  go to state 201
 
 
 State 174
@@ -4368,7 +4372,7 @@ State 174
    15 def: "mutable" T_ID '[' expr expr_comma_list ']' .
    16    | "mutable" T_ID '[' expr expr_comma_list ']' . ':' type
 
-    ':'  shift, and go to state 201
+    ':'  shift, and go to state 202
 
     $default  reduce using rule 15 (def)
 
@@ -4403,40 +4407,40 @@ State 175
     '('               shift, and go to state 49
 
     letdef     go to state 50
-    expr       go to state 202
+    expr       go to state 203
     func_expr  go to state 52
 
 
 State 176
 
-   43 expr: "for" T_ID '=' expr . "to" expr "do" expr "done"
-   44     | "for" T_ID '=' expr . "downto" expr "do" expr "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   42 expr: "for" T_ID '=' expr . "to" expr "do" expr "done"
+   43     | "for" T_ID '=' expr . "downto" expr "do" expr "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    "downto"  shift, and go to state 203
+    "downto"  shift, and go to state 204
     "mod"     shift, and go to state 93
-    "to"      shift, and go to state 204
+    "to"      shift, and go to state 205
     "&&"      shift, and go to state 94
     "||"      shift, and go to state 95
     "<>"      shift, and go to state 96
@@ -4462,32 +4466,32 @@ State 176
 
 State 177
 
-   40 expr: "if" expr "then" expr .
-   41     | "if" expr "then" expr . "else" expr
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   39 expr: "if" expr "then" expr .
+   40     | "if" expr "then" expr . "else" expr
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    "else"  shift, and go to state 205
+    "else"  shift, and go to state 206
     "mod"   shift, and go to state 93
     "&&"    shift, and go to state 94
     "||"    shift, and go to state 95
@@ -4510,43 +4514,43 @@ State 177
     '*'     shift, and go to state 113
     '/'     shift, and go to state 114
 
-    "else"    [reduce using rule 40 (expr)]
-    $default  reduce using rule 40 (expr)
+    "else"    [reduce using rule 39 (expr)]
+    $default  reduce using rule 39 (expr)
 
 
 State 178
 
-  116 pattern_high: "false" .
+  117 pattern_high: "false" .
 
-    $default  reduce using rule 116 (pattern_high)
+    $default  reduce using rule 117 (pattern_high)
 
 
 State 179
 
-  115 pattern_high: "true" .
+  116 pattern_high: "true" .
 
-    $default  reduce using rule 115 (pattern_high)
+    $default  reduce using rule 116 (pattern_high)
 
 
 State 180
 
   112 pattern_high: "+." . T_CONST_FLOAT
 
-    T_CONST_FLOAT  shift, and go to state 206
+    T_CONST_FLOAT  shift, and go to state 207
 
 
 State 181
 
   113 pattern_high: "-." . T_CONST_FLOAT
 
-    T_CONST_FLOAT  shift, and go to state 207
+    T_CONST_FLOAT  shift, and go to state 208
 
 
 State 182
 
-  117 pattern_high: T_ID .
+  118 pattern_high: T_ID .
 
-    $default  reduce using rule 117 (pattern_high)
+    $default  reduce using rule 118 (pattern_high)
 
 
 State 183
@@ -4555,40 +4559,47 @@ State 183
 
     $default  reduce using rule 107 (pattern_high_list)
 
-    pattern_high_list  go to state 208
+    pattern_high_list  go to state 209
 
 
 State 184
+
+  115 pattern_high: T_CONST_CHAR .
+
+    $default  reduce using rule 115 (pattern_high)
+
+
+State 185
 
   111 pattern_high: T_CONST_INT .
 
     $default  reduce using rule 111 (pattern_high)
 
 
-State 185
+State 186
 
   114 pattern_high: T_CONST_FLOAT .
 
     $default  reduce using rule 114 (pattern_high)
 
 
-State 186
-
-  109 pattern_high: '+' . T_CONST_INT
-
-    T_CONST_INT  shift, and go to state 209
-
-
 State 187
 
-  110 pattern_high: '-' . T_CONST_INT
+  109 pattern_high: '+' . T_CONST_INT
 
     T_CONST_INT  shift, and go to state 210
 
 
 State 188
 
-  118 pattern_high: '(' . pattern ')'
+  110 pattern_high: '-' . T_CONST_INT
+
+    T_CONST_INT  shift, and go to state 211
+
+
+State 189
+
+  119 pattern_high: '(' . pattern ')'
 
     "false"           shift, and go to state 178
     "true"            shift, and go to state 179
@@ -4596,66 +4607,67 @@ State 188
     "-."              shift, and go to state 181
     T_ID              shift, and go to state 182
     T_CONSTRUCTOR_ID  shift, and go to state 183
-    T_CONST_INT       shift, and go to state 184
-    T_CONST_FLOAT     shift, and go to state 185
-    '+'               shift, and go to state 186
-    '-'               shift, and go to state 187
-    '('               shift, and go to state 188
+    T_CONST_CHAR      shift, and go to state 184
+    T_CONST_INT       shift, and go to state 185
+    T_CONST_FLOAT     shift, and go to state 186
+    '+'               shift, and go to state 187
+    '-'               shift, and go to state 188
+    '('               shift, and go to state 189
 
-    pattern       go to state 211
-    pattern_high  go to state 191
-
-
-State 189
-
-   72 expr: "match" expr "with" clause . clause_list "end"
-
-    $default  reduce using rule 102 (clause_list)
-
-    clause_list  go to state 212
+    pattern       go to state 212
+    pattern_high  go to state 192
 
 
 State 190
 
-  104 clause: pattern . "->" expr
+   71 expr: "match" expr "with" clause . clause_list "end"
 
-    "->"  shift, and go to state 213
+    $default  reduce using rule 102 (clause_list)
+
+    clause_list  go to state 213
 
 
 State 191
+
+  104 clause: pattern . "->" expr
+
+    "->"  shift, and go to state 214
+
+
+State 192
 
   105 pattern: pattern_high .
 
     $default  reduce using rule 105 (pattern)
 
 
-State 192
+State 193
 
-   42 expr: "while" expr "do" expr . "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   41 expr: "while" expr "do" expr . "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    "done"  shift, and go to state 214
+    "done"  shift, and go to state 215
     "mod"   shift, and go to state 93
     "&&"    shift, and go to state 94
     "||"    shift, and go to state 95
@@ -4680,44 +4692,44 @@ State 192
     '/'     shift, and go to state 114
 
 
-State 193
+State 194
 
    30 expr_comma_list: expr_comma_list . ',' expr
    84 func_expr: T_ID '[' expr expr_comma_list . ']'
 
-    ']'  shift, and go to state 215
+    ']'  shift, and go to state 216
     ','  shift, and go to state 175
 
 
-State 194
+State 195
 
    86 func_expr_list: func_expr_list func_expr .
 
     $default  reduce using rule 86 (func_expr_list)
 
 
-State 195
+State 196
 
    98 type: "array" '[' asterisk_list ']' . "of" type
 
-    "of"  shift, and go to state 216
-
-
-State 196
-
-  101 asterisk_list: asterisk_list ',' . '*'
-
-    '*'  shift, and go to state 217
+    "of"  shift, and go to state 217
 
 
 State 197
+
+  101 asterisk_list: asterisk_list ',' . '*'
+
+    '*'  shift, and go to state 218
+
+
+State 198
 
    28 par: '(' T_ID ':' type ')' .
 
     $default  reduce using rule 28 (par)
 
 
-State 198
+State 199
 
    11 def: T_ID par par_list ':' type '=' . expr
 
@@ -4747,11 +4759,11 @@ State 198
     '('               shift, and go to state 49
 
     letdef     go to state 50
-    expr       go to state 218
+    expr       go to state 219
     func_expr  go to state 52
 
 
-State 199
+State 200
 
    24 constr: T_CONSTRUCTOR_ID "of" type type_list .
    88 type_list: type_list . type
@@ -4767,17 +4779,17 @@ State 199
 
     $default  reduce using rule 24 (constr)
 
-    type  go to state 219
+    type  go to state 220
 
 
-State 200
+State 201
 
    22 constr_list: constr_list '|' constr .
 
     $default  reduce using rule 22 (constr_list)
 
 
-State 201
+State 202
 
    16 def: "mutable" T_ID '[' expr expr_comma_list ']' ':' . type
 
@@ -4790,34 +4802,34 @@ State 201
     T_ID     shift, and go to state 59
     '('      shift, and go to state 60
 
-    type  go to state 220
+    type  go to state 221
 
 
-State 202
+State 203
 
    30 expr_comma_list: expr_comma_list ',' expr .
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -4845,43 +4857,9 @@ State 202
     $default  reduce using rule 30 (expr_comma_list)
 
 
-State 203
-
-   44 expr: "for" T_ID '=' expr "downto" . expr "do" expr "done"
-
-    "begin"           shift, and go to state 27
-    "delete"          shift, and go to state 28
-    "dim"             shift, and go to state 29
-    "false"           shift, and go to state 30
-    "for"             shift, and go to state 31
-    "if"              shift, and go to state 32
-    "let"             shift, and go to state 4
-    "match"           shift, and go to state 33
-    "new"             shift, and go to state 34
-    "not"             shift, and go to state 35
-    "true"            shift, and go to state 36
-    "while"           shift, and go to state 37
-    "+."              shift, and go to state 38
-    "-."              shift, and go to state 39
-    T_ID              shift, and go to state 40
-    T_CONSTRUCTOR_ID  shift, and go to state 41
-    T_CONST_CHAR      shift, and go to state 42
-    T_CONST_INT       shift, and go to state 43
-    T_CONST_FLOAT     shift, and go to state 44
-    T_STRING_LITERAL  shift, and go to state 45
-    '+'               shift, and go to state 46
-    '-'               shift, and go to state 47
-    '!'               shift, and go to state 48
-    '('               shift, and go to state 49
-
-    letdef     go to state 50
-    expr       go to state 221
-    func_expr  go to state 52
-
-
 State 204
 
-   43 expr: "for" T_ID '=' expr "to" . expr "do" expr "done"
+   43 expr: "for" T_ID '=' expr "downto" . expr "do" expr "done"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -4915,7 +4893,7 @@ State 204
 
 State 205
 
-   41 expr: "if" expr "then" expr "else" . expr
+   42 expr: "for" T_ID '=' expr "to" . expr "do" expr "done"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -4949,19 +4927,53 @@ State 205
 
 State 206
 
+   40 expr: "if" expr "then" expr "else" . expr
+
+    "begin"           shift, and go to state 27
+    "delete"          shift, and go to state 28
+    "dim"             shift, and go to state 29
+    "false"           shift, and go to state 30
+    "for"             shift, and go to state 31
+    "if"              shift, and go to state 32
+    "let"             shift, and go to state 4
+    "match"           shift, and go to state 33
+    "new"             shift, and go to state 34
+    "not"             shift, and go to state 35
+    "true"            shift, and go to state 36
+    "while"           shift, and go to state 37
+    "+."              shift, and go to state 38
+    "-."              shift, and go to state 39
+    T_ID              shift, and go to state 40
+    T_CONSTRUCTOR_ID  shift, and go to state 41
+    T_CONST_CHAR      shift, and go to state 42
+    T_CONST_INT       shift, and go to state 43
+    T_CONST_FLOAT     shift, and go to state 44
+    T_STRING_LITERAL  shift, and go to state 45
+    '+'               shift, and go to state 46
+    '-'               shift, and go to state 47
+    '!'               shift, and go to state 48
+    '('               shift, and go to state 49
+
+    letdef     go to state 50
+    expr       go to state 224
+    func_expr  go to state 52
+
+
+State 207
+
   112 pattern_high: "+." T_CONST_FLOAT .
 
     $default  reduce using rule 112 (pattern_high)
 
 
-State 207
+State 208
 
   113 pattern_high: "-." T_CONST_FLOAT .
 
     $default  reduce using rule 113 (pattern_high)
 
 
-State 208
+State 209
 
   106 pattern: T_CONSTRUCTOR_ID pattern_high_list .
   108 pattern_high_list: pattern_high_list . pattern_high
@@ -4971,48 +4983,49 @@ State 208
     "+."           shift, and go to state 180
     "-."           shift, and go to state 181
     T_ID           shift, and go to state 182
-    T_CONST_INT    shift, and go to state 184
-    T_CONST_FLOAT  shift, and go to state 185
-    '+'            shift, and go to state 186
-    '-'            shift, and go to state 187
-    '('            shift, and go to state 188
+    T_CONST_CHAR   shift, and go to state 184
+    T_CONST_INT    shift, and go to state 185
+    T_CONST_FLOAT  shift, and go to state 186
+    '+'            shift, and go to state 187
+    '-'            shift, and go to state 188
+    '('            shift, and go to state 189
 
     $default  reduce using rule 106 (pattern)
 
-    pattern_high  go to state 224
+    pattern_high  go to state 225
 
 
-State 209
+State 210
 
   109 pattern_high: '+' T_CONST_INT .
 
     $default  reduce using rule 109 (pattern_high)
 
 
-State 210
+State 211
 
   110 pattern_high: '-' T_CONST_INT .
 
     $default  reduce using rule 110 (pattern_high)
 
 
-State 211
-
-  118 pattern_high: '(' pattern . ')'
-
-    ')'  shift, and go to state 225
-
-
 State 212
 
-   72 expr: "match" expr "with" clause clause_list . "end"
-  103 clause_list: clause_list . '|' clause
+  119 pattern_high: '(' pattern . ')'
 
-    "end"  shift, and go to state 226
-    '|'    shift, and go to state 227
+    ')'  shift, and go to state 226
 
 
 State 213
+
+   71 expr: "match" expr "with" clause clause_list . "end"
+  103 clause_list: clause_list . '|' clause
+
+    "end"  shift, and go to state 227
+    '|'    shift, and go to state 228
+
+
+State 214
 
   104 clause: pattern "->" . expr
 
@@ -5042,25 +5055,25 @@ State 213
     '('               shift, and go to state 49
 
     letdef     go to state 50
-    expr       go to state 228
+    expr       go to state 229
     func_expr  go to state 52
 
 
-State 214
-
-   42 expr: "while" expr "do" expr "done" .
-
-    $default  reduce using rule 42 (expr)
-
-
 State 215
+
+   41 expr: "while" expr "do" expr "done" .
+
+    $default  reduce using rule 41 (expr)
+
+
+State 216
 
    84 func_expr: T_ID '[' expr expr_comma_list ']' .
 
     $default  reduce using rule 84 (func_expr)
 
 
-State 216
+State 217
 
    98 type: "array" '[' asterisk_list ']' "of" . type
 
@@ -5073,41 +5086,41 @@ State 216
     T_ID     shift, and go to state 59
     '('      shift, and go to state 60
 
-    type  go to state 229
+    type  go to state 230
 
 
-State 217
+State 218
 
   101 asterisk_list: asterisk_list ',' '*' .
 
     $default  reduce using rule 101 (asterisk_list)
 
 
-State 218
+State 219
 
    11 def: T_ID par par_list ':' type '=' expr .
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -5135,7 +5148,7 @@ State 218
     $default  reduce using rule 11 (def)
 
 
-State 219
+State 220
 
    88 type_list: type_list type .
    95 type: type . "->" type
@@ -5147,7 +5160,7 @@ State 219
     $default  reduce using rule 88 (type_list)
 
 
-State 220
+State 221
 
    16 def: "mutable" T_ID '[' expr expr_comma_list ']' ':' type .
    95 type: type . "->" type
@@ -5159,82 +5172,31 @@ State 220
     $default  reduce using rule 16 (def)
 
 
-State 221
-
-   44 expr: "for" T_ID '=' expr "downto" expr . "do" expr "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "do"   shift, and go to state 230
-    "mod"  shift, and go to state 93
-    "&&"   shift, and go to state 94
-    "||"   shift, and go to state 95
-    "<>"   shift, and go to state 96
-    "<="   shift, and go to state 97
-    ">="   shift, and go to state 98
-    "=="   shift, and go to state 99
-    "!="   shift, and go to state 100
-    ":="   shift, and go to state 101
-    "+."   shift, and go to state 102
-    "-."   shift, and go to state 103
-    "*."   shift, and go to state 104
-    "/."   shift, and go to state 105
-    "**"   shift, and go to state 106
-    ';'    shift, and go to state 107
-    '='    shift, and go to state 108
-    '>'    shift, and go to state 109
-    '<'    shift, and go to state 110
-    '+'    shift, and go to state 111
-    '-'    shift, and go to state 112
-    '*'    shift, and go to state 113
-    '/'    shift, and go to state 114
-
-
 State 222
 
-   43 expr: "for" T_ID '=' expr "to" expr . "do" expr "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   43 expr: "for" T_ID '=' expr "downto" expr . "do" expr "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "do"   shift, and go to state 231
     "mod"  shift, and go to state 93
@@ -5263,29 +5225,80 @@ State 222
 
 State 223
 
-   41 expr: "if" expr "then" expr "else" expr .
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   42 expr: "for" T_ID '=' expr "to" expr . "do" expr "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
+
+    "do"   shift, and go to state 232
+    "mod"  shift, and go to state 93
+    "&&"   shift, and go to state 94
+    "||"   shift, and go to state 95
+    "<>"   shift, and go to state 96
+    "<="   shift, and go to state 97
+    ">="   shift, and go to state 98
+    "=="   shift, and go to state 99
+    "!="   shift, and go to state 100
+    ":="   shift, and go to state 101
+    "+."   shift, and go to state 102
+    "-."   shift, and go to state 103
+    "*."   shift, and go to state 104
+    "/."   shift, and go to state 105
+    "**"   shift, and go to state 106
+    ';'    shift, and go to state 107
+    '='    shift, and go to state 108
+    '>'    shift, and go to state 109
+    '<'    shift, and go to state 110
+    '+'    shift, and go to state 111
+    '-'    shift, and go to state 112
+    '*'    shift, and go to state 113
+    '/'    shift, and go to state 114
+
+
+State 224
+
+   40 expr: "if" expr "then" expr "else" expr .
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "mod"  shift, and go to state 93
     "&&"   shift, and go to state 94
@@ -5309,31 +5322,31 @@ State 223
     '*'    shift, and go to state 113
     '/'    shift, and go to state 114
 
-    $default  reduce using rule 41 (expr)
+    $default  reduce using rule 40 (expr)
 
 
-State 224
+State 225
 
   108 pattern_high_list: pattern_high_list pattern_high .
 
     $default  reduce using rule 108 (pattern_high_list)
 
 
-State 225
-
-  118 pattern_high: '(' pattern ')' .
-
-    $default  reduce using rule 118 (pattern_high)
-
-
 State 226
 
-   72 expr: "match" expr "with" clause clause_list "end" .
+  119 pattern_high: '(' pattern ')' .
 
-    $default  reduce using rule 72 (expr)
+    $default  reduce using rule 119 (pattern_high)
 
 
 State 227
+
+   71 expr: "match" expr "with" clause clause_list "end" .
+
+    $default  reduce using rule 71 (expr)
+
+
+State 228
 
   103 clause_list: clause_list '|' . clause
 
@@ -5343,41 +5356,42 @@ State 227
     "-."              shift, and go to state 181
     T_ID              shift, and go to state 182
     T_CONSTRUCTOR_ID  shift, and go to state 183
-    T_CONST_INT       shift, and go to state 184
-    T_CONST_FLOAT     shift, and go to state 185
-    '+'               shift, and go to state 186
-    '-'               shift, and go to state 187
-    '('               shift, and go to state 188
+    T_CONST_CHAR      shift, and go to state 184
+    T_CONST_INT       shift, and go to state 185
+    T_CONST_FLOAT     shift, and go to state 186
+    '+'               shift, and go to state 187
+    '-'               shift, and go to state 188
+    '('               shift, and go to state 189
 
-    clause        go to state 232
-    pattern       go to state 190
-    pattern_high  go to state 191
+    clause        go to state 233
+    pattern       go to state 191
+    pattern_high  go to state 192
 
 
-State 228
+State 229
 
-   50 expr: expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   49 expr: expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
   104 clause: pattern "->" expr .
 
     "mod"  shift, and go to state 93
@@ -5406,52 +5420,20 @@ State 228
     $default  reduce using rule 104 (clause)
 
 
-State 229
+State 230
 
    95 type: type . "->" type
    96     | type . "ref"
    98     | "array" '[' asterisk_list ']' "of" type .
 
+    "ref"  shift, and go to state 118
+
     $default  reduce using rule 98 (type)
-
-
-State 230
-
-   44 expr: "for" T_ID '=' expr "downto" expr "do" . expr "done"
-
-    "begin"           shift, and go to state 27
-    "delete"          shift, and go to state 28
-    "dim"             shift, and go to state 29
-    "false"           shift, and go to state 30
-    "for"             shift, and go to state 31
-    "if"              shift, and go to state 32
-    "let"             shift, and go to state 4
-    "match"           shift, and go to state 33
-    "new"             shift, and go to state 34
-    "not"             shift, and go to state 35
-    "true"            shift, and go to state 36
-    "while"           shift, and go to state 37
-    "+."              shift, and go to state 38
-    "-."              shift, and go to state 39
-    T_ID              shift, and go to state 40
-    T_CONSTRUCTOR_ID  shift, and go to state 41
-    T_CONST_CHAR      shift, and go to state 42
-    T_CONST_INT       shift, and go to state 43
-    T_CONST_FLOAT     shift, and go to state 44
-    T_STRING_LITERAL  shift, and go to state 45
-    '+'               shift, and go to state 46
-    '-'               shift, and go to state 47
-    '!'               shift, and go to state 48
-    '('               shift, and go to state 49
-
-    letdef     go to state 50
-    expr       go to state 233
-    func_expr  go to state 52
 
 
 State 231
 
-   43 expr: "for" T_ID '=' expr "to" expr "do" . expr "done"
+   43 expr: "for" T_ID '=' expr "downto" expr "do" . expr "done"
 
     "begin"           shift, and go to state 27
     "delete"          shift, and go to state 28
@@ -5485,87 +5467,70 @@ State 231
 
 State 232
 
+   42 expr: "for" T_ID '=' expr "to" expr "do" . expr "done"
+
+    "begin"           shift, and go to state 27
+    "delete"          shift, and go to state 28
+    "dim"             shift, and go to state 29
+    "false"           shift, and go to state 30
+    "for"             shift, and go to state 31
+    "if"              shift, and go to state 32
+    "let"             shift, and go to state 4
+    "match"           shift, and go to state 33
+    "new"             shift, and go to state 34
+    "not"             shift, and go to state 35
+    "true"            shift, and go to state 36
+    "while"           shift, and go to state 37
+    "+."              shift, and go to state 38
+    "-."              shift, and go to state 39
+    T_ID              shift, and go to state 40
+    T_CONSTRUCTOR_ID  shift, and go to state 41
+    T_CONST_CHAR      shift, and go to state 42
+    T_CONST_INT       shift, and go to state 43
+    T_CONST_FLOAT     shift, and go to state 44
+    T_STRING_LITERAL  shift, and go to state 45
+    '+'               shift, and go to state 46
+    '-'               shift, and go to state 47
+    '!'               shift, and go to state 48
+    '('               shift, and go to state 49
+
+    letdef     go to state 50
+    expr       go to state 235
+    func_expr  go to state 52
+
+
+State 233
+
   103 clause_list: clause_list '|' clause .
 
     $default  reduce using rule 103 (clause_list)
 
 
-State 233
-
-   44 expr: "for" T_ID '=' expr "downto" expr "do" expr . "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
-
-    "done"  shift, and go to state 235
-    "mod"   shift, and go to state 93
-    "&&"    shift, and go to state 94
-    "||"    shift, and go to state 95
-    "<>"    shift, and go to state 96
-    "<="    shift, and go to state 97
-    ">="    shift, and go to state 98
-    "=="    shift, and go to state 99
-    "!="    shift, and go to state 100
-    ":="    shift, and go to state 101
-    "+."    shift, and go to state 102
-    "-."    shift, and go to state 103
-    "*."    shift, and go to state 104
-    "/."    shift, and go to state 105
-    "**"    shift, and go to state 106
-    ';'     shift, and go to state 107
-    '='     shift, and go to state 108
-    '>'     shift, and go to state 109
-    '<'     shift, and go to state 110
-    '+'     shift, and go to state 111
-    '-'     shift, and go to state 112
-    '*'     shift, and go to state 113
-    '/'     shift, and go to state 114
-
-
 State 234
 
-   43 expr: "for" T_ID '=' expr "to" expr "do" expr . "done"
-   50     | expr . '+' expr
-   51     | expr . '-' expr
-   52     | expr . '*' expr
-   53     | expr . '/' expr
-   54     | expr . "+." expr
-   55     | expr . "-." expr
-   56     | expr . "*." expr
-   57     | expr . "/." expr
-   58     | expr . "**" expr
-   59     | expr . '=' expr
-   60     | expr . "<>" expr
-   61     | expr . '<' expr
-   62     | expr . '>' expr
-   63     | expr . "<=" expr
-   64     | expr . ">=" expr
-   65     | expr . "==" expr
-   66     | expr . "!=" expr
-   67     | expr . "&&" expr
-   68     | expr . "||" expr
-   69     | expr . ';' expr
-   70     | expr . ":=" expr
-   71     | expr . "mod" expr
+   43 expr: "for" T_ID '=' expr "downto" expr "do" expr . "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
     "done"  shift, and go to state 236
     "mod"   shift, and go to state 93
@@ -5594,13 +5559,64 @@ State 234
 
 State 235
 
-   44 expr: "for" T_ID '=' expr "downto" expr "do" expr "done" .
+   42 expr: "for" T_ID '=' expr "to" expr "do" expr . "done"
+   49     | expr . '+' expr
+   50     | expr . '-' expr
+   51     | expr . '*' expr
+   52     | expr . '/' expr
+   53     | expr . "+." expr
+   54     | expr . "-." expr
+   55     | expr . "*." expr
+   56     | expr . "/." expr
+   57     | expr . "**" expr
+   58     | expr . '=' expr
+   59     | expr . "<>" expr
+   60     | expr . '<' expr
+   61     | expr . '>' expr
+   62     | expr . "<=" expr
+   63     | expr . ">=" expr
+   64     | expr . "==" expr
+   65     | expr . "!=" expr
+   66     | expr . "&&" expr
+   67     | expr . "||" expr
+   68     | expr . ';' expr
+   69     | expr . ":=" expr
+   70     | expr . "mod" expr
 
-    $default  reduce using rule 44 (expr)
+    "done"  shift, and go to state 237
+    "mod"   shift, and go to state 93
+    "&&"    shift, and go to state 94
+    "||"    shift, and go to state 95
+    "<>"    shift, and go to state 96
+    "<="    shift, and go to state 97
+    ">="    shift, and go to state 98
+    "=="    shift, and go to state 99
+    "!="    shift, and go to state 100
+    ":="    shift, and go to state 101
+    "+."    shift, and go to state 102
+    "-."    shift, and go to state 103
+    "*."    shift, and go to state 104
+    "/."    shift, and go to state 105
+    "**"    shift, and go to state 106
+    ';'     shift, and go to state 107
+    '='     shift, and go to state 108
+    '>'     shift, and go to state 109
+    '<'     shift, and go to state 110
+    '+'     shift, and go to state 111
+    '-'     shift, and go to state 112
+    '*'     shift, and go to state 113
+    '/'     shift, and go to state 114
 
 
 State 236
 
-   43 expr: "for" T_ID '=' expr "to" expr "do" expr "done" .
+   43 expr: "for" T_ID '=' expr "downto" expr "do" expr "done" .
 
     $default  reduce using rule 43 (expr)
+
+
+State 237
+
+   42 expr: "for" T_ID '=' expr "to" expr "do" expr "done" .
+
+    $default  reduce using rule 42 (expr)
