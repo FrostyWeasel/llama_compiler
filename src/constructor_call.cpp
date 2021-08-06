@@ -106,5 +106,36 @@ void ConstructorCall::sem() {
 }
 
 llvm::Value* ConstructorCall::codegen() {
+    auto constr_entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES));
+    
+    std::vector<llvm::Type*> constructor_arg_types;
 
+    //First element holds the count which acts as an identifier for the constructor
+    constructor_arg_types.push_back(i32);
+    for(auto type: *(constr_entry->get_constructor_type_list())) {
+        constructor_arg_types.push_back(map_to_llvm_type(type));
+    }
+    auto constructor_struct_type = llvm::StructType::create(TheContext, constructor_arg_types,  std::to_string(constr_entry->get_count()) + "_struct");
+    auto constructor_alloca = Builder.CreateAlloca(constructor_struct_type, nullptr, this->id + std::to_string(constr_entry->get_count()) + "_constructor");
+
+    //Store tag in constructor struct
+    auto constr_struct_element_ptr = Builder.CreateStructGEP(constructor_alloca, 0, this->id + std::to_string(constr_entry->get_count()) + "_constructor_tag_ptr");
+    Builder.CreateStore(c32(constr_entry->get_count()), constr_struct_element_ptr);
+    
+
+    //Store expression values in costructor struct
+    if(this->expr_list != nullptr) {
+        unsigned int i = 1;
+        for(auto expr: this->expr_list->get_list()) {
+            auto expr_value = expr->codegen();
+            constr_struct_element_ptr = Builder.CreateStructGEP(constructor_alloca, i++, this->id + std::to_string(constr_entry->get_count()) + "_constructor_arg_ptr");
+            Builder.CreateStore(expr_value, constr_struct_element_ptr);
+        }
+    }
+
+    //Store alloca in constructors entry
+    constr_entry->set_allocation(constructor_alloca);
+
+    //Bitcast to same type as its type
+    return Builder.CreateBitCast(constructor_alloca, map_to_llvm_type(this->type_variable));
 }

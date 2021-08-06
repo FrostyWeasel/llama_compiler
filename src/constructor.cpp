@@ -69,4 +69,17 @@ void Constructor::sem() {
 
 llvm::Value* Constructor::codegen() {
 
+    // std::vector<llvm::Type*> constructor_arg_types;
+    // for(auto type: *(this->type_list)) {
+    //     constructor_arg_types.push_back(map_to_llvm_type(type));
+    // }
+
+    // auto constructor_struct_type = llvm::StructType::create(TheContext, constructor_arg_types, this->id + std::to_string(this->count) + "_constructor");
+
+    // auto constructor_struct = llvm::ConstantStruct::get(constructor_struct_type, )
+
+    // // auto constructor_ptr
+
+    // // auto constructor_entry
+
 }

@@ -111,6 +111,10 @@ llvm::Type* AST::map_to_llvm_type(std::shared_ptr<TypeVariable> type_variable) {
         case TypeTag::Unit:
             return llvm::StructType::get(TheContext);
         break;
+        case TypeTag::UserType:
+            //Pointer to constructor struct
+            return llvm::PointerType::get(i8, 0);
+        break;
         case TypeTag::Unknown:
             return llvm::StructType::get(TheContext);
         break;

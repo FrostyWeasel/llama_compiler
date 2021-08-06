@@ -87,5 +87,34 @@ void Match::sem() {
 }
 
 llvm::Value* Match::codegen() {
+    //Get the value of the expression
+    // auto expr_value = this->expr->codegen();
 
+    // auto clauses =  this->clause_list->get_list();
+
+    
+    /*The patterns that can match constructors are of 2 types:
+        1.Ids here we just store the pointer to the constructor in the id
+        2.Constructors coming from the same user type. Since it is checked during inference
+          that the constructor is correct then its type will match the type of a constructor of user type.
+          
+            2.1 if it is the same contructor that was used for the expr then there tag will be the same and we know
+                the type of the constructor struct from the constructor pattern.
+          
+            2.2 if the tag is different the we have a type missmatch and nothing else needs to be checked. 
+    */
+
+    // //Compare expression against every pattern
+    // for(auto clause_it = clauses.begin(); clause_it != clauses.end(); clause_it++) {
+    //     st->scope_open();
+
+    //     //Compare the expr_value with each pattern and find the first that matches
+    //     auto other_clause_pattern_type = (*clause_it)->infer_pattern();
+    //     st->add_constraint(clause_pattern_type, other_clause_pattern_type, this->lineno);
+
+    //     auto other_clause_expr_type = (*clause_it)->infer_expression();
+    //     st->add_constraint(clause_expr_type, other_clause_expr_type, this->lineno);
+
+    //     st->scope_close();
+    // }
 }

@@ -42,9 +42,34 @@ std::shared_ptr<TypeVariable> TypeDef::infer() {
 }
 
 void TypeDef::sem() {
+    AST::st->scope_open();
 
+    auto t_def_list = this->t_defs->get_list(); 
+
+    //The definitions are first added to the symboltable and then type inference and semantic analysis happens
+    //This is to allow mutually recursive definitions ex.type tree = Leaf | Node of int forest and forest = Empty | NonEmpty of tree forest
+    for(auto t_def: t_def_list) {
+        t_def->add_to_symbol_table();
+    }
+
+    for(auto t_def: t_def_list) {
+        t_def->sem();
+    }
 }
 
 llvm::Value* TypeDef::codegen() {
+    AST::st->scope_open();
 
+    auto t_def_list = this->t_defs->get_list(); 
+
+    //The definitions are first added to the symboltable and then type inference and semantic analysis happens
+    //This is to allow mutually recursive definitions ex.type tree = Leaf | Node of int forest and forest = Empty | NonEmpty of tree forest
+    llvm::Value* t_def_value;
+    for(auto t_def: t_def_list) {
+        t_def->add_to_symbol_table();
+        t_def->allocate();
+        t_def_value = t_def->codegen();
+    }
+
+    return t_def_value;
 }

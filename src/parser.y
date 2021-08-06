@@ -184,18 +184,18 @@ program:
             
             $1->infer();
             $1->unify();
-            // $1->clear_inference_structures();
-            // $1->close_all_program_scopes();
+            $1->clear_inference_structures();
+            $1->close_all_program_scopes();
 
-            // $1->sem();
-            // $1->bind_to_default_types();
+            $1->sem();
+            $1->bind_to_default_types();
             if(debug) std::cout << "AST: " << *$1 << std::endl;
-            // $1->close_all_program_scopes();
+            $1->close_all_program_scopes();
 
-            // $1->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
+            $1->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
 
-            // $1->close_all_program_scopes();
-            // $1->close_library_function_scope();
+            $1->close_all_program_scopes();
+            $1->close_library_function_scope();
             
             delete $1;
         }  

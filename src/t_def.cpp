@@ -46,12 +46,13 @@ void TDef::add_to_symbol_table()  {
 }
 
 void TDef::allocate()  {
+    // auto t_def_type = llvm::dyn_cast<llvm::StructType>(map_to_llvm_type(this->type_variable));
+
+    // auto t_def_struct = t_def_type->create(TheContext, { llvm::PointerType::get(AST::i8, 0) }, "user_type_" + this->id);
 
 }
 
 std::shared_ptr<TypeVariable> TDef::infer() {
-    auto type_entry = dynamic_cast<TypeEntry*>(this->entry);
-
     auto constructors = this->constructor_list->get_list();
 
     for(auto constructor: constructors) {
@@ -62,9 +63,23 @@ std::shared_ptr<TypeVariable> TDef::infer() {
 }
 
 void TDef::sem() {
+    auto constructors = this->constructor_list->get_list();
 
+    for(auto constructor: constructors) {
+        constructor->sem();
+    }
 }
 
 llvm::Value* TDef::codegen() {
+    //TODO: Generate code for a function that can take 2 elements of this type and perform structural check depending on there tag(use the tag to figure out which contructor of this class is used and then bitcast to the constructors type) (the tdefs entry should hold the function definition) .
+    //TODO: Put a count in this class as a unique id for this tdef so that its comparison function is unique.
 
+    auto constructors = this->constructor_list->get_list();
+
+    for(auto constructor: constructors) {
+        constructor->codegen();
+    }
+
+    // auto type_entry = dynamic_cast<TypeEntry*>(this->entry);
+    // return type_entry->get_type_struct(); 
 }

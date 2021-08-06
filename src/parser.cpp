@@ -1534,18 +1534,18 @@ yyreduce:
             
             (yyvsp[0].definition_list)->infer();
             (yyvsp[0].definition_list)->unify();
-            // $1->clear_inference_structures();
-            // $1->close_all_program_scopes();
+            (yyvsp[0].definition_list)->clear_inference_structures();
+            (yyvsp[0].definition_list)->close_all_program_scopes();
 
-            // $1->sem();
-            // $1->bind_to_default_types();
+            (yyvsp[0].definition_list)->sem();
+            (yyvsp[0].definition_list)->bind_to_default_types();
             if(debug) std::cout << "AST: " << *(yyvsp[0].definition_list) << std::endl;
-            // $1->close_all_program_scopes();
+            (yyvsp[0].definition_list)->close_all_program_scopes();
 
-            // $1->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
+            (yyvsp[0].definition_list)->llvm_compile_and_dump(optimizations_flag, intermediate_flag, final_flag, input_filename, compiler_path);
 
-            // $1->close_all_program_scopes();
-            // $1->close_library_function_scope();
+            (yyvsp[0].definition_list)->close_all_program_scopes();
+            (yyvsp[0].definition_list)->close_library_function_scope();
             
             delete (yyvsp[0].definition_list);
         }
