@@ -2,9 +2,11 @@
 #define __MATCH_HPP__
 
 #include "expr.hpp"
+#include "enums.hpp"
 #include "block.hpp"
 
 class Clause;
+class Pattern;
 
 class Match : public Expr {
 public:
@@ -23,6 +25,8 @@ public:
 private:
     Expr* expr;
     Block<Clause>* clause_list;
+
+    void match_expr_to_pattern(llvm::Value* expr_value, llvm::Value* pattern_value, llvm::BasicBlock* match_success, llvm::BasicBlock* match_fail, Pattern* current_pattern, PatternType pattern_type);
 };
 
 #endif

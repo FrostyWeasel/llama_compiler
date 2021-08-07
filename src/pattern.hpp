@@ -20,9 +20,14 @@ public:
 
     virtual std::string get_id() override { return ""; }
 
+    virtual PatternType get_pattern_type() { return this->pattern_type; }
+
+    virtual llvm::Type* get_llvm_type() { return this->llvm_type; }
+
 protected:
     PatternType pattern_type;
     std::shared_ptr<TypeVariable> type_variable;
+    llvm::Type* llvm_type;
 
 };
 

@@ -4,6 +4,7 @@
 #include "pattern.hpp"
 #include "block.hpp"
 #include <string>
+#include <vector>
 #include <memory>
 
 class TypeVariable;
@@ -19,6 +20,8 @@ public:
     virtual void sem() override;
 
     virtual llvm::Value* codegen() override;
+
+    std::vector<Pattern*>& get_pattern_list() { return pattern_list->get_list(); }
 
 private:
     std::string id;

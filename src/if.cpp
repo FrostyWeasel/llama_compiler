@@ -70,10 +70,10 @@ llvm::Value* If::codegen() {
     auto condition_value = this->condition->codegen();
     auto condition_result = Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, condition_value, c1(1));
 
-    auto current_fuction = Builder.GetInsertBlock()->getParent();
+    auto current_function = Builder.GetInsertBlock()->getParent();
 
     if(this->else_expr == nullptr) {
-        auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_fuction);
+        auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_function);
         auto if_end_BB = llvm::BasicBlock::Create(TheContext, "endif");
 
         Builder.CreateCondBr(condition_result, then_BB, if_end_BB);
@@ -86,13 +86,13 @@ llvm::Value* If::codegen() {
         //Codegen for the then block can change the basic block but it is needed for the phi expression
         then_BB = Builder.GetInsertBlock();
 
-        current_fuction->getBasicBlockList().push_back(if_end_BB);
+        current_function->getBasicBlockList().push_back(if_end_BB);
         Builder.SetInsertPoint(if_end_BB);
 
         return llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { });
     }
     else {
-        auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_fuction);
+        auto then_BB = llvm::BasicBlock::Create(TheContext, "then", current_function);
         auto else_BB = llvm::BasicBlock::Create(TheContext, "else");
         auto if_end_BB = llvm::BasicBlock::Create(TheContext, "endif");
 
@@ -107,16 +107,15 @@ llvm::Value* If::codegen() {
         then_BB = Builder.GetInsertBlock();
 
         //A bunch of new basic blocks could have been inserted by the then expression above, now we also add the else BB after them
-        current_fuction->getBasicBlockList().push_back(else_BB);
+        current_function->getBasicBlockList().push_back(else_BB);
         Builder.SetInsertPoint(else_BB);
 
         //Generate code for the else clause
-        Builder.SetInsertPoint(else_BB);
         auto else_value = this->else_expr->codegen();
         Builder.CreateBr(if_end_BB);
         else_BB = Builder.GetInsertBlock();
 
-        current_fuction->getBasicBlockList().push_back(if_end_BB);
+        current_function->getBasicBlockList().push_back(if_end_BB);
         Builder.SetInsertPoint(if_end_BB);
 
         auto phi_node = Builder.CreatePHI(map_to_llvm_type(this->type_variable), 2, "iftmp");

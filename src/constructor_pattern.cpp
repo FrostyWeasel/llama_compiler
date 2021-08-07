@@ -92,5 +92,35 @@ void ConstructorPattern::sem() {
 }
 
 llvm::Value* ConstructorPattern::codegen() {
+    auto constr_entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES));
 
+    std::vector<llvm::Value*> constructor_arg_values;    
+    std::vector<llvm::Type*> constructor_arg_types;
+
+    //First element holds the count which acts as an identifier(tag) for the constructor
+    constructor_arg_types.push_back(i32);
+    constructor_arg_values.push_back(c32(constr_entry->get_count()));
+
+    for(auto pattern: this->pattern_list->get_list()) {
+        auto pattern_value = pattern->codegen();
+
+        constructor_arg_types.push_back(pattern_value->getType());
+        constructor_arg_values.push_back(pattern_value);
+    }
+
+    auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
+    auto constructor_alloca = Builder.CreateAlloca(constructor_struct_type, nullptr, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern");
+
+    //Store constructor type so that it can be accessed by match statement
+    this->llvm_type = constructor_struct_type;
+
+    //Store expression values in costructor struct
+    unsigned int i = 0;
+    for(auto pattern_value: constructor_arg_values) {
+        auto constr_struct_element_ptr = Builder.CreateStructGEP(constructor_alloca, i++, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern_arg_ptr");
+        Builder.CreateStore(pattern_value, constr_struct_element_ptr);
+    }
+
+    //Bitcast to same type as its type
+    return Builder.CreateBitCast(constructor_alloca, map_to_llvm_type(this->type_variable));
 }

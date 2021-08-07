@@ -20,5 +20,6 @@ void CharPattern::sem() {
 }
 
 llvm::Value* CharPattern::codegen() {
-
+    this->llvm_type = i8;
+    return c8(value);
 }

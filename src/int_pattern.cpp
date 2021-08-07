@@ -20,5 +20,6 @@ void IntPattern::sem() {
 }
 
 llvm::Value* IntPattern::codegen() {
-
+    this->llvm_type = i32;
+    return c32(value);
 }

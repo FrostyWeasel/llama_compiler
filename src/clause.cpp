@@ -2,6 +2,7 @@
 #include "pattern.hpp"
 #include "expr.hpp"
 #include "type_variable.hpp"
+#include "error_handler.hpp"
 #include <iostream>
 #include <memory>
 
@@ -23,8 +24,8 @@ void Clause::print(std::ostream& out) const {
 }
 
 std::shared_ptr<TypeVariable> Clause::infer() {
-    this->infer_pattern();
-    return this->infer_expression();
+    error_handler->print_error("Unimplemented clause infer was called\n", ErrorType::Internal);
+    return this->infer_expression(); //never reached
 }
 
 std::shared_ptr<TypeVariable> Clause::infer_pattern() {
@@ -40,5 +41,22 @@ void Clause::sem() {
 }
 
 llvm::Value* Clause::codegen() {
+    error_handler->print_error("Unimplemented clause codegen was called\n", ErrorType::Internal);
+    return this->codegen_expression(); //never reached
+}
 
+llvm::Value* Clause::codegen_pattern() {
+    return this->pattern->codegen();
+}
+
+llvm::Value* Clause::codegen_expression() {
+    return this->expr->codegen();
+}
+
+llvm::Type* Clause::get_clause_pattern_llvm_type() {
+    return this->pattern->get_llvm_type();
+}
+
+PatternType Clause::get_clause_pattern_type() {
+    return this->pattern->get_pattern_type();
 }

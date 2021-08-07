@@ -20,5 +20,6 @@ void FloatPattern::sem() {
 }
 
 llvm::Value* FloatPattern::codegen() {
-
+    this->llvm_type = f64;
+    return cf64(value);
 }

@@ -3,6 +3,10 @@
 #include "clause.hpp"
 #include "type_variable.hpp"
 #include "block.hpp"
+#include "error_handler.hpp"
+#include "constructor_pattern.hpp"
+#include "pattern.hpp"
+#include <sstream>
 #include <iostream>
 #include <memory>
     
@@ -88,9 +92,9 @@ void Match::sem() {
 
 llvm::Value* Match::codegen() {
     //Get the value of the expression
-    // auto expr_value = this->expr->codegen();
+    auto expr_value = this->expr->codegen();
 
-    // auto clauses =  this->clause_list->get_list();
+    auto clauses =  this->clause_list->get_list();
 
     
     /*The patterns that can match constructors are of 2 types:
@@ -104,17 +108,156 @@ llvm::Value* Match::codegen() {
             2.2 if the tag is different the we have a type missmatch and nothing else needs to be checked. 
     */
 
-    // //Compare expression against every pattern
-    // for(auto clause_it = clauses.begin(); clause_it != clauses.end(); clause_it++) {
-    //     st->scope_open();
+    auto current_function = Builder.GetInsertBlock()->getParent();
+    auto match_end = llvm::BasicBlock::Create(TheContext, "match_end");
+    auto match_all_failed = llvm::BasicBlock::Create(TheContext, "match_all_failed");
 
-    //     //Compare the expr_value with each pattern and find the first that matches
-    //     auto other_clause_pattern_type = (*clause_it)->infer_pattern();
-    //     st->add_constraint(clause_pattern_type, other_clause_pattern_type, this->lineno);
+    /*
+        If one pattern fails just move on to the next pattern
+        If all patterns fail then we reach end of pattern checks and branch to match_all_failed
+        if one pattern succeeds then we branch to the expression for that pattern and execute it
+    */
 
-    //     auto other_clause_expr_type = (*clause_it)->infer_expression();
-    //     st->add_constraint(clause_expr_type, other_clause_expr_type, this->lineno);
+    //Compare expression against every pattern
+    for(auto clause_it = clauses.begin(); clause_it != clauses.end(); clause_it++) {
+        st->scope_open();
 
-    //     st->scope_close();
-    // }
+        auto match_success = llvm::BasicBlock::Create(TheContext, "match_success");
+        auto match_fail = llvm::BasicBlock::Create(TheContext, "match_fail"); 
+
+        //Compare the expr_value with each pattern and find the first that matches
+        auto pattern_value = (*clause_it)->codegen_pattern();
+
+        match_expr_to_pattern(expr_value, pattern_value, match_success, match_fail, (*clause_it)->get_pattern(), (*clause_it)->get_clause_pattern_type());
+
+        current_function->getBasicBlockList().push_back(match_success);
+        Builder.SetInsertPoint(match_success);
+
+        (*clause_it)->codegen_expression();
+
+        Builder.CreateBr(match_end);
+
+        current_function->getBasicBlockList().push_back(match_fail);
+        Builder.SetInsertPoint(match_fail);
+
+        st->scope_close();
+    }
+
+    //If we reach this point all pattern checks have failed
+    Builder.CreateBr(match_all_failed);
+
+    //Throw runtime error if pattern was matched 
+    current_function->getBasicBlockList().push_back(match_all_failed);
+    Builder.SetInsertPoint(match_all_failed);
+
+    std::stringstream msg;
+    msg << "No match found in match expression at line " << this->lineno << ".\n";
+
+    auto string_ptr = Builder.CreateGlobalStringPtr(msg.str());
+
+    Builder.CreateCall(AST::runtime_error_function, { string_ptr });
+
+    //Control flow will never reach this branch.
+    Builder.CreateBr(match_end);
+
+    current_function->getBasicBlockList().push_back(match_end);
+    Builder.SetInsertPoint(match_end);
+
+    //TODO: Change this with phi value
+    return llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { });
+}
+
+void Match::match_expr_to_pattern(llvm::Value* expr_value, llvm::Value* pattern_value, llvm::BasicBlock* match_success, llvm::BasicBlock* match_fail, Pattern* current_pattern, PatternType pattern_type) {
+    /*
+        if this or a nested pattern match (for constructors) failed then the hole pattern match failed and we should jump to pattern match_failed BB
+        
+        if this branch succeeded then we branch to match_success
+            if this is a full pattern then match_success == matched_full_pattern_success
+
+            if this is a nested pattern called by a constructor then match_success == constructor_pattern_match_success 
+            and we then check the next pattern argument of the constructor 
+    */
+
+    switch(pattern_type) {
+        case PatternType::Int: {
+            auto cmp_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, expr_value, pattern_value);
+            Builder.CreateCondBr(cmp_result, match_success, match_fail);
+            break;
+        }
+        case PatternType::Float: {
+            auto cmp_result = Builder.CreateFCmp(llvm::CmpInst::Predicate::FCMP_OEQ, expr_value, pattern_value);
+            Builder.CreateCondBr(cmp_result, match_success, match_fail);
+            break;
+        }
+        case PatternType::Bool: {
+            auto cmp_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, expr_value, pattern_value);
+            Builder.CreateCondBr(cmp_result, match_success, match_fail);
+            break;
+        }
+        case PatternType::Char: {
+            auto cmp_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, expr_value, pattern_value);
+            Builder.CreateCondBr(cmp_result, match_success, match_fail);
+            break;
+        }
+        case PatternType::Id: {
+            Builder.CreateStore(expr_value, pattern_value);
+            Builder.CreateBr(match_success);
+            break;
+        }
+        case PatternType::Constructor: {
+            //Load tag of both constructors
+            auto expr_tag_ptr = Builder.CreateBitCast(expr_value, llvm::PointerType::get(i32, 0), "expr_tag_ptr");
+            auto expr_tag = Builder.CreateLoad(expr_tag_ptr, "expr_constr_tag");
+
+            auto pattern_tag_ptr = Builder.CreateBitCast(pattern_value, llvm::PointerType::get(i32, 0), "pattern_tag_ptr");
+            auto pattern_tag = Builder.CreateLoad(pattern_tag_ptr, "pattern_constr_tag");
+
+            //Compare tags
+            auto current_function = Builder.GetInsertBlock()->getParent();
+            auto match_compare_constr_args = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args", current_function);
+
+            auto cmp_tags_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, expr_tag, pattern_tag);
+            Builder.CreateCondBr(cmp_tags_result, match_compare_constr_args, match_fail);
+
+            //Create match_compare_constr_args BB
+            current_function->getBasicBlockList().push_back(match_compare_constr_args);
+            Builder.SetInsertPoint(match_compare_constr_args);
+
+            //Cast the user type pointer to the actual struct type of the constructors
+            auto expr_struct_ptr = Builder.CreateBitCast(expr_value, llvm::PointerType::get(current_pattern->get_llvm_type(), 0), "expr_struct_ptr");
+            auto pattern_struct_ptr = Builder.CreateBitCast(pattern_value, llvm::PointerType::get(current_pattern->get_llvm_type(), 0), "pattern_struct_ptr");
+
+            auto constructor_pattern = dynamic_cast<ConstructorPattern*>(current_pattern);
+            auto pattern_list = constructor_pattern->get_pattern_list();
+
+            unsigned int i = 1;
+            for(auto constr_pattern_arg: pattern_list) {
+                auto expr_value_ptr = Builder.CreateStructGEP(expr_struct_ptr, i, "expr_value_ptr");
+                auto pattern_value_ptr = Builder.CreateStructGEP(pattern_struct_ptr, i, "pattern_value_ptr");
+
+                auto expr_value = Builder.CreateLoad(expr_value_ptr, "expr_value");
+                auto pattern_value = Builder.CreateLoad(pattern_value_ptr, "pattern_value");
+
+                auto match_compare_constr_args = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args", current_function);
+                auto match_compare_constr_args_success = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args_success");
+                Builder.SetInsertPoint(match_compare_constr_args);
+
+                match_expr_to_pattern(expr_value, pattern_value, match_compare_constr_args_success, match_fail, constr_pattern_arg, constr_pattern_arg->get_pattern_type());
+                
+                current_function->getBasicBlockList().push_back(match_compare_constr_args_success);
+                Builder.SetInsertPoint(match_compare_constr_args_success);
+
+                i++;
+            }
+
+            //If by this point we haven't failed a match then constructor match was successfull
+            Builder.CreateBr(match_success);
+
+            break;    
+        }
+        default: {
+            error_handler->print_error("Uknown pattern\n", ErrorType::Internal, this->lineno);
+            break;
+        }
+    }
 }

@@ -20,5 +20,6 @@ void BoolPattern::sem() {
 }
 
 llvm::Value* BoolPattern::codegen() {
-
+    this->llvm_type = i1;
+    return c1(value);
 }

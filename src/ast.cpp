@@ -34,8 +34,11 @@ llvm::IRBuilder<> AST::Builder(TheContext);
 std::unique_ptr<llvm::Module> AST::TheModule;
 std::unique_ptr<llvm::legacy::FunctionPassManager> AST::FPM;
 
-llvm::Function* AST::printf;
-llvm::Function* AST::scanf;
+llvm::Function* AST::runtime_error_function;
+
+llvm::Function* AST::printf_function;
+llvm::Function* AST::scanf_function;
+llvm::Function* AST::exit_function;
 
 llvm::Function* AST::print_string;
 llvm::Function* AST::print_int;
@@ -242,6 +245,9 @@ void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag,
         std::ifstream input_source_file_stream;
         input_source_file_stream.open(input_filename);
 
+        if(input_filename.empty() || input_filename == " ")
+            input_filename = "a";
+
         std::string ir_file_name = input_filename + ".imm";
         std::string asm_file_name = input_filename + ".asm";
         std::string exec_file_name = input_filename + ".out";
@@ -266,10 +272,16 @@ void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag,
 void AST::declare_library_functions() {
     //libc functions
     auto printf_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, true);
-    AST::printf = llvm::Function::Create(printf_type, llvm::Function::LinkageTypes::ExternalLinkage, "printf", TheModule.get());
+    AST::printf_function = llvm::Function::Create(printf_type, llvm::Function::LinkageTypes::ExternalLinkage, "printf", TheModule.get());
 
     auto scanf_type = llvm::FunctionType::get(i32, { llvm::PointerType::get(i8, 0) }, true);
-    AST::scanf = llvm::Function::Create(scanf_type, llvm::Function::LinkageTypes::ExternalLinkage, "scanf", TheModule.get());
+    AST::scanf_function = llvm::Function::Create(scanf_type, llvm::Function::LinkageTypes::ExternalLinkage, "scanf", TheModule.get());
+
+    auto exit_type = llvm::FunctionType::get(llvm::Type::getVoidTy(TheContext), { i32 }, false);
+    AST::exit_function = llvm::Function::Create(exit_type, llvm::Function::LinkageTypes::ExternalLinkage, "exit", TheModule.get());
+
+    //Runtime library functions
+    define_runtime_library_functions();
 
     //Print Functions
     define_print_functions();
@@ -328,6 +340,26 @@ void AST::declare_library_functions() {
     AST::strlen = llvm::Function::Create(strlen_type, llvm::Function::LinkageTypes::ExternalLinkage, "strlen", TheModule.get());
     AST::strlen->addAttribute(0, llvm::Attribute::get(TheContext, llvm::Attribute::AttrKind::SExt));
 
+}
+
+void AST::define_runtime_library_functions() {
+    auto runtime_error_function_type = llvm::FunctionType::get(map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Unit)), { llvm::PointerType::get(i8, 0) }, false);
+    AST::runtime_error_function = llvm::Function::Create(runtime_error_function_type, llvm::Function::LinkageTypes::ExternalLinkage, "__runtime_error", TheModule.get());
+
+    auto previous_insert_point = Builder.GetInsertBlock();
+    auto function_body_BB = llvm::BasicBlock::Create(TheContext, "__runtime_error_entry", AST::runtime_error_function );
+    Builder.SetInsertPoint(function_body_BB);
+
+    auto format_string = Builder.CreateGlobalStringPtr("%s");
+
+    for(auto &par: AST::runtime_error_function->args()) {
+        Builder.CreateCall(AST::printf_function, { format_string, &par });
+    }
+
+    Builder.CreateCall(AST::exit_function, { c32(1) });
+
+    Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
+    Builder.SetInsertPoint(previous_insert_point);
 }
 
 void AST::define_pi() {
@@ -396,7 +428,7 @@ void AST::define_read_functions() {
         Builder.SetInsertPoint(loop_body_BB);
 
         //Read a character from stdin
-        Builder.CreateCall(AST::scanf, { format_string, input_character_alloca });
+        Builder.CreateCall(AST::scanf_function, { format_string, input_character_alloca });
         auto input_char = Builder.CreateLoad(input_character_alloca, "input_char");
 
         //Check if character is '\n'
@@ -447,7 +479,7 @@ void AST::define_read_functions() {
         auto format_string = Builder.CreateGlobalStringPtr("%i");
         auto return_value_ptr = Builder.CreateAlloca(i32, nullptr, "input_integer_ptr");
 
-        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+        Builder.CreateCall(AST::scanf_function, { format_string, return_value_ptr });
 
         Builder.CreateRet(Builder.CreateLoad(return_value_ptr));
         Builder.SetInsertPoint(previous_insert_point);
@@ -464,7 +496,7 @@ void AST::define_read_functions() {
         auto format_string = Builder.CreateGlobalStringPtr("%c");
         auto return_value_ptr = Builder.CreateAlloca(i8, nullptr, "input_character_ptr");
 
-        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+        Builder.CreateCall(AST::scanf_function, { format_string, return_value_ptr });
 
         Builder.CreateRet(Builder.CreateLoad(return_value_ptr));
         Builder.SetInsertPoint(previous_insert_point);
@@ -483,7 +515,7 @@ void AST::define_read_functions() {
         auto format_string = Builder.CreateGlobalStringPtr("%s");
         auto return_value_ptr = Builder.CreateAlloca(i8, c32(10), "input_boolean_ptr");
 
-        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+        Builder.CreateCall(AST::scanf_function, { format_string, return_value_ptr });
 
         auto first_character_of_input_ptr = Builder.CreateGEP(return_value_ptr, c32(0), "first_character_of_inpu_ptr");
         auto condition_result = Builder.CreateCmp(llvm::CmpInst::Predicate::ICMP_EQ, Builder.CreateLoad(first_character_of_input_ptr), c8('t')); 
@@ -534,7 +566,7 @@ void AST::define_read_functions() {
         auto format_string = Builder.CreateGlobalStringPtr("%lf");
         auto return_value_ptr = Builder.CreateAlloca(f64, nullptr, "input_float_ptr");
 
-        Builder.CreateCall(AST::scanf, { format_string, return_value_ptr });
+        Builder.CreateCall(AST::scanf_function, { format_string, return_value_ptr });
 
         Builder.CreateRet(Builder.CreateLoad(return_value_ptr));
         Builder.SetInsertPoint(previous_insert_point);
@@ -552,7 +584,7 @@ void AST::define_print_functions() {
     auto format_string = Builder.CreateGlobalStringPtr("%s");
 
     for(auto &par: AST::print_string->args()) {
-        Builder.CreateCall(AST::printf, { format_string, &par });
+        Builder.CreateCall(AST::printf_function, { format_string, &par });
     }
     Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
@@ -568,7 +600,7 @@ void AST::define_print_functions() {
     format_string = Builder.CreateGlobalStringPtr("%i");
 
     for(auto &par: AST::print_int->args()) {
-        Builder.CreateCall(AST::printf, { format_string, &par });
+        Builder.CreateCall(AST::printf_function, { format_string, &par });
     }
     Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
@@ -584,7 +616,7 @@ void AST::define_print_functions() {
     format_string = Builder.CreateGlobalStringPtr("%c");
 
     for(auto &par: AST::print_char->args()) {
-        Builder.CreateCall(AST::printf, { format_string, &par });
+        Builder.CreateCall(AST::printf_function, { format_string, &par });
     }
     Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
@@ -633,7 +665,7 @@ void AST::define_print_functions() {
     phi_node->addIncoming(then_value, then_BB);
     phi_node->addIncoming(else_value, else_BB);
 
-    Builder.CreateCall(AST::printf, { format_string, phi_node });
+    Builder.CreateCall(AST::printf_function, { format_string, phi_node });
 
     Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);
@@ -649,7 +681,7 @@ void AST::define_print_functions() {
     format_string = Builder.CreateGlobalStringPtr("%lf");
 
     for(auto &par: AST::print_float->args()) {
-        Builder.CreateCall(AST::printf, { format_string, &par });
+        Builder.CreateCall(AST::printf_function, { format_string, &par });
     }
     Builder.CreateRet(llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { }));
     Builder.SetInsertPoint(previous_insert_point);

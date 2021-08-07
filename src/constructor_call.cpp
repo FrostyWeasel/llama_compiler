@@ -115,7 +115,7 @@ llvm::Value* ConstructorCall::codegen() {
     for(auto type: *(constr_entry->get_constructor_type_list())) {
         constructor_arg_types.push_back(map_to_llvm_type(type));
     }
-    auto constructor_struct_type = llvm::StructType::create(TheContext, constructor_arg_types,  std::to_string(constr_entry->get_count()) + "_struct");
+    auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
     auto constructor_alloca = Builder.CreateAlloca(constructor_struct_type, nullptr, this->id + std::to_string(constr_entry->get_count()) + "_constructor");
 
     //Store tag in constructor struct
