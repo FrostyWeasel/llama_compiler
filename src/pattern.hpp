@@ -8,7 +8,9 @@ class Pattern : public AST {
 public:
     Pattern(PatternType pattern_type, std::shared_ptr<TypeVariable> type_variable) : pattern_type(pattern_type), type_variable(type_variable) {  }
     
-    ~Pattern() = default;
+    virtual ~Pattern() {
+
+    }
 
     virtual void print(std::ostream& out) const override = 0;
 

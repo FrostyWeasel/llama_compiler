@@ -11,6 +11,10 @@ class FloatPattern : public Pattern {
 public:
     FloatPattern(float value);
 
+    virtual ~FloatPattern() {
+        
+    }
+
     virtual void print(std::ostream& out) const override;
 
     virtual std::shared_ptr<TypeVariable> infer() override;

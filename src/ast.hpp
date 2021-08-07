@@ -18,14 +18,6 @@
 
 extern int yylineno;
 
-//TODO: In case i implement float
-/*
-
-    During codegen in binary expressions CreateFAdd(etc.) needs to be used instead of CreateAdd.
-    
-
-*/
-
 class SemanticAnalyzer;
 class ErrorHandler;
 class TypeVariable;
@@ -97,6 +89,7 @@ protected:
     static llvm::LLVMContext TheContext;
     static llvm::IRBuilder<> Builder;
     static std::unique_ptr<llvm::Module> TheModule;
+    static std::unique_ptr<llvm::DataLayout> TheDataLayout;
     static std::unique_ptr<llvm::legacy::FunctionPassManager> FPM;
 
     //Runtime library
@@ -106,6 +99,8 @@ protected:
     static llvm::Function* printf_function;
     static llvm::Function* scanf_function;
     static llvm::Function* exit_function;
+    static llvm::Function* malloc_function;
+    static llvm::Function* free_function;
 
     static llvm::Function* print_string;
     static llvm::Function* print_int;

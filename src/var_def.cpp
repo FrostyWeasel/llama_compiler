@@ -32,8 +32,15 @@ void VarDef::add_to_symbol_table() {
 
 void VarDef::allocate() {
     llvm::AllocaInst* alloc_ptr = nullptr;
-    auto referenced_value = Builder.CreateAlloca(map_to_llvm_type(this->type_variable->get_referenced_type()), nullptr, id);
-    alloc_ptr = Builder.CreateAlloca(map_to_llvm_type(this->type_variable), nullptr, id+"_ref");
+
+    //Allocate space in heap for the reference type and then store the pointer to that element in the vardef alloca 
+    auto referenced_type = map_to_llvm_type(this->type_variable->get_referenced_type());
+    auto referenced_value_heap_void_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(referenced_type).getValue()) }, this->id + "_heap_ptr");
+
+    auto llvm_type = map_to_llvm_type(this->type_variable);
+    auto referenced_value = Builder.CreateBitCast(referenced_value_heap_void_ptr, llvm_type);
+
+    alloc_ptr = Builder.CreateAlloca(llvm_type, nullptr, id+"_ref");
     Builder.CreateStore(referenced_value, alloc_ptr);
     this->entry->set_allocation(alloc_ptr);
 }

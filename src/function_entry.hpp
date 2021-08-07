@@ -8,8 +8,8 @@
 class FunctionEntry : public SymbolEntry{
 public:
 
-    FunctionEntry(std::string id, EntryType entry_type, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type, unsigned int parameter_count) : from_type(from_type), to_type(to_type), 
-        parameter_count(parameter_count), SymbolEntry(id, entry_type) { count = FunctionEntry::counter++; }
+    FunctionEntry(std::string id, EntryType entry_type, unsigned int count, std::shared_ptr<TypeVariable> from_type, std::shared_ptr<TypeVariable> to_type, unsigned int parameter_count) : from_type(from_type), to_type(to_type), 
+        parameter_count(parameter_count), count(count), SymbolEntry(id, entry_type) {  }
     
     virtual ~FunctionEntry() {  }
 
@@ -34,7 +34,6 @@ private:
     llvm::Function*     function_declaration;
     unsigned int        parameter_count;
     unsigned int        count;
-    static unsigned int counter;    /* Μοναδικός για κάθε συνάρτηση, για να ξεχωρίζουμε αυτές που έχουν το ίδιο όνομα */
 };
 
 #endif

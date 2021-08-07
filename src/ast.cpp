@@ -21,6 +21,15 @@
 #include <fstream>
 #include <cstdlib>
 
+//TODO: All values passed as pointers to allocas must have the allocas replaced with heap allocation because allocas are local and if the def has been done in a function then they are deallocated upon the function return
+/*
+    !This should happen to:
+        1.The new expression (the delete expr should clean the heap)
+        2.Mutable variables and array elements
+        3.User type constructor structs
+        4.(Functions would be necessary if we could return them from functions but now they are not?)
+*/
+
 std::unique_ptr<SymbolTable> AST::st = std::make_unique<SymbolTable>(20000);
 std::unique_ptr<SemanticAnalyzer> AST::sa = std::make_unique<SemanticAnalyzer>();
 PassStage AST::pass_stage = PassStage::Other;
@@ -33,12 +42,15 @@ llvm::LLVMContext AST::TheContext;
 llvm::IRBuilder<> AST::Builder(TheContext);
 std::unique_ptr<llvm::Module> AST::TheModule;
 std::unique_ptr<llvm::legacy::FunctionPassManager> AST::FPM;
+std::unique_ptr<llvm::DataLayout> AST::TheDataLayout;
 
 llvm::Function* AST::runtime_error_function;
 
 llvm::Function* AST::printf_function;
 llvm::Function* AST::scanf_function;
 llvm::Function* AST::exit_function;
+llvm::Function* AST::malloc_function;
+llvm::Function* AST::free_function;
 
 llvm::Function* AST::print_string;
 llvm::Function* AST::print_int;
@@ -177,6 +189,9 @@ void AST::map_par_list_to_llvm_type(std::shared_ptr<TypeVariable> type_variable,
 void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag, bool final_flag, std::string input_filename, std::string compiler_path) {
     // Initialize
     TheModule = std::make_unique<llvm::Module>("Llama program", TheContext);
+
+    //Initialize Data layout
+    TheDataLayout = std::make_unique<llvm::DataLayout>(TheModule.get());
    
     FPM = std::make_unique<llvm::legacy::FunctionPassManager>(TheModule.get());
     if(optimizations_flag) {
@@ -279,6 +294,12 @@ void AST::declare_library_functions() {
 
     auto exit_type = llvm::FunctionType::get(llvm::Type::getVoidTy(TheContext), { i32 }, false);
     AST::exit_function = llvm::Function::Create(exit_type, llvm::Function::LinkageTypes::ExternalLinkage, "exit", TheModule.get());
+
+    auto malloc_type = llvm::FunctionType::get(llvm::PointerType::get(i8, 0), { i32 }, false);
+    AST::malloc_function = llvm::Function::Create(malloc_type, llvm::Function::LinkageTypes::ExternalLinkage, "malloc", TheModule.get());
+
+    auto free_type = llvm::FunctionType::get(llvm::Type::getVoidTy(TheContext), { llvm::PointerType::get(i8, 0) }, false);
+    AST::free_function = llvm::Function::Create(free_type, llvm::Function::LinkageTypes::ExternalLinkage, "free", TheModule.get());
 
     //Runtime library functions
     define_runtime_library_functions();
@@ -784,146 +805,148 @@ void AST::add_library_functions() {
     std::shared_ptr<TypeVariable> from_type = nullptr;
     std::shared_ptr<TypeVariable> to_type = nullptr;
 
+    unsigned int function_count = 0;
+
     st->scope_open();
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Int);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("print_int", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("print_int", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
    
     //Print Functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Bool);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("print_bool", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("print_bool", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Char);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("print_char", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("print_char", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("print_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("print_float", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Array, 
         std::make_shared<TypeVariable>(TypeTag::Char));
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("print_string", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("print_string", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     //Read Functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("read_int", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("read_int", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     to_type = std::make_shared<TypeVariable>(TypeTag::Bool);
-    st->insert_entry(new FunctionEntry("read_bool", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("read_bool", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     to_type = std::make_shared<TypeVariable>(TypeTag::Char);
-    st->insert_entry(new FunctionEntry("read_char", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("read_char", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("read_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("read_float", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char), 1, DimType::Exact);
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("read_string", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("read_string", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Reference, 
         std::make_shared<TypeVariable>(TypeTag::Int));
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("incr", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("incr", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Reference, 
         std::make_shared<TypeVariable>(TypeTag::Int));
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("decr", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("decr", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     //Conversion functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Char);
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("int_of_char", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("int_of_char", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Int);
     to_type = std::make_shared<TypeVariable>(TypeTag::Char);
-    st->insert_entry(new FunctionEntry("char_of_int", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("char_of_int", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Int);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("float_of_int", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("float_of_int", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("int_of_float", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("int_of_float", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("round", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("round", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     //String functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Array, 
         std::make_shared<TypeVariable>(TypeTag::Char));
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("strlen", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("strlen", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Function, 
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)),
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)));
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("strcmp", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("strcmp", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Function, 
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)),
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)));
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("strcpy", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("strcpy", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Function, 
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)),
         std::make_shared<TypeVariable>(TypeTag::Array, std::make_shared<TypeVariable>(TypeTag::Char)));
     to_type = std::make_shared<TypeVariable>(TypeTag::Unit);
-    st->insert_entry(new FunctionEntry("strcat", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("strcat", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     //Math functions
     from_type = std::make_shared<TypeVariable>(TypeTag::Int);
     to_type = std::make_shared<TypeVariable>(TypeTag::Int);
-    st->insert_entry(new FunctionEntry("abs", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("abs", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("fabs", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("fabs", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("sqrt", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("sqrt", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("sin", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("sin", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("cos", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("cos", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("tan", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("tan", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("atan", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("atan", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("exp", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("exp", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Float);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("ln", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("ln", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     from_type = std::make_shared<TypeVariable>(TypeTag::Unit);
     to_type = std::make_shared<TypeVariable>(TypeTag::Float);
-    st->insert_entry(new FunctionEntry("pi", EntryType::ENTRY_FUNCTION, from_type, to_type, 1));
+    st->insert_entry(new FunctionEntry("pi", EntryType::ENTRY_FUNCTION, function_count++, from_type, to_type, 1));
 
     
 }

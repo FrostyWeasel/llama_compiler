@@ -26,7 +26,7 @@
 #include <cstdio>
 
 std::vector<std::string*> str_to_delete;
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 std::string compiler_path;
 std::string input_filename;

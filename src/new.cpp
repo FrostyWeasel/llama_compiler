@@ -29,5 +29,13 @@ void New::sem() {
 }
 
 llvm::Value* New::codegen() {
-    return Builder.CreateAlloca(map_to_llvm_type(this->new_type_variable), nullptr, "new_assignment");
+    //Allocate space in heap for the reference type and then store the pointer to that element in the new expr alloca 
+    auto llvm_type = map_to_llvm_type(this->type_variable);
+    
+    auto referenced_type = llvm_type->getPointerElementType();
+    auto referenced_value_heap_void_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(referenced_type).getValue()) }, "new_expr_heap_ptr");
+
+    auto referenced_value_ptr = Builder.CreateBitCast(referenced_value_heap_void_ptr, llvm_type, "new_value_ptr");
+
+    return referenced_value_ptr;
 }

@@ -38,15 +38,15 @@ public:
    void set_scope(Scope* scope) { this->scope = scope; }
    Scope* get_scope() { return this->scope; }
 
-   llvm::AllocaInst* get_allocation() { return allocation; }
-   void set_allocation(llvm::AllocaInst* allocation) { this->allocation = allocation; }
+   llvm::Value* get_allocation() { return allocation; }
+   void set_allocation(llvm::Value* allocation) { this->allocation = allocation; }
 
    virtual std::shared_ptr<TypeVariable> get_type() const = 0;
 
 protected:
    std::string         id;                   /* Ονομα αναγνωριστικού          */
    EntryType           entry_type;           /* Τύπος της εγγραφής            */
-   llvm::AllocaInst*   allocation;           /* Ptr to variable in stack      */ 
+   llvm::Value*   allocation;           /* Ptr to variable in stack      */ 
 
 private:
    unsigned int        nesting_level;        /* Βάθος φωλιάσματος             */

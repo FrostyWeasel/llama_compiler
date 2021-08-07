@@ -1,7 +1,5 @@
-type color = Red | Green | Blue
-let x = Red 
-let y = match x with
-		Red -> ()
-		| Green -> ()
-		| k -> ()
-	end
+let x = new int->int
+let f x = x + 5 
+let y = x := f ; !x
+let z = print_int (y 5)
+

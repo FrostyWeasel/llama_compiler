@@ -12,8 +12,15 @@
 #include <iostream>
 #include <map>
     
-FunctionDef::FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
-FunctionDef::FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr), from_type(std::make_shared<TypeVariable>()) {}
+//Start at a higher number to account for library functions
+unsigned int FunctionDef::counter = 50;
+
+FunctionDef::FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr): id(*id), par_list(par_list), Def(new TypeVariable()), expr(expr), from_type(std::make_shared<TypeVariable>()) {
+    this->count = counter++;
+}
+FunctionDef::FunctionDef(std::string* id, Block<Par>* par_list, Expr* expr, std::shared_ptr<TypeVariable> type_variable): id(*id), par_list(par_list), Def(type_variable), expr(expr), from_type(std::make_shared<TypeVariable>()) {
+    this->count = counter++;
+}
 
 FunctionDef::~FunctionDef() {
     delete expr;
@@ -42,7 +49,7 @@ void FunctionDef::print(std::ostream& out) const {
 }
 
 void FunctionDef::add_to_symbol_table() {
-    FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, this->from_type, this->type_variable, this->par_list->block_size());
+    FunctionEntry* entry = new FunctionEntry(id, EntryType::ENTRY_FUNCTION, this->count, this->from_type, this->type_variable, this->par_list->block_size());
     
     st->insert_entry(entry);
 

@@ -48,6 +48,9 @@ private:
     std::map<std::string, std::shared_ptr<TypeVariable>> non_local_variables;
 
     llvm::StructType* non_local_struct_type;
+
+    unsigned int count;
+    static unsigned int counter;
 };
 
 #endif

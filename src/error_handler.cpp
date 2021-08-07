@@ -63,14 +63,14 @@ void ErrorHandler::non_allowed_type(std::shared_ptr<TypeVariable> type, std::str
 //TODO: Put lineno in error message by giving the lineno of the expression to lookup entry
 void ErrorHandler::out_of_scope(std::string id) {
     std::cerr << "Error:\n";
-    std::cerr << "\tVariable " << id << " is out of scope"; 
+    std::cerr << "\tIdentifier " << id << " is out of scope"; 
     exit(1);
 }
 
 //TODO: Put lineno in error message by giving the lineno of the expression to insert entry
 void ErrorHandler::redefining_variable(std::string id) {
     std::cerr << "Error:\n";
-    std::cerr << "\nIdentifier " << id << " is already defined in this scope"; 
+    std::cerr << "\tIdentifier " << id << " is already defined in this scope"; 
     exit(1);
 }
 

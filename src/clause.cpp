@@ -37,7 +37,8 @@ std::shared_ptr<TypeVariable> Clause::infer_expression() {
 }
 
 void Clause::sem() {
-    //Semantic checks happen in match expr.
+    this->pattern->sem();
+    this->expr->sem();
 }
 
 llvm::Value* Clause::codegen() {

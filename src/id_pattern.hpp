@@ -11,6 +11,10 @@ class IdPattern : public Pattern {
 public:
     IdPattern(std::string* id);
 
+    virtual ~IdPattern() {
+        
+    }
+
     virtual void print(std::ostream& out) const override;
 
     virtual std::shared_ptr<TypeVariable> infer() override;

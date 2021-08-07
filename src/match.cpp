@@ -73,9 +73,6 @@ void Match::sem() {
 
     auto clauses =  this->clause_list->get_list();
 
-    //At the start of each clause a new scope is opened and ids defined in the clauses pattern are in scope only in the clauses expression
-    st->scope_open();
-
     for(auto clause_it = clauses.begin(); clause_it != clauses.end(); clause_it++) {
         st->scope_open();
 
@@ -91,12 +88,22 @@ void Match::sem() {
 }
 
 llvm::Value* Match::codegen() {
+    auto current_function = Builder.GetInsertBlock()->getParent();
+    auto match_start = llvm::BasicBlock::Create(TheContext, "match_start", current_function);
+    auto match_end = llvm::BasicBlock::Create(TheContext, "match_end");
+    auto match_all_failed = llvm::BasicBlock::Create(TheContext, "match_all_failed");
+
+    //match return value type
+    auto match_return_type = map_to_llvm_type(this->type_variable);
+
+    Builder.CreateBr(match_start);
+    Builder.SetInsertPoint(match_start);
+
     //Get the value of the expression
     auto expr_value = this->expr->codegen();
 
     auto clauses =  this->clause_list->get_list();
 
-    
     /*The patterns that can match constructors are of 2 types:
         1.Ids here we just store the pointer to the constructor in the id
         2.Constructors coming from the same user type. Since it is checked during inference
@@ -108,15 +115,14 @@ llvm::Value* Match::codegen() {
             2.2 if the tag is different the we have a type missmatch and nothing else needs to be checked. 
     */
 
-    auto current_function = Builder.GetInsertBlock()->getParent();
-    auto match_end = llvm::BasicBlock::Create(TheContext, "match_end");
-    auto match_all_failed = llvm::BasicBlock::Create(TheContext, "match_all_failed");
-
     /*
         If one pattern fails just move on to the next pattern
         If all patterns fail then we reach end of pattern checks and branch to match_all_failed
         if one pattern succeeds then we branch to the expression for that pattern and execute it
     */
+
+    std::vector<llvm::Value*> clause_expr_values;
+    std::vector<llvm::BasicBlock*> clause_expr_BB;
 
     //Compare expression against every pattern
     for(auto clause_it = clauses.begin(); clause_it != clauses.end(); clause_it++) {
@@ -133,10 +139,13 @@ llvm::Value* Match::codegen() {
         current_function->getBasicBlockList().push_back(match_success);
         Builder.SetInsertPoint(match_success);
 
-        (*clause_it)->codegen_expression();
+        auto clause_expr_result = (*clause_it)->codegen_expression();
+        clause_expr_values.push_back(clause_expr_result);
+        clause_expr_BB.push_back(Builder.GetInsertBlock());
 
         Builder.CreateBr(match_end);
 
+        //If this pattern failed then check the next pattern
         current_function->getBasicBlockList().push_back(match_fail);
         Builder.SetInsertPoint(match_fail);
 
@@ -157,14 +166,27 @@ llvm::Value* Match::codegen() {
 
     Builder.CreateCall(AST::runtime_error_function, { string_ptr });
 
+    //Dummy value in case no pattern matched
+    auto dummy_value_alloca = Builder.CreateAlloca(match_return_type, nullptr, "dummy_value_alloca");
+    auto dummy_value = Builder.CreateLoad(dummy_value_alloca, "dummy_value"); 
+
     //Control flow will never reach this branch.
     Builder.CreateBr(match_end);
 
+    //Rest of the code continuous from match_end
     current_function->getBasicBlockList().push_back(match_end);
     Builder.SetInsertPoint(match_end);
 
-    //TODO: Change this with phi value
-    return llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { });
+    auto phi_node = Builder.CreatePHI(match_return_type, clauses.size(), "match_expr_value");
+    phi_node->addIncoming(dummy_value, match_all_failed);
+
+    //Match result may come from any clause's expression value
+    unsigned int i = 0;
+    for(auto clause_expr_value: clause_expr_values) {
+        phi_node->addIncoming(clause_expr_value, clause_expr_BB[i++]);
+    }
+
+    return phi_node;
 }
 
 void Match::match_expr_to_pattern(llvm::Value* expr_value, llvm::Value* pattern_value, llvm::BasicBlock* match_success, llvm::BasicBlock* match_fail, Pattern* current_pattern, PatternType pattern_type) {
@@ -205,6 +227,8 @@ void Match::match_expr_to_pattern(llvm::Value* expr_value, llvm::Value* pattern_
             break;
         }
         case PatternType::Constructor: {
+            auto constructor_pattern = dynamic_cast<ConstructorPattern*>(current_pattern);
+
             //Load tag of both constructors
             auto expr_tag_ptr = Builder.CreateBitCast(expr_value, llvm::PointerType::get(i32, 0), "expr_tag_ptr");
             auto expr_tag = Builder.CreateLoad(expr_tag_ptr, "expr_constr_tag");
@@ -214,33 +238,34 @@ void Match::match_expr_to_pattern(llvm::Value* expr_value, llvm::Value* pattern_
 
             //Compare tags
             auto current_function = Builder.GetInsertBlock()->getParent();
-            auto match_compare_constr_args = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args", current_function);
+            auto match_compare_constr_args_start = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args_start");
 
             auto cmp_tags_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, expr_tag, pattern_tag);
-            Builder.CreateCondBr(cmp_tags_result, match_compare_constr_args, match_fail);
+            Builder.CreateCondBr(cmp_tags_result, match_compare_constr_args_start, match_fail);
 
             //Create match_compare_constr_args BB
-            current_function->getBasicBlockList().push_back(match_compare_constr_args);
-            Builder.SetInsertPoint(match_compare_constr_args);
+            current_function->getBasicBlockList().push_back(match_compare_constr_args_start);
+            Builder.SetInsertPoint(match_compare_constr_args_start);
 
             //Cast the user type pointer to the actual struct type of the constructors
-            auto expr_struct_ptr = Builder.CreateBitCast(expr_value, llvm::PointerType::get(current_pattern->get_llvm_type(), 0), "expr_struct_ptr");
-            auto pattern_struct_ptr = Builder.CreateBitCast(pattern_value, llvm::PointerType::get(current_pattern->get_llvm_type(), 0), "pattern_struct_ptr");
+            auto expr_struct_ptr = Builder.CreateBitCast(expr_value, llvm::PointerType::get(constructor_pattern->get_matching_constructor_llvm_type(), 0), "expr_struct_ptr");
+            auto pattern_struct_ptr = Builder.CreateBitCast(pattern_value, llvm::PointerType::get(constructor_pattern->get_pattern_constructor_llvm_type(), 0), "pattern_struct_ptr");
 
-            auto constructor_pattern = dynamic_cast<ConstructorPattern*>(current_pattern);
             auto pattern_list = constructor_pattern->get_pattern_list();
 
             unsigned int i = 1;
             for(auto constr_pattern_arg: pattern_list) {
+                auto match_compare_constr_args = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args", current_function);
+                auto match_compare_constr_args_success = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args_success");
+                
+                Builder.CreateBr(match_compare_constr_args);
+                Builder.SetInsertPoint(match_compare_constr_args);
+
                 auto expr_value_ptr = Builder.CreateStructGEP(expr_struct_ptr, i, "expr_value_ptr");
                 auto pattern_value_ptr = Builder.CreateStructGEP(pattern_struct_ptr, i, "pattern_value_ptr");
 
                 auto expr_value = Builder.CreateLoad(expr_value_ptr, "expr_value");
                 auto pattern_value = Builder.CreateLoad(pattern_value_ptr, "pattern_value");
-
-                auto match_compare_constr_args = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args", current_function);
-                auto match_compare_constr_args_success = llvm::BasicBlock::Create(TheContext, "match_compare_constr_args_success");
-                Builder.SetInsertPoint(match_compare_constr_args);
 
                 match_expr_to_pattern(expr_value, pattern_value, match_compare_constr_args_success, match_fail, constr_pattern_arg, constr_pattern_arg->get_pattern_type());
                 

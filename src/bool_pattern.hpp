@@ -11,6 +11,10 @@ class BoolPattern : public Pattern {
 public:
     BoolPattern(bool value);
 
+    virtual ~BoolPattern() {
+        
+    }
+
     virtual void print(std::ostream& out) const override;
 
     virtual std::shared_ptr<TypeVariable> infer() override;

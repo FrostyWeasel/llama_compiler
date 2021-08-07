@@ -32,6 +32,12 @@ void Delete::sem() {
 }
 
 llvm::Value* Delete::codegen() {
-    this->expr->codegen();
+    //This is a pointer to somewhere in the heap
+    auto expr_value = this->expr->codegen();
+
+    auto expr_heap_ptr = Builder.CreateBitCast(expr_value, llvm::PointerType::get(i8, 0));
+
+    Builder.CreateCall(AST::free_function, { expr_heap_ptr });
+
     return llvm::ConstantStruct::get(llvm::StructType::get(TheContext), { });
 }

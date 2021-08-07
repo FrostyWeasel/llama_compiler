@@ -88,7 +88,13 @@ std::shared_ptr<TypeVariable> ConstructorPattern::infer() {
 }
 
 void ConstructorPattern::sem() {
+    if(pattern_list != nullptr) {
+        auto patterns = pattern_list->get_list();
 
+        for(auto pattern: patterns) {
+            pattern->sem();
+        }
+    }
 }
 
 llvm::Value* ConstructorPattern::codegen() {
@@ -97,30 +103,50 @@ llvm::Value* ConstructorPattern::codegen() {
     std::vector<llvm::Value*> constructor_arg_values;    
     std::vector<llvm::Type*> constructor_arg_types;
 
+    // * If one of the arg patterns of this constr is an id then its type will be a pointer to the id type but in the matching constructor it would be a type not a pointer to it.
+    std::vector<llvm::Type*> matching_constructor_arg_types;
+
     //First element holds the count which acts as an identifier(tag) for the constructor
     constructor_arg_types.push_back(i32);
     constructor_arg_values.push_back(c32(constr_entry->get_count()));
 
+    matching_constructor_arg_types.push_back(i32);
+
     for(auto pattern: this->pattern_list->get_list()) {
         auto pattern_value = pattern->codegen();
 
-        constructor_arg_types.push_back(pattern_value->getType());
         constructor_arg_values.push_back(pattern_value);
+        constructor_arg_types.push_back(pattern_value->getType());
+
+        if(pattern->get_pattern_type() == PatternType::Id) {
+            matching_constructor_arg_types.push_back(pattern_value->getType()->getPointerElementType());
+        }
+        else {
+            matching_constructor_arg_types.push_back(pattern_value->getType());
+        }
     }
 
-    auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
-    auto constructor_alloca = Builder.CreateAlloca(constructor_struct_type, nullptr, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern");
+    auto matching_constructor_struct_type = llvm::StructType::get(TheContext, matching_constructor_arg_types);
 
     //Store constructor type so that it can be accessed by match statement
+    this->matching_constructor_llvm_type = matching_constructor_struct_type;
+
+    
+    auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
+    auto constructor_struct_heap_void_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(constructor_struct_type).getValue()) }, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern_struct_heap_void_ptr");
+
+    auto constructor_struct_heap_ptr = Builder.CreateBitCast(constructor_struct_heap_void_ptr, llvm::PointerType::get(constructor_struct_type, 0), this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern_struct_heap_ptr");
+
+    this->pattern_constructor_llvm_type = constructor_struct_type;
     this->llvm_type = constructor_struct_type;
 
     //Store expression values in costructor struct
     unsigned int i = 0;
     for(auto pattern_value: constructor_arg_values) {
-        auto constr_struct_element_ptr = Builder.CreateStructGEP(constructor_alloca, i++, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern_arg_ptr");
+        auto constr_struct_element_ptr = Builder.CreateStructGEP(constructor_struct_heap_ptr, i++, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern_arg_ptr");
         Builder.CreateStore(pattern_value, constr_struct_element_ptr);
     }
 
-    //Bitcast to same type as its type
-    return Builder.CreateBitCast(constructor_alloca, map_to_llvm_type(this->type_variable));
+    //Bitcast to same type as its user type (i8*)
+    return Builder.CreateBitCast(constructor_struct_heap_ptr, map_to_llvm_type(this->type_variable));
 }

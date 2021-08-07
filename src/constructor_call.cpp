@@ -103,6 +103,13 @@ std::shared_ptr<TypeVariable> ConstructorCall::infer() {
 
 void ConstructorCall::sem() {
 
+    if(this->expr_list != nullptr) {
+        auto exprs = this->expr_list->get_list();
+        for(auto expr: exprs) {
+            expr->sem();
+        }
+    }
+
 }
 
 llvm::Value* ConstructorCall::codegen() {
@@ -116,26 +123,27 @@ llvm::Value* ConstructorCall::codegen() {
         constructor_arg_types.push_back(map_to_llvm_type(type));
     }
     auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
-    auto constructor_alloca = Builder.CreateAlloca(constructor_struct_type, nullptr, this->id + std::to_string(constr_entry->get_count()) + "_constructor");
+    auto constructor_struct_heap_void_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(constructor_struct_type).getValue()) }, this->id + std::to_string(constr_entry->get_count()) + "_constructor_struct_heap_void_ptr");
+    
+    auto constructor_struct_heap_ptr = Builder.CreateBitCast(constructor_struct_heap_void_ptr, llvm::PointerType::get(constructor_struct_type, 0), this->id + std::to_string(constr_entry->get_count()) + "_constructor_struct_heap_ptr");
 
     //Store tag in constructor struct
-    auto constr_struct_element_ptr = Builder.CreateStructGEP(constructor_alloca, 0, this->id + std::to_string(constr_entry->get_count()) + "_constructor_tag_ptr");
+    auto constr_struct_element_ptr = Builder.CreateStructGEP(constructor_struct_heap_ptr, 0, this->id + std::to_string(constr_entry->get_count()) + "_constructor_tag_ptr");
     Builder.CreateStore(c32(constr_entry->get_count()), constr_struct_element_ptr);
     
-
     //Store expression values in costructor struct
     if(this->expr_list != nullptr) {
         unsigned int i = 1;
         for(auto expr: this->expr_list->get_list()) {
             auto expr_value = expr->codegen();
-            constr_struct_element_ptr = Builder.CreateStructGEP(constructor_alloca, i++, this->id + std::to_string(constr_entry->get_count()) + "_constructor_arg_ptr");
+            constr_struct_element_ptr = Builder.CreateStructGEP(constructor_struct_heap_ptr, i++, this->id + std::to_string(constr_entry->get_count()) + "_constructor_arg_ptr");
             Builder.CreateStore(expr_value, constr_struct_element_ptr);
         }
     }
 
     //Store alloca in constructors entry
-    constr_entry->set_allocation(constructor_alloca);
+    constr_entry->set_allocation(constructor_struct_heap_ptr);
 
-    //Bitcast to same type as its type
-    return Builder.CreateBitCast(constructor_alloca, map_to_llvm_type(this->type_variable));
+    //Bitcast to same type as its usertype (i8*)
+    return Builder.CreateBitCast(constructor_struct_heap_ptr, map_to_llvm_type(this->type_variable));
 }

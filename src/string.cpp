@@ -32,7 +32,8 @@ llvm::Value* String::codegen() {
     }
     data.push_back(c8('\0'));
 
-    auto array_data_ptr = Builder.CreateAlloca(data_type, nullptr, "string_data");
+    auto array_data_heap_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(data_type).getValue()) }, "array_data_heap_ptr");
+    auto array_data_ptr = Builder.CreateBitCast(array_data_heap_ptr, llvm::PointerType::get(data_type, 0), "array_data");
     Builder.CreateStore(llvm::ConstantArray::get(data_type, data), array_data_ptr);
 
     //To be compatible with array_type

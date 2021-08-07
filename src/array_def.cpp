@@ -76,8 +76,12 @@ llvm::Value* ArrayDef::codegen() {
 
     //Allocate space for the array elements in the heap and store the pointer to the first element in the array struct
     auto array_ptr = Builder.CreateStructGEP(this->entry->get_allocation(), i, "array_ptr");
-    auto array_alloca = Builder.CreateAlloca(map_to_llvm_type(this->type_variable->get_array_type()), array_size, "array");
-    Builder.CreateStore(array_alloca, array_ptr);
+
+    auto array_data_type = map_to_llvm_type(this->type_variable->get_array_type());
+    auto array_data_heap_ptr = Builder.CreateCall(AST::malloc_function, { Builder.CreateMul(c32(TheDataLayout->getTypeAllocSize(array_data_type).getValue()), array_size) }, "array_data_heap_ptr");
+    auto array_data_ptr = Builder.CreateBitCast(array_data_heap_ptr, llvm::PointerType::get(array_data_type, 0), "array_data");
+
+    Builder.CreateStore(array_data_ptr, array_ptr);
 
     //Store the array size in the first position of the array struct
     auto array_size_pt = Builder.CreateStructGEP(this->entry->get_allocation(), 0, "array_size_ptr");

@@ -1,18 +1,17 @@
 #include "ref_type.hpp"
 #include "type_variable.hpp"
+#include "error_handler.hpp"
 #include <memory>
 #include <iostream>
     
 RefType::RefType(TypeVariable* type_variable) : type_variable(std::shared_ptr<TypeVariable>(type_variable)), Type(TypeTag::Reference) { 
     if(this->type_variable->get_tag() == TypeTag::Array) {
-        std::cerr << "Referenced type can not be array.\n";
-        exit(1); // TODO: Error handling + Should i do this?
+        error_handler->print_error("Referenced type can not be array.\n", ErrorType::User);
     }
 }
 RefType::RefType(std::shared_ptr<TypeVariable> type_variable) : type_variable(type_variable), Type(TypeTag::Reference) { 
     if(this->type_variable->get_tag() == TypeTag::Array) {
-        std::cerr << "Referenced type can not be array.\n";
-        exit(1); // TODO: Error handling + Should i do this?
+        error_handler->print_error("Referenced type can not be array.\n", ErrorType::User);
     }
 }
 

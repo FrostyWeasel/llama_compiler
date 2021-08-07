@@ -11,6 +11,10 @@ class CharPattern : public Pattern {
 public:
     CharPattern(char value);
 
+    virtual ~CharPattern() {
+        
+    }
+
     virtual void print(std::ostream& out) const override;
 
     virtual std::shared_ptr<TypeVariable> infer() override;
