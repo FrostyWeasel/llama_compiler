@@ -1,0 +1,10 @@
+type number = Complex of int int
+
+let num = Complex 42 1
+
+let x =
+  match num with
+    Complex 0.0 im -> print_float im
+  end
+
+

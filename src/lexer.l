@@ -149,7 +149,8 @@ W [ \t\n\r]
 "for"		{ return T_FOR; }
 "if"		{ return T_IF; }
 "in"		{ return T_IN; }
-"int"		{ return T_INT; }        
+"int"		{ return T_INT; }
+"float"		{ return T_FLOAT; }        
 "let"		{ return T_LET; }
 "match"		{ return T_MATCH; }
 "mutable"	{ return T_MUTABLE; }

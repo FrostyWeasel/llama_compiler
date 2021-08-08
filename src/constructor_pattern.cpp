@@ -121,7 +121,6 @@ llvm::Value* ConstructorPattern::codegen() {
     //Store constructor type so that it can be accessed by match statement
     this->matching_constructor_llvm_type = constr_entry->get_llvm_type();
 
-    
     auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
     auto constructor_struct_heap_void_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(constructor_struct_type).getValue()) }, this->id + std::to_string(constr_entry->get_count()) + "_constructor_pattern_struct_heap_void_ptr");
 
