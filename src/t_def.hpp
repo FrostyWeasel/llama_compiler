@@ -11,6 +11,7 @@
 class SymbolEntry;
 class TypeVariable;
 class Constructor;
+class TypeEntry;
 
 class TDef : public AST {
 public:
@@ -35,16 +36,21 @@ public:
     void set_type(std::shared_ptr<TypeVariable> type_variable) { this->type_variable = type_variable; }
     std::shared_ptr<TypeVariable> get_type() { return this->type_variable; }
 
-    SymbolEntry* get_entry() { return this->entry; }
+    TypeEntry* get_entry() { return this->entry; }
 
 private:
     std::string id;
     Block<Constructor>* constructor_list;
     std::shared_ptr<TypeVariable> type_variable;
 
+    unsigned int count;
+    static unsigned int counter;
+
+    llvm::Function* user_type_comparison_function;
+
     //The entry in the ST corresponding to this definition 
     //* Do not delete this it is owned by the ST.
-    SymbolEntry* entry; 
+    TypeEntry* entry; 
 };
 
 #endif

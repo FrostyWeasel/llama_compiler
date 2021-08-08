@@ -119,14 +119,7 @@ void ConstructorCall::sem() {
 llvm::Value* ConstructorCall::codegen() {
     auto constr_entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES));
     
-    std::vector<llvm::Type*> constructor_arg_types;
-
-    //First element holds the count which acts as an identifier for the constructor
-    constructor_arg_types.push_back(i32);
-    for(auto type: *(constr_entry->get_constructor_type_list())) {
-        constructor_arg_types.push_back(map_to_llvm_type(type));
-    }
-    auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);
+    auto constructor_struct_type = constr_entry->get_llvm_type();
     auto constructor_struct_heap_void_ptr = Builder.CreateCall(AST::malloc_function, { c32(TheDataLayout->getTypeAllocSize(constructor_struct_type).getValue()) }, this->id + std::to_string(constr_entry->get_count()) + "_constructor_struct_heap_void_ptr");
     
     auto constructor_struct_heap_ptr = Builder.CreateBitCast(constructor_struct_heap_void_ptr, llvm::PointerType::get(constructor_struct_type, 0), this->id + std::to_string(constr_entry->get_count()) + "_constructor_struct_heap_ptr");

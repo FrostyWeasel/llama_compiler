@@ -19,9 +19,20 @@ public:
 
     std::vector<std::shared_ptr<TypeVariable>>* get_constructor_type_list() { return this->type_list; }
 
+    inline llvm::Type* get_llvm_type() { return this->llvm_type; }
+    inline void set_llvm_type(llvm::Type* llvm_type) { this->llvm_type = llvm_type; }
+
+    inline llvm::Function* get_constructor_structural_cmp_function() { return this->constructor_structural_cmp_function; }
+    inline void set_constructor_structural_cmp_function(llvm::Function* constructor_structural_cmp_function) { this->constructor_structural_cmp_function = constructor_structural_cmp_function; }
+
 private:
     std::shared_ptr<TypeVariable> type_constructed;
     std::vector<std::shared_ptr<TypeVariable>>* type_list;
+
+    llvm::Type* llvm_type;
+
+    llvm::Function* constructor_structural_cmp_function;
+
     unsigned int count;
 };
 

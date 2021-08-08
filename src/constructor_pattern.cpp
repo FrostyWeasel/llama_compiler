@@ -106,14 +106,9 @@ llvm::Value* ConstructorPattern::codegen() {
     std::vector<llvm::Value*> constructor_arg_values;    
     std::vector<llvm::Type*> constructor_arg_types;
 
-    // * If one of the arg patterns of this constr is an id then its type will be a pointer to the id type but in the matching constructor it would be a type not a pointer to it.
-    std::vector<llvm::Type*> matching_constructor_arg_types;
-
     //First element holds the count which acts as an identifier(tag) for the constructor
     constructor_arg_types.push_back(i32);
     constructor_arg_values.push_back(c32(constr_entry->get_count()));
-
-    matching_constructor_arg_types.push_back(i32);
 
     for(auto pattern: this->pattern_list->get_list()) {
         auto pattern_value = pattern->codegen();
@@ -121,18 +116,10 @@ llvm::Value* ConstructorPattern::codegen() {
         constructor_arg_values.push_back(pattern_value);
         constructor_arg_types.push_back(pattern_value->getType());
 
-        if(pattern->get_pattern_type() == PatternType::Id) {
-            matching_constructor_arg_types.push_back(pattern_value->getType()->getPointerElementType());
-        }
-        else {
-            matching_constructor_arg_types.push_back(pattern_value->getType());
-        }
     }
 
-    auto matching_constructor_struct_type = llvm::StructType::get(TheContext, matching_constructor_arg_types);
-
     //Store constructor type so that it can be accessed by match statement
-    this->matching_constructor_llvm_type = matching_constructor_struct_type;
+    this->matching_constructor_llvm_type = constr_entry->get_llvm_type();
 
     
     auto constructor_struct_type = llvm::StructType::get(TheContext, constructor_arg_types);

@@ -9,6 +9,7 @@
 class TypeVariable;
 class TDef;
 class TypeEntry;
+class ConstructorEntry;
 
 class Constructor : public AST {
 public:
@@ -35,7 +36,11 @@ public:
     void set_type(std::shared_ptr<TypeVariable> type_constructed) { this->type_constructed = type_constructed; }
     std::shared_ptr<TypeVariable> get_type() { return this->type_constructed; }
 
-    SymbolEntry* get_entry() { return this->entry; }
+    ConstructorEntry* get_entry() { return this->entry; }
+
+    inline llvm::Function* get_function_declaration() { return this->constructor_structural_cmp_function; }
+
+    inline unsigned int get_tag() { return this->count; }
 
 private:
     std::string id;
@@ -45,11 +50,13 @@ private:
 
     //count is used to uniquely identify a constructor
     unsigned int count;
-    static unsigned int counter; 
+    static unsigned int counter;
+
+    llvm::Function* constructor_structural_cmp_function; 
 
     //The entry in the ST corresponding to this definition 
     //* Do not delete this it is owned by the ST.
-    SymbolEntry* entry; 
+    ConstructorEntry* entry; 
 };
 
 #endif

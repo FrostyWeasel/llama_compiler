@@ -3,6 +3,7 @@
 #include "error_handler.hpp"
 #include "symbol_table.hpp"
 #include "semantic_analyzer.hpp"
+#include "type_entry.hpp"
 #include <iostream>
 #include <memory>
 
@@ -565,15 +566,24 @@ llvm::Value* BinOp::codegen() {
         case OpType::Equals:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+
+            //for references the pointer to the reference is compared if compairing the type is desired the user can dereference first
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_OEQ, lhs, rhs, "equ");
+            else if(this->lval->get_type()->get_tag() == TypeTag::UserType) {
+                auto user_type = this->lval->get_type();
+                auto user_type_id = user_type->get_user_type_id();
+                auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry_of_type(user_type_id, EntryType::ENTRY_TYPE));
+                auto cmp_function_def = type_entry->get_constructor_cmp_function();
+                return Builder.CreateCall(cmp_function_def, { lhs, rhs }, "equ");
+            }
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "equ");
             break;
         case OpType::GreaterOrEqualThan:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_OGE, lhs, rhs, "greater_or_equal");
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_SGE, lhs, rhs, "greater_or_equal");
@@ -581,7 +591,7 @@ llvm::Value* BinOp::codegen() {
         case OpType::GreaterThan:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_OGT, lhs, rhs, "greater_than");
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_SGT, lhs, rhs, "greater_than");
@@ -589,7 +599,7 @@ llvm::Value* BinOp::codegen() {
         case OpType::LessOrEqualThan:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_OLE, lhs, rhs, "less_or_equal");
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_SLE, lhs, rhs, "less_or_equal");
@@ -597,7 +607,7 @@ llvm::Value* BinOp::codegen() {
         case OpType::LessThan:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_OLT, lhs, rhs, "less_than");
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_SLT, lhs, rhs, "less_than");
@@ -617,7 +627,7 @@ llvm::Value* BinOp::codegen() {
         case OpType::NatEquals:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_OEQ, lhs, rhs, "nat_equ");
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_EQ, lhs, rhs, "nat_equ");
@@ -626,7 +636,7 @@ llvm::Value* BinOp::codegen() {
         case OpType::NatNotEquals:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float))) {
+            if(this->lval->get_type()->get_tag() == TypeTag::Float) {
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_ONE, lhs, rhs, "nat_not_equ");
             }
 
@@ -636,8 +646,16 @@ llvm::Value* BinOp::codegen() {
         case OpType::NotEquals:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
-            if(lhs->getType() == map_to_llvm_type(std::make_shared<TypeVariable>(TypeTag::Float)))
+
+            if(this->lval->get_type()->get_tag() == TypeTag::Float)
                 return Builder.CreateFCmp(llvm::CmpInst::FCMP_ONE, lhs, rhs, "not_equ");
+            else if(this->lval->get_type()->get_tag() == TypeTag::UserType) {
+                auto user_type = this->lval->get_type();
+                auto user_type_id = user_type->get_user_type_id();
+                auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry_of_type(user_type_id, EntryType::ENTRY_TYPE));
+                auto cmp_function_def = type_entry->get_constructor_cmp_function();
+                return Builder.CreateNot(Builder.CreateCall(cmp_function_def, { lhs, rhs }, "equ"), "not_equ");
+            }
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_NE, lhs, rhs, "not_equ");
                 
