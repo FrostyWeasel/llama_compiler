@@ -63,7 +63,7 @@ std::shared_ptr<TypeVariable> UnOp::infer() {
 
             this->st->add_constraint(expr_type, this->type_variable, this->lineno);
             break;
-        case OpType::Dereference:{
+        case OpType::Dereference: {
             expr_type = this->expr->infer(); //Type must be t ref
             this->type_variable = std::make_shared<TypeVariable>(); //Type must be t
 

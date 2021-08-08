@@ -1113,7 +1113,7 @@ YY_RULE_SETUP
 case 22:
 YY_RULE_SETUP
 #line 158 "./src/lexer.l"
-{ return T_NOT; }
+{ yylval.op = OpType::Not; return T_NOT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP

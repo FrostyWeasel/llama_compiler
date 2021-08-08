@@ -25,32 +25,6 @@ void ConstructorPattern::print(std::ostream& out) const {
 std::shared_ptr<TypeVariable> ConstructorPattern::infer() {
     auto constr_entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES));
 
-    auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry(constr_entry->get_type()->get_user_type_id(), LookupType::LOOKUP_ALL_SCOPES));
-    
-    //Check that user type which constructor constructs is currently the one in scope. For example here Red has type color but currently color has no constructor Red but Something and Else:
-    /*
-        type color = Red | Green | Blue
-        type color = Something | Else
-        let y = Else
-        let x = match y with
-                Red -> ... (* Red here is user_type color = Red | Green | Blue but that type is actually not in scope*) 
-    */
-    auto includes_this_constructor = false;
-    for(auto constructor: type_entry->get_constructors()) {
-        if(constructor->get_id() == this->id) {
-            includes_this_constructor = true;
-            break;
-        }
-    }
-
-    if(!includes_this_constructor) {
-        std::stringstream msg;
-        msg << "The constructor " << this->id << " does not belong to type " <<
-            type_entry->get_type()->get_user_type_id() << " as was expected.\n";
-        
-        error_handler->print_error(msg.str(), ErrorType::User, this->lineno);
-    }
-
     //Check the pattern list with which the constructor was called and compare them to the constructor definition
     auto constructor_type_list = *(constr_entry->get_constructor_type_list());
 
@@ -88,6 +62,35 @@ std::shared_ptr<TypeVariable> ConstructorPattern::infer() {
 }
 
 void ConstructorPattern::sem() {
+    auto constr_entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(this->id, LookupType::LOOKUP_ALL_SCOPES));
+   //we might find ParEntries of the same name which we don't want so make sure its a type entry
+    auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry_of_type(constr_entry->get_type()->get_user_type_id(), EntryType::ENTRY_TYPE));
+    
+    //Check that user type which constructor constructs is currently the one in scope. For example here Red has type color but currently color has no constructor Red but Something and Else:
+    /*
+        type color = Red | Green | Blue
+        type color = Something | Else
+        let y = Else
+        let x = match y with
+                Red -> ... (* Red here is user_type color = Red | Green | Blue but that type is actually not in scope*) 
+    */
+    auto includes_this_constructor = false;
+    for(auto constructor: type_entry->get_constructors()) {
+        if(constructor->get_id() == this->id) {
+            includes_this_constructor = true;
+            break;
+        }
+    }
+
+    if(!includes_this_constructor) {
+        std::stringstream msg;
+        msg << "The constructor " << this->id << " does not belong to type " <<
+            type_entry->get_type()->get_user_type_id() << " as was expected.\n";
+        
+        error_handler->print_error(msg.str(), ErrorType::User, this->lineno);
+    }
+
+
     if(pattern_list != nullptr) {
         auto patterns = pattern_list->get_list();
 

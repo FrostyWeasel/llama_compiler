@@ -64,7 +64,7 @@ public:
 
     void set_tag_to_default();
 
-    std::string& get_user_type_id();
+    std::string get_user_type_id();
 
     static bool are_user_types_the_same(std::shared_ptr<TypeVariable> t1, std::shared_ptr<TypeVariable> t2);
 

@@ -197,7 +197,7 @@ TypeVariable::TypeVariable(TypeTag type_tag, std::string user_type_id) {
     }
 }
 
-std::string& TypeVariable::get_user_type_id() {
+std::string TypeVariable::get_user_type_id() {
     switch (this->type->get_tag()) {
         case TypeTag::UserType: {
             auto user_type = std::dynamic_pointer_cast<UserType>(this->type);

@@ -38,7 +38,7 @@ llvm::Value* Id::codegen() {
     auto allocation = id_entry->get_allocation();
 
     if(allocation != nullptr)
-        return Builder.CreateLoad(allocation->getAllocatedType(), allocation, id);
+        return Builder.CreateLoad(allocation, id);
 
     return nullptr;
 }

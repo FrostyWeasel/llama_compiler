@@ -67,7 +67,14 @@ llvm::Value* TypeDef::codegen() {
     llvm::Value* t_def_value;
     for(auto t_def: t_def_list) {
         t_def->add_to_symbol_table();
+
+    }
+
+    for(auto t_def: t_def_list) {
         t_def->allocate();
+    }
+
+    for(auto t_def: t_def_list) {
         t_def_value = t_def->codegen();
     }
 

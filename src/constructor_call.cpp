@@ -45,29 +45,6 @@ void ConstructorCall::print(std::ostream &out) const {
 
 std::shared_ptr<TypeVariable> ConstructorCall::infer() {
     auto entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES));
-    
-    //Check that user type which constructor constructs is currently the one in scope. For example here Red has type color but currently color has no constructor Red but Something and Else:
-    /*
-        type color = Red | Green | Blue
-        type color = Something | Else
-        let y = Red 
-    */
-    auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry(entry->get_type()->get_user_type_id(), LookupType::LOOKUP_ALL_SCOPES));
-    auto includes_this_constructor = false;
-    for(auto constructor: type_entry->get_constructors()) {
-        if(constructor->get_id() == this->id) {
-            includes_this_constructor = true;
-            break;
-        }
-    }
-
-    if(!includes_this_constructor) {
-        std::stringstream msg;
-        msg << "The constructor " << this->id << " does not belong to type " <<
-            entry->get_type()->get_user_type_id() << " as was expected.\n";
-        
-        error_handler->print_error(msg.str(), ErrorType::User, this->lineno);
-    }
 
     auto constructor_type_list = *entry->get_constructor_type_list();
 
@@ -102,6 +79,33 @@ std::shared_ptr<TypeVariable> ConstructorCall::infer() {
 }
 
 void ConstructorCall::sem() {
+
+    auto entry = dynamic_cast<ConstructorEntry*>(st->lookup_entry(id, LookupType::LOOKUP_ALL_SCOPES));
+
+    //Check that user type which constructor constructs is currently the one in scope. For example here Red has type color but currently color has no constructor Red but Something and Else:
+    /*
+        type color = Red | Green | Blue
+        type color = Something | Else
+        let y = Red 
+    */
+   //we might find ParEntries of the same name which we don't want so make sure its a type entry
+    auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry_of_type(entry->get_type()->get_user_type_id(), EntryType::ENTRY_TYPE));
+    
+    auto includes_this_constructor = false;
+    for(auto constructor: type_entry->get_constructors()) {
+        if(constructor->get_id() == this->id) {
+            includes_this_constructor = true;
+            break;
+        }
+    }
+
+    if(!includes_this_constructor) {
+        std::stringstream msg;
+        msg << "The constructor " << this->id << " does not belong to type " <<
+            entry->get_type()->get_user_type_id() << " as was expected.\n";
+        
+        error_handler->print_error(msg.str(), ErrorType::User, this->lineno);
+    }
 
     if(this->expr_list != nullptr) {
         auto exprs = this->expr_list->get_list();
@@ -141,9 +145,11 @@ llvm::Value* ConstructorCall::codegen() {
         }
     }
 
+    auto constructor_casted_ptr = Builder.CreateBitCast(constructor_struct_heap_ptr, map_to_llvm_type(this->type_variable));
+
     //Store alloca in constructors entry
-    constr_entry->set_allocation(constructor_struct_heap_ptr);
+    constr_entry->set_allocation(constructor_casted_ptr);
 
     //Bitcast to same type as its usertype (i8*)
-    return Builder.CreateBitCast(constructor_struct_heap_ptr, map_to_llvm_type(this->type_variable));
+    return constructor_casted_ptr;
 }

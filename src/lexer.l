@@ -154,7 +154,7 @@ W [ \t\n\r]
 "match"		{ return T_MATCH; }
 "mutable"	{ return T_MUTABLE; }
 "new"		{ return T_NEW; }
-"not"		{ return T_NOT; }
+"not"		{ yylval.op = OpType::Not; return T_NOT; }
 "of"		{ return T_OF; }
 "rec"		{ return T_REC; }
 "ref"		{ return T_REF; }

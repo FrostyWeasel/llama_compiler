@@ -133,6 +133,22 @@ SymbolEntry* SymbolTable::lookup_entry(std::string id, LookupType lookup_type) {
     return nullptr;
 }
 
+SymbolEntry* SymbolTable::lookup_entry_of_type(std::string id, EntryType entry_type) {
+    unsigned int hash_value = PJW_hash(id) % hashtable_size;
+    SymbolEntry* entry = hashtable[hash_value];
+
+    while (entry != nullptr) {
+        if((entry->get_id() == id) && (!entry->get_scope()->get_hidden()) && (entry->get_entry_type() == entry_type))
+            return entry;
+        else
+            entry = entry->get_next_hash();
+    }           
+
+    error_handler->out_of_scope(id);
+
+    return nullptr;
+}
+
 bool SymbolTable::contains(std::string id, LookupType lookup_type) {
     unsigned int hash_value = PJW_hash(id) % hashtable_size;
     SymbolEntry* entry = hashtable[hash_value];

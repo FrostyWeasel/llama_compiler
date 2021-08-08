@@ -235,7 +235,7 @@ llvm::Value* FunctionDef::codegen() {
 
 
     //Load all non local variables and replace their alloca in the symbol table with the ones in the function body
-    std::map<std::string, llvm::AllocaInst*> non_local_allocas;
+    std::map<std::string, llvm::Value*> non_local_allocas;
 
     i = 0;
     for(auto nl_it = this->non_local_variables.begin(); nl_it != this->non_local_variables.end(); nl_it++) {
