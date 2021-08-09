@@ -88,8 +88,8 @@ void BinOp::print(std::ostream &out) const {
             out << " **";
             break;
         default:
-            out << "ERROR: No known type "; //TODO: Error: Replace by error handling
-            exit(1);
+            error_handler->print_error("Unknown binary operator type\n", ErrorType::Internal, this->lineno);
+
             break;
     }
     if(rval != nullptr)
@@ -537,12 +537,38 @@ llvm::Value* BinOp::codegen() {
     llvm::Value* rhs = nullptr;
 
     switch (op) {
-        case OpType::And:
+        case OpType::And: {
             lhs = this->lval->codegen();
+
+            auto top_BB = Builder.GetInsertBlock();
+
+            //If the lhs is false then we know that the whole expr is false and we do not execute the rhs
+            auto current_function = Builder.GetInsertBlock()->getParent();
+
+            auto execute_and_rhs_BB = llvm::BasicBlock::Create(TheContext, "execute_and_rhs", current_function);
+            auto and_expr_end_BB = llvm::BasicBlock::Create(TheContext, "and_expr_end");
+
+            auto short_circuit_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, lhs, c1(0), "short_circuit_result");
+            Builder.CreateCondBr(short_circuit_result, and_expr_end_BB, execute_and_rhs_BB);
+
+            Builder.SetInsertPoint(execute_and_rhs_BB);
             rhs = this->rval->codegen();
 
-            return Builder.CreateAnd(lhs, rhs, "andtmp");
+            execute_and_rhs_BB = Builder.GetInsertBlock();
+
+            auto and_result = Builder.CreateAnd(lhs, rhs, "and");
+            Builder.CreateBr(and_expr_end_BB);
+
+            current_function->getBasicBlockList().push_back(and_expr_end_BB);
+            Builder.SetInsertPoint(and_expr_end_BB);
+
+            auto phi_result = Builder.CreatePHI(i1, 2, "andtmp");
+            phi_result->addIncoming(lhs, top_BB);
+            phi_result->addIncoming(and_result, execute_and_rhs_BB);
+
+            return phi_result;
             break;
+        }
         case OpType::Assign: {
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();
@@ -654,18 +680,48 @@ llvm::Value* BinOp::codegen() {
                 auto user_type_id = user_type->get_user_type_id();
                 auto type_entry = dynamic_cast<TypeEntry*>(st->lookup_entry_of_type(user_type_id, EntryType::ENTRY_TYPE));
                 auto cmp_function_def = type_entry->get_constructor_cmp_function();
+
                 return Builder.CreateNot(Builder.CreateCall(cmp_function_def, { lhs, rhs }, "equ"), "not_equ");
             }
             else
                 return Builder.CreateICmp(llvm::CmpInst::ICMP_NE, lhs, rhs, "not_equ");
                 
             break;
-        case OpType::Or:
+        case OpType::Or: {
             lhs = this->lval->codegen();
+
+            auto top_BB = Builder.GetInsertBlock();
+
+            //If the lhs is true then we know that the whole expr is true and we do not execute the rhs
+            auto current_function = Builder.GetInsertBlock()->getParent();
+
+            auto execute_or_rhs_BB = llvm::BasicBlock::Create(TheContext, "execute_or_rhs", current_function);
+            auto or_expr_end_BB = llvm::BasicBlock::Create(TheContext, "or_expr_end");
+
+            auto short_circuit_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_EQ, lhs, c1(1), "short_circuit_result");
+            Builder.CreateCondBr(short_circuit_result, or_expr_end_BB, execute_or_rhs_BB);
+
+            Builder.SetInsertPoint(execute_or_rhs_BB);
             rhs = this->rval->codegen();
+
+            //rhs codegen may change BB so get current BB (the one in which the assignment to the rhs happened) for the phi node
+            execute_or_rhs_BB = Builder.GetInsertBlock();
+
+            auto or_result = Builder.CreateOr(lhs, rhs, "or");
+            Builder.CreateBr(or_expr_end_BB);
+
+            current_function->getBasicBlockList().push_back(or_expr_end_BB);
+            Builder.SetInsertPoint(or_expr_end_BB);
+
+            auto phi_result = Builder.CreatePHI(i1, 2, "andtmp");
+            phi_result->addIncoming(lhs, top_BB);
+            phi_result->addIncoming(or_result, execute_or_rhs_BB);
+
+            return phi_result;
 
             return Builder.CreateOr(lhs, rhs, "ortmp");
             break;
+        }
         case OpType::Plus:
             lhs = this->lval->codegen();
             rhs = this->rval->codegen();

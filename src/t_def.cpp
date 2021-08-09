@@ -102,7 +102,6 @@ llvm::Value* TDef::codegen() {
     auto comparisons_success_BB = llvm::BasicBlock::Create(TheContext, "comparisons_success");
     auto comparison_failed_BB = llvm::BasicBlock::Create(TheContext, "comparison_failed");
 
-
     //Load constructor tag and see whether they match
     auto constructor_1 = Builder.CreateBitCast(function_decl->getArg(0), llvm::PointerType::get(i32, 0));
     auto constructor_2 = Builder.CreateBitCast(function_decl->getArg(1), llvm::PointerType::get(i32, 0));

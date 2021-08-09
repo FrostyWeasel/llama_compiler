@@ -21,15 +21,6 @@
 #include <fstream>
 #include <cstdlib>
 
-//TODO: All values passed as pointers to allocas must have the allocas replaced with heap allocation because allocas are local and if the def has been done in a function then they are deallocated upon the function return
-/*
-    !This should happen to:
-        1.The new expression (the delete expr should clean the heap)
-        2.Mutable variables and array elements
-        3.User type constructor structs
-        4.(Functions would be necessary if we could return them from functions but now they are not?)
-*/
-
 std::unique_ptr<SymbolTable> AST::st = std::make_unique<SymbolTable>(20000);
 std::unique_ptr<SemanticAnalyzer> AST::sa = std::make_unique<SemanticAnalyzer>();
 PassStage AST::pass_stage = PassStage::Other;

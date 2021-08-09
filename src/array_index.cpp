@@ -109,7 +109,35 @@ llvm::Value* ArrayIndex::codegen() {
         else
             offset = Builder.CreateAdd(offset, (*expr_it)->codegen());
     }
+
+    //Check that offset is in bounds of array
+    auto current_function = Builder.GetInsertBlock()->getParent();
+    auto array_index_in_bounds_BB = llvm::BasicBlock::Create(TheContext, "array_index_in_bounds_BB");
+    auto array_index_out_of_bounds_BB = llvm::BasicBlock::Create(TheContext, "array_index_out_of_bounds_BB");
+
+    auto array_size = Builder.CreateLoad(Builder.CreateStructGEP(entry->get_allocation(), 0, "array_size_ptr"), "array_size");
+
+    // 0 <= offset < array_size
+    auto cmp_in_bounds_negative_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_SGE, offset, c32(0), "cmp_in_bounds_negative_result");
+    auto cmp_in_bounds_positive_result = Builder.CreateICmp(llvm::CmpInst::Predicate::ICMP_SLT, offset, array_size, "cmp_in_bounds_positive_result");
+    auto cmp_in_bounds_result = Builder.CreateAnd(cmp_in_bounds_negative_result, cmp_in_bounds_positive_result, "cmp_in_bounds_result");
+    Builder.CreateCondBr(cmp_in_bounds_result, array_index_in_bounds_BB, array_index_out_of_bounds_BB);
     
+    current_function->getBasicBlockList().push_back(array_index_out_of_bounds_BB);
+    Builder.SetInsertPoint(array_index_out_of_bounds_BB);
+
+    //Throw runtime error if index is out of bounds
+    std::stringstream msg;
+    msg << "In line " << std::to_string(this->lineno) << ":\n\tArray index is out of bounds for array: " << this->id << "\n";
+    auto string_ptr = Builder.CreateGlobalStringPtr(msg.str());
+    Builder.CreateCall(AST::runtime_error_function, { string_ptr });
+
+    //This point is never reached
+    Builder.CreateBr(array_index_in_bounds_BB);
+
+    current_function->getBasicBlockList().push_back(array_index_in_bounds_BB);
+    Builder.SetInsertPoint(array_index_in_bounds_BB);
+
     auto array_data_ptr = Builder.CreateLoad(Builder.CreateStructGEP(entry->get_allocation(), dim_count + 1), "array_data_ptr");
 
     return Builder.CreateGEP(array_data_ptr, { offset }, "array_element_ptr");

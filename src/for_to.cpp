@@ -40,6 +40,9 @@ llvm::Value* ForTo::codegen() {
     //Get initial value of iterator variable
     auto start_value = this->first_condition->codegen();
 
+    // * End condition is calculated outside the loop so that its value is the same during every iteration even if it is for example a function call or array indexing whose value should change every iteration 
+    auto end_condition = this->second_condition->codegen();
+
     auto current_function = Builder.GetInsertBlock()->getParent();
 
     //Current previous BB
@@ -61,7 +64,6 @@ llvm::Value* ForTo::codegen() {
 
     Builder.CreateStore(phi_node, iterator_alloca);
 
-    auto end_condition = this->second_condition->codegen();
     auto condition_result = Builder.CreateICmp(llvm::CmpInst::ICMP_SLT, end_condition, phi_node, "end_condition");
     Builder.CreateCondBr(condition_result, loop_end_BB, loop_body_BB);
 
