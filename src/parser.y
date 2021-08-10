@@ -36,6 +36,7 @@ bool final_flag;
 bool optimizations_flag;
 
 extern FILE* yyin;
+extern int yylineno;
 
 %}
 
@@ -395,13 +396,13 @@ std::string get_file_name(std::string file_path, char seperator = '/') {
     auto sep_position = file_path.rfind(seperator);
 
     if(sep_position != std::string::npos) {
-        return file_path.substr(sep_position + 1, file_path.size() - (dot_position == std::string::npos ? 1 : (file_path.size() - dot_position) + 2));
+        return file_path.substr(0, dot_position);
     }
-    return "";
+    return "a";
 }
 
 void yyerror(const char* msg){
-    fprintf(stderr, "Error: %s\n", msg);
+    fprintf(stderr, "Error in line %i: %s\n", yylineno, msg);
     exit(1);
 }
 

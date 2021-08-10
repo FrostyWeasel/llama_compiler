@@ -156,4 +156,5 @@ llvm::Value* TDef::codegen() {
     Builder.CreateRet(phi_node_result);
     Builder.SetInsertPoint(previous_insert_point);
 
+    return function_decl;
 }

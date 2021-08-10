@@ -222,4 +222,6 @@ llvm::Value* Constructor::codegen() {
 
     Builder.CreateRet(phi_node_result);
     Builder.SetInsertPoint(previous_insert_point);
+
+    return constr_comparison_function;
 }

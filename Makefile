@@ -1,4 +1,4 @@
-.PHONY: all lexer parser clean distclean
+.PHONY: all lexer parser clean distclean cleancode
 
 LLVMCONFIG=llvm-config
 
@@ -33,3 +33,6 @@ clean:
 
 distclean: clean
 	$(RM) compiler
+
+cleancode:
+	$(RM) *.imm *.out *.asm

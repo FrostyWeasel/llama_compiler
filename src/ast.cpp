@@ -251,9 +251,6 @@ void AST::llvm_compile_and_dump(bool optimizations_flag, bool intermediate_flag,
         std::ifstream input_source_file_stream;
         input_source_file_stream.open(input_filename);
 
-        if(input_filename.empty() || input_filename == " ")
-            input_filename = "a";
-
         std::string ir_file_name = input_filename + ".imm";
         std::string asm_file_name = input_filename + ".asm";
         std::string exec_file_name = input_filename + ".out";

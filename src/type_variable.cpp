@@ -208,6 +208,8 @@ std::string TypeVariable::get_user_type_id() {
              error_handler->print_error("Invalid get_user_type_id typetag is not UserType\n", ErrorType::Internal);
             break;
     }
+
+    return "";
 }
 
 bool TypeVariable::operator== (const TypeVariable& rhs) const {
